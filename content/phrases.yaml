@@ -21,6 +21,16 @@
   rom: an níi tâo-rài káp
   en: How much is this?
   voice: m
+- id: have-water
+  th: มีน้ำเปล่าไหมครับ
+  rom: mee nám plào mǎi káp
+  en: Do you have water?
+  voice: m
+- id: no-bag
+  th: ไม่เอาถุงครับ
+  rom: mâi ao tǔng káp
+  en: No bag, thanks
+  voice: m
 - id: want-bag
   th: รับถุงไหมคะ
   rom: ráp tǔng mǎi ká

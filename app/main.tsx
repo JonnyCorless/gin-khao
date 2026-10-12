@@ -161,6 +161,7 @@ function App() {
         <div class="mark" lang="th">กินข้าว</div>
         <h1>Gin Khao</h1>
         <p class="muted">Thai for daily life in Chiang Mai</p>
+        <p class="whatsnew">New: two 7-Eleven phrases, delivered without reinstalling</p>
       </header>
 
       <section class="status">
