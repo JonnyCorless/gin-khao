@@ -28,6 +28,9 @@ export interface DayLog {
   done?: boolean;
   reviews: number;
   learned: number;
+  /** first attempts at quiz questions today, and how many were right */
+  tries?: number;
+  right?: number;
 }
 
 export interface SessionState {
@@ -48,6 +51,14 @@ export interface ProgressData {
   address: string;
   placementDone: boolean;
   session: SessionState | null;
+  /** scene id -> times completed */
+  scenes: Record<string, number>;
+  /** mission id -> when you did it, and an optional note */
+  missions: Record<string, { date: string; note?: string }>;
+  /** today's suggested mission */
+  missionPick: { date: string; id: string } | null;
+  /** phrase id -> how many times you've missed it recently (the "Tricky ones") */
+  misses: Record<string, number>;
 }
 
 export const MAX_HEARTS = 5;
@@ -66,6 +77,10 @@ const defaults = (): ProgressData => ({
   address: '',
   placementDone: false,
   session: null,
+  scenes: {},
+  missions: {},
+  missionPick: null,
+  misses: {},
 });
 
 let state: ProgressData = defaults();
@@ -90,6 +105,12 @@ export function useProgress(): ProgressData {
     return () => { subs.delete(f); };
   }, []);
   return state;
+}
+
+/** Save right now (the app is going to the background). */
+export function flushSave() {
+  clearTimeout(saveTimer);
+  save();
 }
 
 async function save() {
@@ -142,6 +163,22 @@ export function finishDay() {
   });
 }
 
+/** Remember a miss (or ease off after a right answer) for the Tricky ones list. */
+export function noteMiss(id: string, ok: boolean) {
+  update(p => {
+    const n = p.misses[id] ?? 0;
+    if (!ok) p.misses = { ...p.misses, [id]: n + 1 };
+    else if (n > 0) {
+      const next = { ...p.misses };
+      if (n <= 1) delete next[id]; else next[id] = n - 1;
+      p.misses = next;
+    }
+  });
+}
+
+export const trickyIds = (p: ProgressData, limit = 12) =>
+  Object.entries(p.misses).sort((a, b) => b[1] - a[1]).slice(0, limit).map(([id]) => id);
+
 /** Streak as it stands now: it only breaks once a whole day has been missed. */
 export function currentStreak(p: ProgressData): number {
   return p.streak.last === today() || p.streak.last === yesterday() ? p.streak.count : 0;
@@ -176,6 +213,10 @@ export function resetProgress() {
     p.hearts = d.hearts;
     p.session = null;
     p.placementDone = false;
+    p.scenes = {};
+    p.missions = {};
+    p.missionPick = null;
+    p.misses = {};
   });
 }
 

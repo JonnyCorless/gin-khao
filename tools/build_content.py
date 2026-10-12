@@ -112,26 +112,65 @@ def load():
             add(item, f"food.yaml {section}", "m")
     add(food["basil"], "food.yaml basil", "m")
 
+    all_ids = seen.copy()
+    optional = lambda name: read(CONTENT / name) if (CONTENT / name).exists() else []
+    characters = optional("characters.yaml")
+    who = {c["id"] for c in characters}
+    scenes = optional("scenes.yaml")
+    scene_ids = {s["id"] for s in scenes}
+    for s in scenes:
+        if s.get("who") not in who:
+            fail(f"scene '{s['id']}': unknown character '{s.get('who')}'")
+        for n in s.get("needs", []):
+            if n not in scene_ids:
+                fail(f"scene '{s['id']}' needs unknown scene '{n}'")
+        for st in s["steps"]:
+            refs = ([st["they"]] if "they" in st else []) + st.get("reply", []) + st.get("wrong", [])
+            for r in refs:
+                if r not in all_ids:
+                    fail(f"scene '{s['id']}': unknown phrase '{r}'")
+            if ("you" in st) and not st.get("reply"):
+                fail(f"scene '{s['id']}': a 'you' step needs replies")
+    missions = optional("missions.yaml")
+    for m in missions:
+        for r in m.get("phrases", []):
+            if r not in all_ids:
+                fail(f"mission '{m['id']}': unknown phrase '{r}'")
+
     prices = []
     for n in PRICES:
         item = {"id": f"price-{n}", "th": f"{thai_number(n)}บาท", "rom": "-", "en": f"{n} baht", "voice": "f"}
         add(item, "prices", "f")
         prices.append(n)
 
-    return situations, phrases, food, prices, speak
+    extra = {"characters": characters, "scenes": scenes, "missions": missions}
+    return situations, phrases, food, prices, speak, extra
 
 
-def audio_key(item, voice=None):
-    return sha1(f"{VOICES[voice or item['voice']]}|{item['th']}".encode("utf-8"))
+# Every item gets two clips: normal speed, and a genuinely slow recording for the "slow" button
+# (stretching the normal clip on the phone stutters).
+SPEEDS = {"": "-5%", "slow": "-40%"}
+
+
+def clips(items):
+    for item in items:
+        for speed, rate in SPEEDS.items():
+            name = f"{item['id']}.{speed}" if speed else item["id"]
+            yield {"key": name, "file": f"{name}.mp3", "th": item["th"], "voice": item["voice"], "rate": rate, "speed": speed}
+
+
+def audio_key(clip, voice=None):
+    tag = f"|{clip['speed']}" if clip["speed"] else ""
+    return sha1(f"{VOICES[voice or clip['voice']]}|{clip['th']}{tag}".encode("utf-8"))
 
 
 def other(voice):
     return "m" if voice == "f" else "f"
 
 
-def audio_ok(item, index):
-    """Made with the item's voice, or with the other voice when the preferred one refused that text."""
-    return (AUDIO / f"{item['id']}.mp3").exists() and index.get(item["id"]) in (audio_key(item), audio_key(item, other(item["voice"])))
+def audio_ok(clip, index):
+    """Made with the clip's voice, or with the other voice when the preferred one refused that text."""
+    return (AUDIO / clip["file"]).exists() and index.get(clip["key"]) in (audio_key(clip), audio_key(clip, other(clip["voice"])))
 
 
 def read_index():
@@ -144,44 +183,50 @@ async def make_audio(items):
 
     AUDIO.mkdir(exist_ok=True)
     index = read_index()
-    todo = [i for i in items if not audio_ok(i, index)]
+    all_clips = list(clips(items))
+    todo = [c for c in all_clips if not audio_ok(c, index)]
     sem = asyncio.Semaphore(1)  # the free service throttles bursts
     failed = []
+    print(f"{len(todo)} clip(s) to make")
 
     def save_index():
         (AUDIO / "index.json").write_text(json.dumps(dict(sorted(index.items())), indent=1, ensure_ascii=False), encoding="utf-8")
 
-    async def one(item):
+    async def one(clip):
         # The female Thai voice refuses some texts (e.g. some prices), so try the other voice too.
-        voices = [item["voice"], item["voice"], other(item["voice"]), item["voice"], other(item["voice"])]
+        voices = [clip["voice"], clip["voice"], other(clip["voice"]), clip["voice"], other(clip["voice"])]
         async with sem:
             for attempt, v in enumerate(voices):
                 try:
-                    await edge_tts.Communicate(item["th"], VOICES[v], rate="-5%").save(str(AUDIO / f"{item['id']}.mp3"))
-                    index[item["id"]] = audio_key(item, v)
+                    await edge_tts.Communicate(clip["th"], VOICES[v], rate=clip["rate"]).save(str(AUDIO / clip["file"]))
+                    index[clip["key"]] = audio_key(clip, v)
                     save_index()  # survive being stopped part-way
                     await asyncio.sleep(0.4)
                     return
                 except Exception:
                     await asyncio.sleep(1.5 * (attempt + 1))
-            failed.append(item["id"])
+            failed.append(clip["key"])
 
     try:
-        await asyncio.gather(*(one(i) for i in todo))
+        await asyncio.gather(*(one(c) for c in todo))
     finally:
-        live = {i["id"] for i in items}
+        live = {c["key"] for c in all_clips}
         for stale in [k for k in index if k not in live]:
             index.pop(stale)
             (AUDIO / f"{stale}.mp3").unlink(missing_ok=True)
         save_index()
     if failed:
-        sys.exit(f"Audio failed for {len(failed)} item(s): {', '.join(failed[:20])}. Run again to retry.")
-    print(f"Generated {len(todo)} audio file(s)")
+        sys.exit(f"Audio failed for {len(failed)} clip(s): {', '.join(failed[:20])}. Run again to retry.")
+    print(f"Generated {len(todo)} audio clip(s)")
 
 
 def check_audio(items):
     index = read_index()
-    bad = [i["id"] for i in items if not audio_ok(i, index)]
+    # Slow clips are nice to have (the app falls back to normal speed); normal clips are required.
+    missing_slow = [c["key"] for c in clips(items) if c["speed"] and not audio_ok(c, index)]
+    if missing_slow:
+        print(f"Note: {len(missing_slow)} slow clip(s) not made yet; the app plays normal speed for those.")
+    bad = [c["key"] for c in clips(items) if not c["speed"] and not audio_ok(c, index)]
     if bad:
         sys.exit(f"Audio missing or out of date for: {', '.join(bad[:20])}{' …' if len(bad) > 20 else ''}. "
                  "Run 'npm run content' on the PC and commit audio/.")
@@ -198,7 +243,7 @@ def clean(item):
     return {k: v for k, v in item.items() if k != "voice"}
 
 
-def build_site(situations, phrases, food, prices, speak):
+def build_site(situations, phrases, food, prices, speak, extra):
     if SITE.exists():
         shutil.rmtree(SITE)
     (SITE / "audio").mkdir(parents=True)
@@ -209,10 +254,11 @@ def build_site(situations, phrases, food, prices, speak):
         "phrases": [clean(p) | {"audio": f"audio/{p['id']}.mp3"} for p in phrases],
         "food": {k: ([clean(i) for i in v] if isinstance(v, list) else clean(v)) for k, v in food.items()},
         "prices": prices,
+        **extra,
     }
     (SITE / "content.json").write_text(json.dumps(content, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    for item in speak:
-        src = AUDIO / f"{item['id']}.mp3"
+    for clip in clips(speak):
+        src = AUDIO / clip["file"]
         if src.exists():
             shutil.copy2(src, SITE / "audio" / src.name)
     files = [{"path": f.relative_to(SITE).as_posix(), "sha1": sha1(f.read_bytes()), "size": f.stat().st_size}
@@ -224,12 +270,12 @@ def build_site(situations, phrases, food, prices, speak):
 
 
 def main():
-    situations, phrases, food, prices, speak = load()
+    situations, phrases, food, prices, speak, extra = load()
     if "--check" in sys.argv:
         check_audio(speak)
     else:
         asyncio.run(make_audio(speak))
-    build_site(situations, phrases, food, prices, speak)
+    build_site(situations, phrases, food, prices, speak, extra)
 
 
 if __name__ == "__main__":

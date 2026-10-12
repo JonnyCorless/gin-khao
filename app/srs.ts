@@ -22,13 +22,32 @@ const fromCard = (c: Card): SavedCard => ({
 
 export type Result = 'again' | 'good' | 'easy';
 
+const DAY = 86400000;
+// While a phrase is new, keep the gaps short: tomorrow, then 3 days, then 7, before FSRS takes over.
+const EARLY_CAP_DAYS = [1, 3, 7];
+
+/** Due tomorrow morning (not exactly 24 hours later), so it's ready for the next day's session. */
+const daysFromNow = (n: number) => {
+  const d = new Date(Date.now() + n * DAY);
+  d.setHours(4, 0, 0, 0);
+  return d;
+};
+
 export function grade(id: string, result: Result) {
   update(p => {
     const now = new Date();
     const saved = p.cards[id];
     const card = saved ? toCard(saved) : createEmptyCard(now);
     const rating = result === 'again' ? Rating.Again : result === 'easy' ? Rating.Easy : Rating.Good;
-    p.cards = { ...p.cards, [id]: fromCard(scheduler.next(card, now, rating).card) };
+    const next = scheduler.next(card, now, rating).card;
+    if (result === 'again') {
+      next.due = daysFromNow(1); // missed: back tomorrow
+    } else if (result === 'good') {
+      const goodSoFar = next.reps - next.lapses; // rough count of successful reviews
+      const cap = EARLY_CAP_DAYS[Math.min(goodSoFar, EARLY_CAP_DAYS.length) - 1];
+      if (cap && next.due.getTime() > daysFromNow(cap).getTime()) next.due = daysFromNow(cap);
+    }
+    p.cards = { ...p.cards, [id]: fromCard(next) };
   });
 }
 

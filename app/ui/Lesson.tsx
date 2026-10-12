@@ -10,7 +10,8 @@ import { Icon } from './icons';
 import { PlayButton } from './PhraseCard';
 import { SpeakCheck } from './Speak';
 
-export interface Answer { ex: Ex; ok: boolean }
+/** first: the first time this question was asked in this lesson (repeats after a miss aren't graded again) */
+export interface Answer { ex: Ex; ok: boolean; first: boolean }
 
 interface Props {
   title: string;
@@ -19,6 +20,10 @@ interface Props {
   useHearts?: boolean;
   /** Show a "Don't know" button (placement check), which counts as a wrong answer. */
   dontKnow?: boolean;
+  /** Bring missed questions back a few cards later (with the intro again for new phrases). */
+  requeue?: boolean;
+  /** The question list changed (a miss was requeued), so a paused session can resume with it. */
+  onQueue?: (queue: string[]) => void;
   onAnswer?: (a: Answer) => void;
   onProgress?: (index: number) => void;
   onDone: () => void;
@@ -38,14 +43,18 @@ export function HeartsBar() {
 
 const mins = (ms: number) => Math.max(1, Math.ceil(ms / 60000));
 
-export function Lesson({ title, exs, start = 0, useHearts = true, dontKnow = false, onAnswer, onProgress, onDone, onExit }: Props) {
+export function Lesson({ title, exs, start = 0, useHearts = true, dontKnow = false, requeue = true, onQueue, onAnswer, onProgress, onDone, onExit }: Props) {
   const p = useProgress();
+  const [queue, setQueue] = useState(exs);
   const [i, setI] = useState(start);
   const [picked, setPicked] = useState<number | null>(null);
   const [typed, setTyped] = useState('');
   const [verdict, setVerdict] = useState<null | boolean>(null);
   const [skipped, setSkipped] = useState(false);
-  const ex = useMemo(() => decode(exs[Math.min(i, exs.length - 1)]), [i, exs]);
+  const asked = useRef(new Set<string>());
+  const raw = queue[Math.min(i, queue.length - 1)];
+  // keyed on position too, so a repeated question still resets the screen
+  const ex = useMemo(() => decode(raw), [raw, i]);
   const it = item(ex.id);
   const choices = useMemo(() => (ex.type === 'meaning' || ex.type === 'recall' || ex.type === 'listen' ? options(ex) : []), [ex]);
   const h = hearts(p);
@@ -66,18 +75,29 @@ export function Lesson({ title, exs, start = 0, useHearts = true, dontKnow = fal
     setVerdict(ok);
     (ok ? good : bad)();
     if (!ok && useHearts) loseHeart();
-    onAnswer?.({ ex, ok });
+    const first = !asked.current.has(raw);
+    asked.current.add(raw);
+    onAnswer?.({ ex, ok, first });
     if (!ok && ex.type !== 'price') play(ex.id);
+    if (!ok && requeue && ex.type !== 'price') {
+      // ask it again a few cards later; new phrases get their intro card again first
+      const hadIntro = queue.slice(0, i).includes(`intro:${ex.id}`);
+      const again = hadIntro ? [`intro:${ex.id}`, raw] : [raw];
+      const at = Math.min(i + 4, queue.length);
+      const q = [...queue.slice(0, at), ...again, ...queue.slice(at)];
+      setQueue(q);
+      onQueue?.(q);
+    }
   };
 
   const next = () => {
     tap();
-    if (i + 1 >= exs.length) { onDone(); return; }
+    if (i + 1 >= queue.length) { onDone(); return; }
     onProgress?.(i + 1);
     setI(i + 1);
   };
 
-  const pct = Math.round((i / exs.length) * 100);
+  const pct = Math.round((i / queue.length) * 100);
 
   return (
     <div class="lesson">

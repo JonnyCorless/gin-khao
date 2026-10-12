@@ -35,10 +35,50 @@ export interface Food {
   meats: Item[];
 }
 
+export interface Character {
+  id: string;
+  name: string;
+  th: string;
+  role: string;
+  situation: string;
+  avatar: string;
+  color: string;
+  about: string;
+}
+
+export interface SceneStep {
+  they?: string;
+  you?: string;
+  narrate?: string;
+  reply?: string[];
+  wrong?: string[];
+  check?: boolean;
+}
+
+export interface Scene {
+  id: string;
+  title: string;
+  who: string;
+  setup: string;
+  needs?: string[];
+  steps: SceneStep[];
+  end: string;
+}
+
+export interface Mission {
+  id: string;
+  title: string;
+  detail: string;
+  phrases: string[];
+}
+
 export interface Content {
   schema: number;
   situations: Situation[];
   phrases: Phrase[];
   food: Food;
   prices: number[];
+  characters?: Character[];
+  scenes?: Scene[];
+  missions?: Mission[];
 }

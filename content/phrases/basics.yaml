@@ -6,72 +6,20 @@
   th: สวัสดีครับ
   rom: sà-wàt-dee káp
   en: Hello / Goodbye
-  alt: [หวัดดีครับ, สวัสดีคับ]
+  alt:
+  - หวัดดีครับ
+  - สวัสดีคับ
 - id: thank-you
   kind: say
   th: ขอบคุณครับ
   rom: kòp-kun káp
   en: Thank you
-- id: little-thai
-  kind: say
-  th: พูดไทยได้นิดหน่อยครับ
-  rom: pûut tai dâi nít-nòi káp
-  en: I speak a little Thai
-  note: Say this first. People slow down and help.
-- id: dont-understand
-  kind: say
-  th: ไม่เข้าใจครับ
-  rom: mâi kâo-jai káp
-  en: I don't understand
-- id: speak-slowly
-  kind: say
-  th: พูดช้าๆ ได้ไหมครับ
-  rom: pûut cháa cháa dâi mǎi káp
-  en: Can you speak slowly?
-- id: once-more
-  kind: say
-  th: อีกทีได้ไหมครับ
-  rom: ìik tee dâi mǎi káp
-  en: Once more, please?
-- id: take-this
-  kind: say
-  th: เอาอันนี้ครับ
-  rom: ao an-níi káp
-  en: I'll take this one
-  note: Point while you say it. This one line gets you almost anything.
-- id: how-much
-  kind: say
-  th: อันนี้เท่าไหร่ครับ
-  rom: an-níi tâo-rài káp
-  en: How much is this?
-- id: type-it
-  kind: say
-  th: พิมพ์ให้ดูหน่อยได้ไหมครับ
-  rom: pim hâi duu nòi dâi mǎi káp
-  en: Can you type it for me?
-  note: Hold out your phone or point at their calculator when a price goes too fast.
-- id: thats-all
-  kind: say
-  th: แค่นี้ครับ
-  rom: kâe-níi káp
-  en: That's all
-  note: The answer to "anything else?"
 - id: excuse-me
   kind: say
   th: ขอโทษครับ
   rom: kǒr-tôht káp
   en: Excuse me / Sorry
   note: Also how you get someone's attention.
-- id: no-worries
-  kind: say
-  th: ไม่เป็นไรครับ
-  rom: mâi pen rai káp
-  en: No worries / No thanks
-- id: no-thanks
-  kind: say
-  th: ไม่เอาครับ
-  rom: mâi ao káp
-  en: I don't want it, thanks
 - id: yes-right
   kind: say
   th: ใช่ครับ
@@ -87,21 +35,48 @@
   th: ได้ครับ
   rom: dâi káp
   en: OK / Sure
+- id: no-thanks
+  kind: say
+  th: ไม่เอาครับ
+  rom: mâi ao káp
+  en: I don't want it, thanks
+- id: no-worries
+  kind: say
+  th: ไม่เป็นไรครับ
+  rom: mâi pen rai káp
+  en: No worries / No thanks
+- id: take-this
+  kind: say
+  th: เอาอันนี้ครับ
+  rom: ao an-níi káp
+  en: I'll take this one
+  note: Point while you say it. This one line gets you almost anything.
+- id: how-much
+  kind: say
+  th: อันนี้เท่าไหร่ครับ
+  rom: an-níi tâo-rài káp
+  en: How much is this?
+- id: dont-understand
+  kind: say
+  th: ไม่เข้าใจครับ
+  rom: mâi kâo-jai káp
+  en: I don't understand
+- id: once-more
+  kind: say
+  th: อีกทีได้ไหมครับ
+  rom: ìik tee dâi mǎi káp
+  en: Once more, please?
+- id: thats-all
+  kind: say
+  th: แค่นี้ครับ
+  rom: kâe-níi káp
+  en: That's all
+  note: The answer to "anything else?"
 - id: toilet
   kind: say
   th: ห้องน้ำอยู่ไหนครับ
   rom: hông-náam yùu nǎi káp
   en: Where's the toilet?
-- id: help-me
-  kind: say
-  th: ช่วยหน่อยได้ไหมครับ
-  rom: chûai nòi dâi mǎi káp
-  en: Could you help me?
-- id: thai-not-good
-  kind: say
-  th: ผมพูดไทยไม่เก่งครับ
-  rom: pǒm pûut tai mâi gèng káp
-  en: My Thai isn't good
 - id: h-ok
   kind: hear
   th: ได้ค่ะ
@@ -112,11 +87,6 @@
   th: ไม่ได้ค่ะ
   rom: mâi dâi kâ
   en: Not possible
-- id: h-wait
-  kind: hear
-  th: รอแป๊บนึงนะคะ
-  rom: ror páep nueng ná ká
-  en: Wait a moment
 - id: h-dont-have
   kind: hear
   th: ไม่มีค่ะ
@@ -127,7 +97,29 @@
   th: หมดแล้วค่ะ
   rom: mòt láew kâ
   en: All gone / Sold out
-  replies: [no-worries]
+  replies:
+  - no-worries
+- id: help-me
+  kind: say
+  th: ช่วยหน่อยได้ไหมครับ
+  rom: chûai nòi dâi mǎi káp
+  en: Could you help me?
+- id: little-thai
+  kind: say
+  th: พูดไทยได้นิดหน่อยครับ
+  rom: pûut tai dâi nít-nòi káp
+  en: I speak a little Thai
+  note: Say this first. People slow down and help.
+- id: speak-slowly
+  kind: say
+  th: พูดช้าๆ ได้ไหมครับ
+  rom: pûut cháa cháa dâi mǎi káp
+  en: Can you speak slowly?
+- id: h-wait
+  kind: hear
+  th: รอแป๊บนึงนะคะ
+  rom: ror páep nueng ná ká
+  en: Wait a moment
 - id: h-this-way
   kind: hear
   th: ทางนี้ค่ะ
@@ -139,3 +131,14 @@
   rom: à-rai ná ká
   en: Sorry, what?
   note: They didn't catch you. Say it again, a little slower.
+- id: thai-not-good
+  kind: say
+  th: ผมพูดไทยไม่เก่งครับ
+  rom: pǒm pûut tai mâi gèng káp
+  en: My Thai isn't good
+- id: type-it
+  kind: say
+  th: พิมพ์ให้ดูหน่อยได้ไหมครับ
+  rom: pim hâi duu nòi dâi mǎi káp
+  en: Can you type it for me?
+  note: Hold out your phone or point at their calculator when a price goes too fast.

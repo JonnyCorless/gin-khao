@@ -3,11 +3,22 @@ import { C, phrase } from '../data';
 import { PLACEMENT, randomPrice, shuffle, STEPS, todaysSession, type Ex } from '../lesson';
 import { scheduleReminders } from '../reminders';
 import { grade, isLearned, learnedCount, dueIds } from '../srs';
-import { currentStreak, dayLog, finishDay, logDay, today, update, useProgress } from '../store';
+import { finishScene, scenes } from '../scenes';
+import { currentStreak, dayLog, finishDay, logDay, noteMiss, today, trickyIds, update, useProgress, type SessionState } from '../store';
+import type { Scene } from '../types';
 import { Icon } from '../ui/icons';
 import { HeartsBar, Lesson, type Answer } from '../ui/Lesson';
+import { MissionCard, MissionsView } from '../ui/Missions';
+import { RegularsRow, RegularView } from '../ui/Regulars';
+import { ScenePlayer } from '../ui/Scene';
 
-type Run = { kind: 'session' } | { kind: 'placement' } | { kind: 'practice'; title: string; exs: string[] };
+type Run =
+  | { kind: 'session' }
+  | { kind: 'placement' }
+  | { kind: 'practice'; title: string; exs: string[] }
+  | { kind: 'regular'; who: string }
+  | { kind: 'scene'; scene: Scene; back: string }
+  | { kind: 'missions' };
 
 function greeting() {
   const h = new Date().getHours();
@@ -30,17 +41,45 @@ export function Today() {
   const learned = learnedCount();
   const streak = currentStreak(p);
   const due = dueIds(99).length;
+  const tricky = trickyIds(p).filter(id => !!phrase(id));
 
-  const onSessionAnswer = (stepKey: string) => ({ ex, ok }: Answer) => {
+  // Every answer feeds the Tricky ones list; only first attempts move the review schedule.
+  const onSessionAnswer = (stepKey: string) => ({ ex, ok, first }: Answer) => {
+    if (ex.type === 'price') return;
+    noteMiss(ex.id, ok);
+    if (!first) return;
+    logDay(d => { d.tries = (d.tries ?? 0) + 1; d.right = (d.right ?? 0) + (ok ? 1 : 0); });
     if (stepKey === 'review') { grade(ex.id, ok ? 'good' : 'again'); logDay(d => { d.reviews++; }); }
     if (stepKey === 'learn' && isFinalLearnQuiz(ex)) { grade(ex.id, ok ? 'good' : 'again'); logDay(d => { d.learned++; }); }
     if (stepKey === 'listen' && isLearned(ex.id)) grade(ex.id, ok ? 'good' : 'again');
+  };
+
+  const onPracticeAnswer = ({ ex, ok, first }: Answer) => {
+    if (ex.type === 'price') return;
+    noteMiss(ex.id, ok);
+    if (first && isLearned(ex.id)) grade(ex.id, ok ? 'good' : 'again');
+  };
+
+  const advanceSession = (s: SessionState) => {
+    const last = s.step + 1 >= s.steps.length;
+    update(p => { if (p.session) p.session = { ...p.session, step: s.step + 1, index: 0 }; });
+    if (last) {
+      finishDay();
+      scheduleReminders();
+      setRun(null);
+      setCelebrate(true);
+    }
   };
 
   if (run?.kind === 'session') {
     const s = todaysSession();
     const step = s.steps[s.step];
     if (!step) { setRun(null); return null; }
+    if (step.key === 'scene') {
+      const sc = scenes().find(x => `scene:${x.id}` === step.ids[0]);
+      if (!sc) { advanceSession(s); return null; }
+      return <ScenePlayer key={sc.id} scene={sc} onDone={() => { finishScene(sc.id); advanceSession(s); }} onExit={() => setRun(null)} />;
+    }
     return (
       <Lesson
         key={`${s.date}-${s.step}`}
@@ -48,21 +87,26 @@ export function Today() {
         exs={step.ids}
         start={s.index}
         onAnswer={onSessionAnswer(step.key)}
+        onQueue={queue => update(p => {
+          if (!p.session) return;
+          const steps = p.session.steps.map((st, k) => (k === p.session!.step ? { ...st, ids: queue } : st));
+          p.session = { ...p.session, steps };
+        })}
         onProgress={index => update(p => { if (p.session) p.session = { ...p.session, index }; })}
-        onDone={() => {
-          const last = s.step + 1 >= s.steps.length;
-          update(p => { if (p.session) p.session = { ...p.session, step: s.step + 1, index: 0 }; });
-          if (last) {
-            finishDay();
-            scheduleReminders();
-            setRun(null);
-            setCelebrate(true);
-          }
-        }}
+        onDone={() => advanceSession(s)}
         onExit={() => setRun(null)}
       />
     );
   }
+
+  if (run?.kind === 'scene') {
+    const back = run.back;
+    return <ScenePlayer key={run.scene.id} scene={run.scene} onDone={() => { finishScene(run.scene.id); setRun({ kind: 'regular', who: back }); }} onExit={() => setRun({ kind: 'regular', who: back })} />;
+  }
+  if (run?.kind === 'regular') {
+    return <RegularView who={run.who} onBack={() => setRun(null)} onPlay={sc => setRun({ kind: 'scene', scene: sc, back: run.who })} />;
+  }
+  if (run?.kind === 'missions') return <MissionsView onBack={() => setRun(null)} />;
 
   if (run?.kind === 'placement') {
     return (
@@ -71,6 +115,7 @@ export function Today() {
         exs={PLACEMENT}
         useHearts={false}
         dontKnow
+        requeue={false}
         onAnswer={({ ex, ok }) => { if (ok && ex.type !== 'price') grade(ex.id, 'easy'); }}
         onDone={() => { update(p => { p.placementDone = true; p.session = null; }); setRun(null); }}
         onExit={() => { update(p => { p.placementDone = true; p.session = null; }); setRun(null); }}
@@ -83,7 +128,7 @@ export function Today() {
       <Lesson
         title={run.title}
         exs={run.exs}
-        onAnswer={({ ex, ok }) => { if (isLearned(ex.id)) grade(ex.id, ok ? 'good' : 'again'); }}
+        onAnswer={onPracticeAnswer}
         onDone={() => setRun(null)}
         onExit={() => setRun(null)}
       />
@@ -154,6 +199,10 @@ export function Today() {
         )}
       </section>
 
+      <MissionCard onAll={() => setRun({ kind: 'missions' })} />
+
+      <RegularsRow onOpen={who => setRun({ kind: 'regular', who })} />
+
       <section class="stats">
         <div class="stat"><b>{learned}</b><span>of {total} phrases learned</span></div>
         <div class="stat"><b>{due}</b><span>due for review</span></div>
@@ -162,6 +211,11 @@ export function Today() {
       <section class="block">
         <h3>Extra practice</h3>
         <div class="practice">
+          {tricky.length > 0 && (
+            <button class="tile-btn tricky" onClick={() => setRun({ kind: 'practice', title: 'Tricky ones', exs: shuffle(tricky).map(id => `${phrase(id)?.kind === 'say' ? 'recall' : 'meaning'}:${id}`) })}>
+              <Icon name="flag" /><b>Tricky ones</b><span>{tricky.length} you've missed</span>
+            </button>
+          )}
           <button class="tile-btn" onClick={() => setRun({ kind: 'practice', title: 'Listening drill', exs: shuffle(C().phrases.filter(x => x.kind === 'hear')).slice(0, 8).map(x => `listen:${x.id}`) })}>
             <Icon name="ear" /><b>Listening drill</b><span>What staff say</span>
           </button>

@@ -14,7 +14,7 @@ import { Food } from './screens/Food';
 import { Settings } from './screens/Settings';
 import { ShowTab } from './screens/ShowTab';
 import { Today } from './screens/Today';
-import { loadProgress } from './store';
+import { flushSave, loadProgress } from './store';
 import { loadContent } from './sync';
 import { Icon } from './ui/icons';
 import { closeShow, ShowOverlay } from './ui/ShowOverlay';
@@ -78,7 +78,8 @@ function App() {
     const h1 = CapApp.addListener('appUrlOpen', e => go(routeOf(e.url)));
     onReminderTap(go);
     const h2 = CapApp.addListener('resume', () => { checkUpdates(); });
-    return () => { h1.then(h => h.remove()); h2.then(h => h.remove()); };
+    const h3 = CapApp.addListener('pause', () => { flushSave(); });
+    return () => { h1.then(h => h.remove()); h2.then(h => h.remove()); h3.then(h => h.remove()); };
   }, []);
 
   // Android back: close Show mode, then leave a situation, then go back to Today, then minimise.

@@ -1,6 +1,7 @@
 // Exercises and today's session. An exercise is stored as "type:id" (or "price:85") so a
 // half-finished session survives closing the app.
 import { C, item, phrase } from './data';
+import { sessionScene } from './scenes';
 import { curriculum, dueIds, isLearned, nextNew } from './srs';
 import { P, today, update, type SessionState } from './store';
 import type { Item, Phrase } from './types';
@@ -38,14 +39,25 @@ export const STEPS: Record<string, StepInfo> = {
   review: { key: 'review', title: 'Warm-up review', blurb: 'Phrases due today', icon: 'sparkle' },
   learn: { key: 'learn', title: 'New phrases', blurb: 'Hear, say, then check', icon: 'browse' },
   listen: { key: 'listen', title: 'Listening', blurb: 'What staff say to you', icon: 'ear' },
+  scene: { key: 'scene', title: 'Scene', blurb: 'Role-play with one of your regulars', icon: 'people' },
   prices: { key: 'prices', title: 'Prices', blurb: 'Catch the number', icon: 'coins' },
 };
 
 export const NEW_PER_DAY = 8;
 
+/** Fewer new phrases when the review pile is big or the last session was rough. */
+export function newPerDay(): number {
+  if (dueIds(99).length >= 25) return 4;
+  const days = P().days;
+  const last = Object.keys(days).filter(d => d < today()).sort().pop();
+  const log = last ? days[last] : undefined;
+  if (log?.tries && log.tries >= 6 && (log.right ?? 0) / log.tries < 0.7) return 5;
+  return NEW_PER_DAY;
+}
+
 export function buildSession(): SessionState {
   const review = dueIds(25).map(id => phrase(id)).filter((p): p is Phrase => !!p).map(p => `${quizType(p)}:${p.id}`);
-  const fresh = nextNew(NEW_PER_DAY);
+  const fresh = nextNew(newPerDay());
   const learn: string[] = [];
   for (const p of fresh) learn.push(`intro:${p.id}`, `${p.kind === 'say' ? 'meaning' : 'listen'}:${p.id}`);
   for (const p of shuffle(fresh)) learn.push(`${p.kind === 'say' ? 'recall' : 'meaning'}:${p.id}`);
@@ -53,10 +65,12 @@ export function buildSession(): SessionState {
   const hearPool = hearLearned.length >= 4 ? hearLearned : curriculum().filter(p => p.kind === 'hear').slice(0, 10);
   const listen = shuffle(hearPool).slice(0, 5).map(p => `listen:${p.id}`);
   const prices = Array.from({ length: 4 }, () => `price:${randomPrice()}`);
+  const scene = sessionScene();
   const steps = [
     { key: 'review', ids: review },
     { key: 'learn', ids: learn },
     { key: 'listen', ids: listen },
+    { key: 'scene', ids: scene ? [`scene:${scene.id}`] : [] },
     { key: 'prices', ids: prices },
   ].filter(s => s.ids.length > 0);
   return { date: today(), step: 0, index: 0, steps };
