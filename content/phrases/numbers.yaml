@@ -1,0 +1,20 @@
+# Numbers. The price trainer uses generated price audio (see tools/build_content.py).
+- {id: n-0, kind: word, th: ศูนย์, rom: sǔun, en: "0"}
+- {id: n-1, kind: word, th: หนึ่ง, rom: nùeng, en: "1"}
+- {id: n-2, kind: word, th: สอง, rom: sǒng, en: "2"}
+- {id: n-3, kind: word, th: สาม, rom: sǎam, en: "3"}
+- {id: n-4, kind: word, th: สี่, rom: sìi, en: "4"}
+- {id: n-5, kind: word, th: ห้า, rom: hâa, en: "5"}
+- {id: n-6, kind: word, th: หก, rom: hòk, en: "6"}
+- {id: n-7, kind: word, th: เจ็ด, rom: jèt, en: "7"}
+- {id: n-8, kind: word, th: แปด, rom: pàet, en: "8"}
+- {id: n-9, kind: word, th: เก้า, rom: gâo, en: "9"}
+- {id: n-10, kind: word, th: สิบ, rom: sìp, en: "10"}
+- {id: n-11, kind: word, th: สิบเอ็ด, rom: sìp-èt, en: "11", note: "A 1 at the end of a bigger number is èt, not nùeng."}
+- {id: n-20, kind: word, th: ยี่สิบ, rom: yîi-sìp, en: "20", note: "20 is yîi-sìp, never sǒng-sìp."}
+- {id: n-21, kind: word, th: ยี่สิบเอ็ด, rom: yîi-sìp-èt, en: "21"}
+- {id: n-50, kind: word, th: ห้าสิบ, rom: hâa-sìp, en: "50"}
+- {id: n-100, kind: word, th: หนึ่งร้อย, rom: nùeng rói, en: "100", note: "People often just say rói."}
+- {id: n-500, kind: word, th: ห้าร้อย, rom: hâa rói, en: "500"}
+- {id: n-1000, kind: word, th: หนึ่งพัน, rom: nùeng pan, en: "1,000"}
+- {id: n-baht, kind: word, th: บาท, rom: bàat, en: baht}

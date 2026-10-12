@@ -1,191 +1,123 @@
 import { render } from 'preact';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { Capacitor } from '@capacitor/core';
-import { SpeechRecognition } from '@capacitor-community/speech-recognition';
-import { loadContent, type Loaded, type Phrase } from './sync';
-import { APP_VERSION, WEB_BUILD } from './config';
-import { applyWeb, checkApk, confirmBoot, installApk, native, nativeInfo, prepareWeb, Updater, type ApkLatest, type NativeInfo } from './updater';
+import { App as CapApp } from '@capacitor/app';
+import '@fontsource-variable/figtree';
+import '@fontsource/noto-sans-thai-looped/400.css';
+import '@fontsource/noto-sans-thai-looped/600.css';
+import '@fontsource/kanit/500.css';
 import './styles.css';
+import { setLoaded } from './data';
+import { onReminderTap, scheduleReminders } from './reminders';
+import { Browse } from './screens/Browse';
+import { Food } from './screens/Food';
+import { Settings } from './screens/Settings';
+import { ShowTab } from './screens/ShowTab';
+import { Today } from './screens/Today';
+import { loadProgress } from './store';
+import { loadContent } from './sync';
+import { Icon } from './ui/icons';
+import { closeShow, ShowOverlay } from './ui/ShowOverlay';
+import { checkUpdates, UpdateBanner } from './updates';
+import { confirmBoot } from './updater';
 
-function PhraseCard({ p, url }: { p: Phrase; url: string }) {
-  const audio = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const play = (rate: number) => {
-    if (!audio.current) {
-      audio.current = new Audio(url);
-      audio.current.onended = () => setPlaying(false);
-    }
-    const a = audio.current;
-    a.pause();
-    a.currentTime = 0;
-    a.playbackRate = rate;
-    setPlaying(true);
-    a.play().catch(() => setPlaying(false));
-  };
+type Tab = 'today' | 'browse' | 'food' | 'show' | 'settings';
+const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: 'today', label: 'Today', icon: 'today' },
+  { id: 'browse', label: 'Browse', icon: 'browse' },
+  { id: 'food', label: 'Food', icon: 'bowl' },
+  { id: 'show', label: 'Show', icon: 'show' },
+  { id: 'settings', label: 'Settings', icon: 'settings' },
+];
+const isTab = (s: string): s is Tab => TABS.some(t => t.id === s);
+const routeOf = (url: string) => url.replace(/^ginkhao:\/\//, '').split(/[/?#]/)[0];
+
+function Loading({ done, total, error }: { done: number; total: number; error: string }) {
   return (
-    <article class="card">
-      <div class="card-text">
-        <div class="th" lang="th">{p.th}</div>
-        <div class="rom">{p.rom}</div>
-        <div class="en">{p.en}</div>
-      </div>
-      <div class="card-acts">
-        <button class={`play${playing ? ' on' : ''}`} onClick={() => play(1)} aria-label={`Play: ${p.en}`}>
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
-        </button>
-        <button class="slow" onClick={() => play(0.7)}>slow</button>
-      </div>
-    </article>
-  );
-}
-
-type MicState = { status: 'idle' | 'listening' | 'done' | 'error'; text: string };
-
-function MicTest() {
-  const [s, setS] = useState<MicState>({ status: 'idle', text: '' });
-  const native = Capacitor.isNativePlatform();
-  const run = async () => {
-    try {
-      const { available } = await SpeechRecognition.available();
-      if (!available) throw new Error('Speech recognition is not available. Install or update the Google app, then try again.');
-      const perm = await SpeechRecognition.requestPermissions();
-      if (perm.speechRecognition !== 'granted') throw new Error('Microphone permission was not granted.');
-      setS({ status: 'listening', text: '' });
-      const r = await SpeechRecognition.start({ language: 'th-TH', maxResults: 5, prompt: 'พูดว่า สวัสดีครับ', partialResults: false, popup: true });
-      const matches = r.matches ?? [];
-      setS({ status: 'done', text: matches.length ? matches.join('  ·  ') : 'Nothing heard. Try again, a bit closer to the phone.' });
-    } catch (e) {
-      setS({ status: 'error', text: e instanceof Error ? e.message : String(e) });
-    }
-  };
-  return (
-    <section class="panel">
-      <div class="eyebrow">Phase 0 check</div>
-      <h2>Thai speech recognition</h2>
-      <p class="muted">Tap the button and say <b lang="th">สวัสดีครับ</b> (sà-wàt-dee káp). If Thai text comes back, speaking practice will work on this phone.</p>
-      <button class="primary" onClick={run} disabled={!native || s.status === 'listening'}>
-        {native ? (s.status === 'listening' ? 'Listening…' : 'Test the mic') : 'Only works in the installed app'}
-      </button>
-      {s.text && <p class={s.status === 'error' ? 'bad' : 'good'} lang="th">{s.text}</p>}
-    </section>
-  );
-}
-
-function UpdateBanner({ build }: { build: number }) {
-  const [busy, setBusy] = useState(false);
-  return (
-    <section class="banner">
-      <div>
-        <b>Update ready</b>
-        <div class="muted">New version of Gin Khao downloaded (build {build}).</div>
-      </div>
-      <button class="primary" disabled={busy} onClick={() => { setBusy(true); applyWeb(build).catch(() => setBusy(false)); }}>
-        {busy ? 'Restarting…' : 'Restart now'}
-      </button>
-    </section>
-  );
-}
-
-function AppUpdates({ info, apk, contentVersion, check, checking, error }: {
-  info: NativeInfo | null; apk: ApkLatest | null; contentVersion?: string; check: () => void; checking: boolean; error: string;
-}) {
-  const [status, setStatus] = useState('');
-  const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    if (info?.status) setStatus(info.status);
-  }, [info]);
-  useEffect(() => {
-    if (!native) return;
-    const h = Updater.addListener('apkStatus', s => { setStatus(s.message); setBusy(s.busy); });
-    return () => { h.then(x => x.remove()); };
-  }, []);
-  return (
-    <section class="panel">
-      <div class="eyebrow">Settings</div>
-      <h2>App updates</h2>
-      {info && !apk && !checking && !error && <p class="muted">The app is up to date.</p>}
-      {apk && (
-        <div class="apk-new">
-          <b>New app version {apk.name}</b>
-          {apk.notes && <div class="muted">{apk.notes}</div>}
-          <button class="primary" disabled={busy} onClick={() => { setBusy(true); installApk(apk).catch(e => { setStatus(String(e)); setBusy(false); }); }}>
-            {busy ? 'Working…' : 'Update app'}
-          </button>
-        </div>
-      )}
-      {status && <p class="muted">{status}</p>}
-      {info?.webReverted && <p class="bad">The last update didn't start, so Gin Khao went back to the built-in version.</p>}
-      {error && <p class="bad">Couldn't check for updates: {error}</p>}
-      <dl class="versions">
-        <dt>App</dt><dd>{info ? `${info.versionName} (${info.versionCode})` : APP_VERSION}</dd>
-        <dt>Web build</dt><dd>{WEB_BUILD || 'dev'}</dd>
-        <dt>Content</dt><dd>{contentVersion ?? '…'}</dd>
-      </dl>
-      <button class="ghost" onClick={check} disabled={checking}>{checking ? 'Checking…' : 'Check now'}</button>
-    </section>
+    <main class="loading">
+      <svg viewBox="0 0 108 108" width="96" height="96" aria-hidden="true" class="logo">
+        <circle cx="54" cy="54" r="54" fill="var(--indigo)" />
+        <path d="M47 37c-3-4 3-7 0-12M61 37c-3-4 3-7 0-12" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none" />
+        <path d="M35 56c1-10 9-15 19-15s18 5 19 15z" fill="#E2C25A" />
+        <path d="M31 56h46c0 14-10 24-23 24S31 70 31 56zM46 79h16l-2 5h-12z" fill="#fff" />
+      </svg>
+      <div class="loading-th" lang="th">กินข้าว</div>
+      {error ? <p class="bad">{error}</p> : <p class="muted">{total > 0 ? `Getting your phrases ready… ${done}/${total}` : 'Opening…'}</p>}
+      {total > 0 && !error && <div class="bar"><div style={{ width: `${(done / total) * 100}%` }} /></div>}
+    </main>
   );
 }
 
 function App() {
-  const [data, setData] = useState<Loaded | null>(null);
-  const [failed, setFailed] = useState<string | null>(null);
-  const [info, setInfo] = useState<NativeInfo | null>(null);
-  const [apk, setApk] = useState<ApkLatest | null>(null);
-  const [webReady, setWebReady] = useState<number | null>(null);
-  const [checking, setChecking] = useState(false);
-  const [updErr, setUpdErr] = useState('');
+  const [ready, setReady] = useState(false);
+  const [prog, setProg] = useState({ done: 0, total: 0 });
+  const [error, setError] = useState('');
+  const [tab, setTab] = useState<Tab>('today');
+  const [openSit, setOpenSit] = useState<string | null>(null);
 
-  const checkUpdates = async () => {
-    const ni = await nativeInfo();
-    setInfo(ni);
-    if (!ni) return;
-    setChecking(true);
-    setUpdErr('');
-    try {
-      setApk(await checkApk(ni));
-      setWebReady(await prepareWeb(ni));
-    } catch (e) {
-      setUpdErr(e instanceof Error ? e.message : String(e));
-    }
-    setChecking(false);
+  const go = (route: string) => {
+    closeShow();
+    if (isTab(route)) setTab(route);
   };
 
   useEffect(() => {
-    confirmBoot();
-    loadContent().then(setData).catch(e => setFailed(String(e)));
-    checkUpdates();
+    (async () => {
+      try {
+        await loadProgress();
+        setLoaded(await loadContent((done, total) => setProg({ done, total })));
+        setReady(true);
+        confirmBoot();
+        checkUpdates();
+        scheduleReminders();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    })();
+    if (!Capacitor.isNativePlatform()) return;
+    CapApp.getLaunchUrl().then(r => { if (r?.url) go(routeOf(r.url)); }).catch(() => {});
+    const h1 = CapApp.addListener('appUrlOpen', e => go(routeOf(e.url)));
+    onReminderTap(go);
+    const h2 = CapApp.addListener('resume', () => { checkUpdates(); });
+    return () => { h1.then(h => h.remove()); h2.then(h => h.remove()); };
   }, []);
 
-  const sourceLabel = { synced: 'Up to date from GitHub', cached: 'Offline: using saved content', bundled: 'Offline: using built-in content' };
+  // Android back: close Show mode, then leave a situation, then go back to Today, then minimise.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const h = CapApp.addListener('backButton', () => {
+      if (closeShow()) return;
+      if (tab === 'browse' && openSit) { setOpenSit(null); return; }
+      if (tab !== 'today') { setTab('today'); return; }
+      CapApp.minimizeApp();
+    });
+    return () => { h.then(x => x.remove()); };
+  }, [tab, openSit]);
+
+  useEffect(() => { window.scrollTo(0, 0); }, [tab, openSit]);
+
+  if (!ready) return <Loading {...prog} error={error} />;
 
   return (
-    <main class="wrap">
-      {webReady && <UpdateBanner build={webReady} />}
-      <header class="hero">
-        <div class="mark" lang="th">กินข้าว</div>
-        <h1>Gin Khao</h1>
-        <p class="muted">Thai for daily life in Chiang Mai</p>      </header>
-
-      <section class="status">
-        {failed && <span class="bad">Couldn't load content: {failed}</span>}
-        {!data && !failed && <span class="muted">Checking for new content…</span>}
-        {data && (
-          <>
-            <span class={`dot ${data.source}`} aria-hidden="true" />
-            <span>{sourceLabel[data.source]}</span>
-            <span class="muted mono">content {data.version} · app {APP_VERSION}</span>
-          </>
-        )}
-      </section>
-
-      <section class="list">
-        {data?.content.phrases.map(p => <PhraseCard key={p.id} p={p} url={data.audioUrl(p)} />)}
-      </section>
-
-      <MicTest />
-
-      <AppUpdates info={info} apk={apk} contentVersion={data?.version} check={checkUpdates} checking={checking} error={updErr} />
-    </main>
+    <>
+      <UpdateBanner />
+      <main class="app">
+        {tab === 'today' && <Today />}
+        {tab === 'browse' && <Browse open={openSit} setOpen={setOpenSit} />}
+        {tab === 'food' && <Food />}
+        {tab === 'show' && <ShowTab />}
+        {tab === 'settings' && <Settings />}
+      </main>
+      <nav class="tabs" aria-label="Sections">
+        {TABS.map(t => (
+          <button key={t.id} class={tab === t.id ? 'on' : ''} aria-current={tab === t.id ? 'page' : undefined}
+            onClick={() => { if (t.id === 'browse' && tab === 'browse') setOpenSit(null); setTab(t.id); }}>
+            <Icon name={t.icon} size={22} />
+            <span>{t.label}</span>
+          </button>
+        ))}
+      </nav>
+      <ShowOverlay />
+    </>
   );
 }
 

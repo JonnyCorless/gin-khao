@@ -4,4 +4,10 @@
     <string name="title_activity_main">Gin Khao</string>
     <string name="package_name">com.ginkhao.app</string>
     <string name="custom_url_scheme">com.ginkhao.app</string>
+    <string name="sc_show">Show cards</string>
+    <string name="sc_show_long">Show a phrase to someone</string>
+    <string name="sc_food">Food guard</string>
+    <string name="sc_food_long">Check a menu for offal</string>
+    <string name="sc_today">Today</string>
+    <string name="sc_today_long">Today\'s session</string>
 </resources>

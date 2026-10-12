@@ -6,6 +6,9 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   // Android 15 draws apps edge to edge; keep the web view clear of the status and navigation bars.
   android: { allowMixedContent: false, adjustMarginsForEdgeToEdge: 'auto' },
+  plugins: {
+    LocalNotifications: { smallIcon: 'ic_stat_gk', iconColor: '#2E3A87' },
+  },
 };
 
 export default config;

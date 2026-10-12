@@ -1,0 +1,27 @@
+# Situations in Browse, in curriculum order. New phrases in Today are taught in this order.
+# icon: one of the line icons in app/ui/icons.tsx
+- id: basics
+  title: Getting by
+  th: เอาตัวรอด
+  icon: hand
+  blurb: The lines that get you out of trouble at any counter.
+- id: shop
+  title: Shops & 7-Eleven
+  th: ร้านสะดวกซื้อ
+  icon: bag
+  blurb: The till asks the same few questions every time. Learn to hear them and the visit becomes routine.
+- id: food
+  title: Food & stalls
+  th: ร้านอาหาร
+  icon: bowl
+  blurb: Noodle shops ask short questions in the same order. Each has two or three answers.
+- id: numbers
+  title: Numbers & prices
+  th: ตัวเลข
+  icon: coins
+  blurb: Prices come fast. Train your ear until haa sìp and haa rói stop sounding alike.
+- id: petrol
+  title: Petrol
+  th: ปั๊มน้ำมัน
+  icon: fuel
+  blurb: You already do this one. Use it as a warm-up.

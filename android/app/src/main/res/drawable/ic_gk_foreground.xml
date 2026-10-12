@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gin Khao icon: a bowl of rice with steam, drawn inside the adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- steam -->
+    <path
+        android:pathData="M47,37 C44,33 50,30 47,25"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M61,37 C58,33 64,30 61,25"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <!-- rice -->
+    <path
+        android:pathData="M35,56 C36,46 44,41 54,41 C64,41 72,46 73,56 Z"
+        android:fillColor="#E2C25A" />
+    <!-- bowl -->
+    <path
+        android:pathData="M31,56 L77,56 C77,70 67,80 54,80 C41,80 31,70 31,56 Z"
+        android:fillColor="#FFFFFF" />
+    <!-- foot -->
+    <path
+        android:pathData="M46,79 L62,79 L60,84 L48,84 Z"
+        android:fillColor="#FFFFFF" />
+    <!-- rim line -->
+    <path
+        android:pathData="M31,56 L77,56"
+        android:strokeColor="#C9A227"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+</vector>

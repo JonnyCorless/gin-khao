@@ -1,0 +1,276 @@
+# Shops & 7-Eleven. hear = what staff say (with your replies), say = what you can ask.
+- id: s-welcome
+  kind: hear
+  th: สวัสดีค่ะ เซเว่นยินดีต้อนรับค่ะ
+  rom: sà-wàt-dee kâ, se-wên yin-dee tôn-ráp kâ
+  en: Hello, welcome to 7-Eleven
+  note: They say it to everyone who walks in. A smile or "sà-wàt-dee káp" is plenty.
+  replies: [hello]
+- id: s-bag
+  kind: hear
+  th: รับถุงไหมคะ
+  rom: ráp tǔng mǎi ká
+  en: Do you want a bag?
+  note: Bags often cost 1–2 baht now.
+  replies: [s-no-thanks-bag, s-yes-please]
+- id: s-heat
+  kind: hear
+  th: อุ่นไหมคะ
+  rom: ùn mǎi ká
+  en: Shall I heat it up?
+  replies: [s-heat-yes, s-heat-no]
+- id: s-card
+  kind: hear
+  th: มีบัตรออลไหมคะ
+  rom: mee bàt all mǎi ká
+  en: Do you have an ALL member card?
+  note: ALL member is 7-Eleven's points card. They may ask for your phone number instead.
+  replies: [s-dont-have]
+- id: s-points
+  kind: hear
+  th: สะสมแต้มไหมคะ
+  rom: sà-sǒm tâem mǎi ká
+  en: Do you want to collect points?
+  replies: [no-worries]
+- id: s-straw
+  kind: hear
+  th: รับหลอดไหมคะ
+  rom: ráp lòt mǎi ká
+  en: Do you want a straw?
+  replies: [s-yes-please, s-no-thanks-plain]
+- id: s-spoon-q
+  kind: hear
+  th: รับช้อนไหมคะ
+  rom: ráp chón mǎi ká
+  en: Do you want a spoon?
+  replies: [s-yes-please, s-no-thanks-plain]
+- id: s-cash-or
+  kind: hear
+  th: เงินสดหรือโอนคะ
+  rom: ngern sòt rǔe oon ká
+  en: Cash or transfer?
+  note: Transfer (oon) means scanning their QR code with a Thai banking app.
+  replies: [s-cash, s-scan]
+- id: s-total
+  kind: hear
+  th: ทั้งหมดแปดสิบเก้าบาทค่ะ
+  rom: táng-mòt pàet-sìp-gâo bàat kâ
+  en: That's 89 baht altogether
+  note: The total is also on the little screen facing you.
+- id: s-coins
+  kind: hear
+  th: มีเหรียญไหมคะ
+  rom: mee rǐan mǎi ká
+  en: Do you have coins?
+  replies: [s-have, s-dont-have]
+- id: s-change
+  kind: hear
+  th: เงินทอนค่ะ
+  rom: ngern ton kâ
+  en: Here's your change
+  replies: [thank-you]
+- id: s-anything-else
+  kind: hear
+  th: เอาอะไรเพิ่มไหมคะ
+  rom: ao à-rai pôem mǎi ká
+  en: Anything else?
+  replies: [thats-all]
+- id: s-at-back
+  kind: hear
+  th: อยู่ข้างหลังค่ะ
+  rom: yùu kâang-lǎng kâ
+  en: It's at the back
+- id: s-over-there
+  kind: hear
+  th: อยู่ตรงนั้นค่ะ
+  rom: yùu trong-nán kâ
+  en: It's over there
+- id: s-fridge
+  kind: hear
+  th: ในตู้เย็นค่ะ
+  rom: nai tûu-yen kâ
+  en: In the fridge
+- id: s-thanks-staff
+  kind: hear
+  th: ขอบคุณค่ะ
+  rom: kòp-kun kâ
+  en: Thank you
+
+# Your answers
+- id: s-no-thanks-bag
+  kind: say
+  th: ไม่เอาถุงครับ
+  rom: mâi ao tǔng káp
+  en: No bag, thanks
+- id: s-yes-please
+  kind: say
+  th: เอาครับ
+  rom: ao káp
+  en: Yes, please
+- id: s-no-thanks-plain
+  kind: say
+  th: ไม่เอาครับ
+  rom: mâi ao káp
+  en: No, thanks
+- id: s-heat-yes
+  kind: say
+  th: อุ่นครับ
+  rom: ùn káp
+  en: Yes, heat it up
+- id: s-heat-no
+  kind: say
+  th: ไม่ต้องอุ่นครับ
+  rom: mâi tông ùn káp
+  en: No need to heat it
+- id: s-dont-have
+  kind: say
+  th: ไม่มีครับ
+  rom: mâi mee káp
+  en: No, I don't have one
+- id: s-have
+  kind: say
+  th: มีครับ
+  rom: mee káp
+  en: Yes, I have
+- id: s-cash
+  kind: say
+  th: เงินสดครับ
+  rom: ngern sòt káp
+  en: Cash
+- id: s-scan
+  kind: say
+  th: สแกนครับ
+  rom: sà-kaen káp
+  en: I'll scan
+- id: s-water
+  kind: say
+  th: มีน้ำเปล่าไหมครับ
+  rom: mee náam-plào mǎi káp
+  en: Do you have (plain) water?
+- id: s-where-water
+  kind: say
+  th: น้ำเปล่าอยู่ตรงไหนครับ
+  rom: náam-plào yùu trong-nǎi káp
+  en: Where's the water?
+- id: s-where-tissue
+  kind: say
+  th: ทิชชู่อยู่ตรงไหนครับ
+  rom: tít-chûu yùu trong-nǎi káp
+  en: Where are the tissues?
+- id: s-ice
+  kind: say
+  th: มีน้ำแข็งไหมครับ
+  rom: mee náam-kǎeng mǎi káp
+  en: Do you have ice?
+- id: s-ice-bag
+  kind: say
+  th: ขอน้ำแข็งถุงนึงครับ
+  rom: kǒr náam-kǎeng tǔng nueng káp
+  en: A bag of ice, please
+- id: s-bag-too
+  kind: say
+  th: ขอถุงด้วยครับ
+  rom: kǒr tǔng dûai káp
+  en: A bag too, please
+- id: s-big-bag
+  kind: say
+  th: มีถุงใหญ่ไหมครับ
+  rom: mee tǔng yài mǎi káp
+  en: Do you have a big bag?
+- id: s-straw-too
+  kind: say
+  th: ขอหลอดด้วยครับ
+  rom: kǒr lòt dûai káp
+  en: A straw too, please
+- id: s-spoon-too
+  kind: say
+  th: ขอช้อนด้วยครับ
+  rom: kǒr chón dûai káp
+  en: A spoon too, please
+- id: s-chopsticks
+  kind: say
+  th: ขอตะเกียบด้วยครับ
+  rom: kǒr tà-gìap dûai káp
+  en: Chopsticks too, please
+- id: s-heat-too
+  kind: say
+  th: อุ่นด้วยครับ
+  rom: ùn dûai káp
+  en: Heat it up too, please
+- id: s-receipt
+  kind: say
+  th: ขอใบเสร็จด้วยครับ
+  rom: kǒr bai-sèt dûai káp
+  en: A receipt too, please
+- id: s-pay-card
+  kind: say
+  th: จ่ายด้วยบัตรได้ไหมครับ
+  rom: jàai dûai bàt dâi mǎi káp
+  en: Can I pay by card?
+- id: s-pay-scan
+  kind: say
+  th: สแกนจ่ายได้ไหมครับ
+  rom: sà-kaen jàai dâi mǎi káp
+  en: Can I pay by scanning?
+- id: s-no-small
+  kind: say
+  th: ไม่มีเงินย่อยครับ
+  rom: mâi mee ngern yôi káp
+  en: I don't have small change
+- id: s-big-note
+  kind: say
+  th: มีแต่แบงค์พันครับ
+  rom: mee tàe baeng pan káp
+  en: I've only got a 1,000 note
+  note: Small shops and stalls hate 1,000 notes. Break them at 7-Eleven.
+- id: s-two-of
+  kind: say
+  th: เอาสองอันครับ
+  rom: ao sǒng an káp
+  en: Two of these, please
+- id: s-this-too
+  kind: say
+  th: อันนี้ด้วยครับ
+  rom: an-níi dûai káp
+  en: This one too
+- id: s-another-kind
+  kind: say
+  th: มีแบบอื่นไหมครับ
+  rom: mee bàep ùen mǎi káp
+  en: Do you have another kind?
+- id: s-bigger
+  kind: say
+  th: มีขนาดใหญ่กว่านี้ไหมครับ
+  rom: mee kà-nàat yài gwàa níi mǎi káp
+  en: Do you have a bigger size?
+- id: s-sold-out-q
+  kind: say
+  th: หมดแล้วเหรอครับ
+  rom: mòt láew rǒe káp
+  en: Sold out?
+- id: s-sim
+  kind: say
+  th: มีซิมไหมครับ
+  rom: mee sim mǎi káp
+  en: Do you sell SIM cards?
+- id: s-top-up
+  kind: say
+  th: เติมเงินโทรศัพท์ครับ
+  rom: toem ngern too-rá-sàp káp
+  en: Top up my phone, please
+- id: s-bill
+  kind: say
+  th: จ่ายค่าไฟที่นี่ได้ไหมครับ
+  rom: jàai kâa-fai tîi-nîi dâi mǎi káp
+  en: Can I pay my electricity bill here?
+  note: 7-Eleven's counter service takes electricity, water and phone bills. Bring the bill.
+- id: s-charger
+  kind: say
+  th: มีที่ชาร์จไหมครับ
+  rom: mee tîi-châat mǎi káp
+  en: Do you have phone chargers?
+- id: s-batteries
+  kind: say
+  th: มีถ่านไหมครับ
+  rom: mee tàan mǎi káp
+  en: Do you have batteries?

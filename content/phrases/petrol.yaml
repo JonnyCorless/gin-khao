@@ -1,0 +1,67 @@
+# Petrol (on a scooter).
+- id: p-which-fuel
+  kind: hear
+  th: เติมอะไรคะ
+  rom: toem à-rai ká
+  en: Which fuel?
+  replies: [p-95, p-91, p-diesel]
+- id: p-full-q
+  kind: hear
+  th: เต็มถังไหมคะ
+  rom: tem tǎng mǎi ká
+  en: Fill it up?
+  replies: [p-full, p-100]
+- id: p-lift-seat
+  kind: hear
+  th: ยกเบาะด้วยค่ะ
+  rom: yók bò dûai kâ
+  en: Lift the seat, please
+  note: On most scooters the tank is under the seat.
+- id: p-open-cap
+  kind: hear
+  th: เปิดฝาถังด้วยค่ะ
+  rom: pòet fǎa tǎng dûai kâ
+  en: Open the fuel cap, please
+
+- id: p-95
+  kind: say
+  th: เก้าห้าครับ
+  rom: gâo hâa káp
+  en: 95
+  note: Fuel grades are read digit by digit, so 95 is gâo hâa.
+- id: p-91
+  kind: say
+  th: เก้าเอ็ดครับ
+  rom: gâo èt káp
+  en: 91
+- id: p-diesel
+  kind: say
+  th: ดีเซลครับ
+  rom: dee-sel káp
+  en: Diesel
+- id: p-full
+  kind: say
+  th: เต็มถังครับ
+  rom: tem tǎng káp
+  en: Full tank
+- id: p-100
+  kind: say
+  th: ร้อยบาทครับ
+  rom: rói bàat káp
+  en: 100 baht's worth
+- id: p-95-full
+  kind: say
+  th: เก้าห้า เต็มถังครับ
+  rom: gâo hâa, tem tǎng káp
+  en: 95, full tank
+  note: You already know this one.
+- id: p-95-50
+  kind: say
+  th: เก้าห้า ห้าสิบบาทครับ
+  rom: gâo hâa, hâa-sìp bàat káp
+  en: 95, 50 baht's worth
+- id: p-air
+  kind: say
+  th: เติมลมด้วยครับ
+  rom: toem lom dûai káp
+  en: Air in the tyres too, please

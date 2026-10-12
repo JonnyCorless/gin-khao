@@ -1,0 +1,215 @@
+# Food & stalls: ordering, preferences, and staying away from offal.
+- id: f-what-like
+  kind: hear
+  th: รับอะไรดีคะ
+  rom: ráp à-rai dee ká
+  en: What would you like?
+  replies: [take-this, f-same-as-usual]
+- id: f-here-or-away
+  kind: hear
+  th: ทานที่นี่หรือกลับบ้านคะ
+  rom: taan tîi-nîi rǔe glàp-bâan ká
+  en: Eat here or take away?
+  replies: [f-eat-here, f-take-away, f-in-bag]
+- id: f-which-noodle
+  kind: hear
+  th: เส้นอะไรคะ
+  rom: sên à-rai ká
+  en: Which noodles?
+  replies: [f-sen-lek, f-sen-yai, f-sen-mee, f-ba-mee]
+- id: f-soup-or-dry
+  kind: hear
+  th: น้ำหรือแห้งคะ
+  rom: náam rǔe hâeng ká
+  en: With soup or dry?
+  replies: [f-soup, f-dry]
+- id: f-size
+  kind: hear
+  th: ธรรมดาหรือพิเศษคะ
+  rom: tam-má-daa rǔe pí-sèt ká
+  en: Regular or large?
+  note: Large (pí-sèt) means more meat, usually 10 baht extra.
+  replies: [f-regular, f-large]
+- id: f-spicy-q
+  kind: hear
+  th: เผ็ดไหมคะ
+  rom: pèt mǎi ká
+  en: Spicy?
+  replies: [f-not-spicy, f-little-spicy]
+- id: f-veg-q
+  kind: hear
+  th: ใส่ผักไหมคะ
+  rom: sài pàk mǎi ká
+  en: Vegetables in it?
+  replies: [f-put-in, f-dont-put]
+
+- id: f-eat-here
+  kind: say
+  th: ทานที่นี่ครับ
+  rom: taan tîi-nîi káp
+  en: Eat here
+- id: f-take-away
+  kind: say
+  th: กลับบ้านครับ
+  rom: glàp-bâan káp
+  en: Take away (lit. "go home")
+- id: f-in-bag
+  kind: say
+  th: ใส่ถุงครับ
+  rom: sài tǔng káp
+  en: In a bag, please (take away)
+- id: f-sen-lek
+  kind: say
+  th: เส้นเล็กครับ
+  rom: sên lék káp
+  en: Thin rice noodles
+- id: f-sen-yai
+  kind: say
+  th: เส้นใหญ่ครับ
+  rom: sên yài káp
+  en: Wide rice noodles
+- id: f-sen-mee
+  kind: say
+  th: เส้นหมี่ครับ
+  rom: sên mìi káp
+  en: Rice vermicelli
+- id: f-ba-mee
+  kind: say
+  th: บะหมี่ครับ
+  rom: bà-mìi káp
+  en: Egg noodles
+- id: f-soup
+  kind: say
+  th: น้ำครับ
+  rom: náam káp
+  en: With soup
+- id: f-dry
+  kind: say
+  th: แห้งครับ
+  rom: hâeng káp
+  en: Dry
+- id: f-regular
+  kind: say
+  th: ธรรมดาครับ
+  rom: tam-má-daa káp
+  en: Regular
+- id: f-large
+  kind: say
+  th: พิเศษครับ
+  rom: pí-sèt káp
+  en: Large
+- id: f-put-in
+  kind: say
+  th: ใส่ครับ
+  rom: sài káp
+  en: Yes, put it in
+- id: f-dont-put
+  kind: say
+  th: ไม่ใส่ครับ
+  rom: mâi sài káp
+  en: Leave it out
+- id: f-no-offal
+  kind: say
+  th: ไม่ใส่เครื่องในครับ
+  rom: mâi sài krûeang-nai káp
+  en: No offal in it, please
+- id: f-has-offal
+  kind: say
+  th: มีเครื่องในไหมครับ
+  rom: mee krûeang-nai mǎi káp
+  en: Does it have offal in it?
+- id: f-dont-eat-offal
+  kind: say
+  th: ผมไม่กินเครื่องในครับ
+  rom: pǒm mâi gin krûeang-nai káp
+  en: I don't eat offal
+  note: Clear and polite. Stalls hear it often.
+- id: f-no-blood
+  kind: say
+  th: ไม่เอาเลือดครับ
+  rom: mâi ao lûeat káp
+  en: No blood, please
+- id: f-just-minced
+  kind: say
+  th: เอาแต่หมูสับครับ
+  rom: ao tàe mǔu-sàp káp
+  en: Just minced pork, please
+  note: Swap in gài (chicken) or gûng (prawn).
+- id: f-what-meat
+  kind: say
+  th: อันนี้เนื้ออะไรครับ
+  rom: an-níi núea à-rai káp
+  en: What meat is this?
+- id: f-not-spicy
+  kind: say
+  th: ไม่เผ็ดครับ
+  rom: mâi pèt káp
+  en: Not spicy, please
+- id: f-little-spicy
+  kind: say
+  th: เผ็ดนิดหน่อยครับ
+  rom: pèt nít-nòi káp
+  en: A little spicy
+- id: f-less-sweet
+  kind: say
+  th: หวานน้อยครับ
+  rom: wǎan nói káp
+  en: Less sweet, please
+  note: Works for coffee, tea and shakes too.
+- id: f-not-sweet
+  kind: say
+  th: ไม่หวานครับ
+  rom: mâi wǎan káp
+  en: Not sweet
+- id: f-less-fish-sauce
+  kind: say
+  th: น้ำปลาน้อยๆ ครับ
+  rom: náam-plaa nói nói káp
+  en: Go easy on the fish sauce
+- id: f-no-sugar
+  kind: say
+  th: ไม่ใส่น้ำตาลครับ
+  rom: mâi sài náam-taan káp
+  en: No sugar, please
+- id: f-no-msg
+  kind: say
+  th: ไม่ใส่ผงชูรสครับ
+  rom: mâi sài pǒng-chuu-rót káp
+  en: No MSG, please
+- id: f-my-way
+  kind: say
+  th: ไม่เผ็ด หวานน้อย น้ำปลาน้อยๆ ครับ
+  rom: mâi pèt, wǎan nói, náam-plaa nói nói káp
+  en: Not spicy, less sweet, easy on the fish sauce
+  note: Your usual. Pinned to Show cards.
+- id: f-menu
+  kind: say
+  th: ขอเมนูหน่อยครับ
+  rom: kǒr me-nuu nòi káp
+  en: The menu, please
+- id: f-water-bottle
+  kind: say
+  th: ขอน้ำเปล่าขวดนึงครับ
+  rom: kǒr náam-plào kùat nueng káp
+  en: A bottle of water, please
+- id: f-what-this
+  kind: say
+  th: อันนี้อะไรครับ
+  rom: an-níi à-rai káp
+  en: What's this?
+- id: f-same-as-usual
+  kind: say
+  th: เอาเหมือนเดิมครับ
+  rom: ao mǔean doem káp
+  en: Same as usual, please
+  note: For when you've become a regular.
+- id: f-delicious
+  kind: say
+  th: อร่อยมากครับ
+  rom: à-ròi mâak káp
+  en: Really tasty!
+- id: f-pay
+  kind: say
+  th: เก็บตังค์ด้วยครับ
+  rom: gèp tang dûai káp
+  en: Can I pay, please?

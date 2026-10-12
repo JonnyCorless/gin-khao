@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Long-press the app icon: jump straight to these screens (opens ginkhao://<screen>). -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="show"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_show"
+        android:shortcutLongLabel="@string/sc_show_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.ginkhao.app"
+            android:targetClass="com.ginkhao.app.MainActivity"
+            android:data="ginkhao://show" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="food"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_food"
+        android:shortcutLongLabel="@string/sc_food_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.ginkhao.app"
+            android:targetClass="com.ginkhao.app.MainActivity"
+            android:data="ginkhao://food" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="today"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_today"
+        android:shortcutLongLabel="@string/sc_today_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.ginkhao.app"
+            android:targetClass="com.ginkhao.app.MainActivity"
+            android:data="ginkhao://today" />
+    </shortcut>
+</shortcuts>
