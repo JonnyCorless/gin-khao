@@ -1,0 +1,172 @@
+# Role-play scenes with the regulars.
+# steps:
+#   {they: id}                          they say a line; tap to carry on
+#   {they: id, reply: [ids], wrong: [ids]}   they say it, you pick (or say) a reply; any reply is right
+#   {they: id, check: true}             they say it, you show you understood (pick the meaning)
+#   {you: "task", reply: [ids], wrong: [ids]}  you start: pick what to say
+#   {narrate: "text"}                   what happens
+# needs: scenes that must be done first.
+- id: may-1
+  title: First 7-Eleven run
+  who: may
+  setup: You've picked up a sandwich and a bottle of water. Nong May is on the till.
+  steps:
+    - {they: s-welcome}
+    - {they: s-heat, reply: [s-heat-yes, s-heat-no], wrong: [s-no-thanks-bag, s-cash]}
+    - {they: s-bag, reply: [s-no-thanks-bag, s-yes-please], wrong: [s-heat-yes, s-dont-have]}
+    - {they: s-cash-or, reply: [s-cash, s-scan], wrong: [s-dont-have, hello]}
+    - {they: s-total, check: true}
+    - {narrate: You hand over a 100 note.}
+    - {they: s-change, reply: [thank-you], wrong: [hello, excuse-me]}
+  end: Nong May nods and smiles. Next time she'll know you.
+- id: may-2
+  title: Ice and a straw
+  who: may
+  needs: [may-1]
+  setup: It's 35 degrees. You want ice for your drink at home.
+  steps:
+    - {they: s-welcome}
+    - {you: Ask if they have ice., reply: [s-ice], wrong: [s-water, s-sim]}
+    - {they: s-fridge, check: true}
+    - {narrate: You get a bag of ice and an iced coffee.}
+    - {they: s-straw, reply: [s-yes-please, s-no-thanks-plain], wrong: [s-heat-yes]}
+    - {they: s-anything-else, reply: [thats-all], wrong: [s-two-of, no-worries]}
+    - {they: s-cash-or, reply: [s-scan, s-cash], wrong: [s-no-small]}
+  end: Cold drink, no fuss. You're getting quick at this.
+- id: may-3
+  title: Paying the electricity bill
+  who: may
+  needs: [may-2]
+  setup: The electricity bill came through the gate. 7-Eleven's counter takes it.
+  steps:
+    - {you: Ask if you can pay the electricity bill here., reply: [s-bill], wrong: [s-top-up, s-pay-card]}
+    - {they: h-ok, check: true}
+    - {narrate: She scans the barcode on the bill.}
+    - {they: s-total, check: true}
+    - {you: "You only have a 1,000 note. Tell her.", reply: [s-big-note], wrong: [s-no-small, s-have]}
+    - {they: h-ok}
+    - {they: s-change, reply: [thank-you], wrong: [thats-all]}
+  end: Bill paid without anyone switching to English.
+- id: noi-1
+  title: Khao soi at Pa Noi's
+  who: noi
+  setup: Lunchtime. The khao soi pot is steaming. Pa Noi looks up.
+  steps:
+    - {they: f-what-like, reply: [take-this], wrong: [s-two-of, f-pay]}
+    - {narrate: You point at the khao soi picture.}
+    - {they: f-here-or-away, reply: [f-eat-here, f-take-away], wrong: [f-soup]}
+    - {they: f-spicy-q, reply: [f-not-spicy, f-little-spicy], wrong: [f-less-sweet]}
+    - {they: f-size, reply: [f-regular, f-large], wrong: [f-dry]}
+    - {narrate: It's very good.}
+    - {you: Tell her it's really tasty., reply: [f-delicious], wrong: [thank-you, f-same-as-usual]}
+    - {you: Ask to pay., reply: [f-pay], wrong: [f-menu, how-much]}
+  end: Pa Noi laughs at "à-ròi mâak". You've made a friend.
+- id: noi-2
+  title: Noodles, no offal
+  who: noi
+  needs: [noi-1]
+  setup: Pa Noi also does noodle soup. Her pot has liver and intestines in it, so be clear.
+  steps:
+    - {they: f-what-like, reply: [take-this], wrong: [f-pay]}
+    - {they: f-which-noodle, reply: [f-sen-lek, f-sen-yai, f-sen-mee, f-ba-mee], wrong: [f-soup, f-regular]}
+    - {they: f-soup-or-dry, reply: [f-soup, f-dry], wrong: [f-sen-lek]}
+    - {you: Make sure there's no offal in it., reply: [f-no-offal, f-dont-eat-offal], wrong: [f-no-msg, f-less-sweet]}
+    - {they: h-ok}
+    - {they: f-veg-q, reply: [f-put-in, f-dont-put], wrong: [f-no-blood]}
+    - {they: f-spicy-q, reply: [f-not-spicy, f-little-spicy], wrong: [f-not-sweet]}
+  end: A clean bowl, nothing surprising in it.
+- id: noi-3
+  title: A regular now
+  who: noi
+  needs: [noi-2]
+  setup: Your third visit this week. Pa Noi already knows what you like.
+  steps:
+    - {they: f-what-like, reply: [f-same-as-usual], wrong: [take-this, f-menu]}
+    - {they: f-here-or-away, reply: [f-take-away, f-in-bag], wrong: [f-eat-here, f-dry]}
+    - {you: "Ask for your usual: not spicy, less sweet, easy on the fish sauce.", reply: [f-my-way], wrong: [f-not-sweet, f-no-sugar]}
+    - {they: h-ok}
+    - {you: Ask to pay., reply: [f-pay], wrong: [how-much]}
+  end: '"Same as usual" is how you know you belong.'
+- id: ploy-1
+  title: Filling up
+  who: ploy
+  setup: You pull the scooter up to the pump.
+  steps:
+    - {they: p-which-fuel, reply: [p-95, p-91], wrong: [p-full, n-9]}
+    - {they: p-full-q, reply: [p-full, p-100], wrong: [p-95]}
+    - {they: p-lift-seat, check: true}
+    - {narrate: You lift the seat. She fills up.}
+    - {you: Ask for air in the tyres too., reply: [p-air], wrong: [sc-flat, p-full]}
+    - {they: h-ok}
+    - {you: Say thank you., reply: [thank-you], wrong: [hello]}
+  end: Full tank, firm tyres, all in Thai.
+- id: tum-1
+  title: Flat tyre
+  who: tum
+  setup: Your back tyre went flat on the way home. You push the scooter into Pi Tum's shop.
+  steps:
+    - {they: sc-whats-wrong, reply: [sc-flat], wrong: [sc-wont-start, sc-brakes]}
+    - {they: sc-new-tyre, check: true}
+    - {you: Ask how much it'll cost., reply: [sc-how-much-cost], wrong: [sc-when-ready, sc-take-long]}
+    - {they: sc-total, check: true}
+    - {they: sc-wait-q, reply: [sc-can-wait, sc-come-back], wrong: [ok-can]}
+    - {narrate: "Twenty minutes later, a new tyre."}
+    - {you: Say thank you., reply: [thank-you], wrong: [excuse-me]}
+  end: Pi Tum gives a little nod. He'll remember the scooter.
+- id: tum-2
+  title: Oil change
+  who: tum
+  needs: [tum-1]
+  setup: It's been 3,000 km. Time for an oil change.
+  steps:
+    - {you: Ask for an oil change., reply: [sc-oil], wrong: [p-air, sc-wash]}
+    - {they: sc-wait-q, reply: [sc-come-back, sc-can-wait], wrong: [sc-flat]}
+    - {you: Ask what time it'll be ready., reply: [sc-when-ready], wrong: [sc-how-much-cost]}
+    - {they: sc-tomorrow, check: true}
+    - {you: That's fine. Say OK., reply: [ok-can], wrong: [not-right]}
+  end: Booked in. You'll pick it up tomorrow.
+- id: fon-1
+  title: A bad stomach
+  who: fon
+  setup: Something from last night disagreed with you. You walk to Phi Fon's pharmacy.
+  steps:
+    - {they: he-whats-wrong, reply: [he-diarrhoea, he-stomach], wrong: [he-headache, he-cough]}
+    - {they: he-allergic-q, reply: [he-not-allergic], wrong: [s-have]}
+    - {you: Ask for rehydration salts., reply: [he-ors], wrong: [he-painkillers]}
+    - {they: he-after-meals, check: true}
+    - {they: he-three-times, check: true}
+    - {you: Say thank you., reply: [thank-you], wrong: [no-worries]}
+  end: Salts, tablets, and a promise to take it easy.
+- id: ying-1
+  title: The aircon's broken
+  who: ying
+  setup: Khun Ying comes round on the 5th for the rent.
+  steps:
+    - {they: hm-rent, reply: [hm-pay-rent], wrong: [s-bill]}
+    - {they: hm-anything-broken, reply: [hm-aircon], wrong: [hm-gas-out, s-dont-have]}
+    - {you: Ask when someone can come and fix it., reply: [hm-when-fix], wrong: [hm-rubbish-day]}
+    - {they: hm-repairman, check: true}
+    - {you: Say thank you., reply: [thank-you], wrong: [hello]}
+  end: Rent paid, aircon booked. A good landlord to keep.
+- id: mon-1
+  title: Morning in the soi
+  who: mon
+  setup: Lung Mon is sweeping outside his gate as you walk past.
+  steps:
+    - {you: Say good morning., reply: [hello], wrong: [thank-you]}
+    - {they: so-eaten, reply: [so-eaten-yes, so-not-yet], wrong: [so-full]}
+    - {they: so-where-been, reply: [so-been-market, so-out-about], wrong: [so-from-england]}
+    - {they: so-from-where, reply: [so-from-england], wrong: [so-just-arrived]}
+    - {they: so-thai-good, reply: [so-just-little], wrong: [thank-you, so-fine]}
+    - {you: "Say you're off, see you.", reply: [so-off-now, so-see-later], wrong: [no-worries]}
+  end: Lung Mon waves the broom. Tomorrow he'll ask again.
+- id: chai-1
+  title: The checkpoint
+  who: chai
+  setup: A row of cones near the ring road. Officer Chai waves you over.
+  steps:
+    - {they: sc-where-going, reply: [sc-going-home, sc-going-market], wrong: [so-from-england]}
+    - {they: sc-licence, reply: [sc-here-you-are], wrong: [s-dont-have, no-thanks]}
+    - {narrate: He checks it and hands it back.}
+    - {you: Say thank you., reply: [thank-you], wrong: [so-off-now]}
+  end: Polite, quick, on your way. That's how checkpoints go.

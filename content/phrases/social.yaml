@@ -1,0 +1,140 @@
+# Neighbours and regulars: the same friendly questions every day.
+- id: so-eaten
+  kind: hear
+  voice: m
+  th: กินข้าวหรือยังครับ
+  rom: gin kâao rǔe yang káp
+  en: Have you eaten yet?
+  note: A greeting, like "how are you?". Not an invitation.
+  replies: [so-eaten-yes, so-not-yet]
+- id: so-where-been
+  kind: hear
+  voice: m
+  th: ไปไหนมาครับ
+  rom: pai nǎi maa káp
+  en: Where have you been?
+  note: Also just a greeting. Any short answer is fine.
+  replies: [so-been-market, so-out-about]
+- id: so-from-where
+  kind: hear
+  voice: m
+  th: มาจากไหนครับ
+  rom: maa jàak nǎi káp
+  en: Where are you from?
+  replies: [so-from-england]
+- id: so-been-long
+  kind: hear
+  voice: m
+  th: อยู่เมืองไทยนานหรือยังครับ
+  rom: yùu mueang tai naan rǔe yang káp
+  en: Have you been in Thailand long?
+  replies: [so-just-arrived, so-two-months]
+- id: so-thai-good
+  kind: hear
+  voice: m
+  th: พูดไทยเก่งนะครับ
+  rom: pûut tai gèng ná káp
+  en: Your Thai is good!
+  note: You'll hear this after two words. Smile and say "nít-nòi".
+  replies: [so-just-little]
+- id: so-eat-with-us
+  kind: hear
+  voice: m
+  th: กินด้วยกันไหมครับ
+  rom: gin dûai gan mǎi káp
+  en: Want to eat with us?
+  replies: [thank-you, so-full]
+- id: so-name-q
+  kind: hear
+  voice: m
+  th: ชื่ออะไรครับ
+  rom: chûe à-rai káp
+  en: What's your name?
+  replies: [so-my-name]
+
+- id: so-eaten-yes
+  kind: say
+  th: กินแล้วครับ
+  rom: gin láew káp
+  en: Yes, I have
+- id: so-not-yet
+  kind: say
+  th: ยังครับ
+  rom: yang káp
+  en: Not yet
+- id: so-been-market
+  kind: say
+  th: ไปตลาดมาครับ
+  rom: pai tà-làat maa káp
+  en: I've been to the market
+- id: so-out-about
+  kind: say
+  th: ไปเที่ยวมาครับ
+  rom: pai tîao maa káp
+  en: Just out and about
+- id: so-from-england
+  kind: say
+  th: มาจากอังกฤษครับ
+  rom: maa jàak ang-grìt káp
+  en: I'm from England
+- id: so-just-arrived
+  kind: say
+  th: เพิ่งมาครับ
+  rom: pôeng maa káp
+  en: I've only just come
+- id: so-two-months
+  kind: say
+  th: อยู่มาสองเดือนครับ
+  rom: yùu maa sǒng duean káp
+  en: I've been here two months
+- id: so-just-little
+  kind: say
+  th: นิดหน่อยครับ
+  rom: nít-nòi káp
+  en: Just a little
+- id: so-full
+  kind: say
+  th: อิ่มแล้วครับ
+  rom: ìm láew káp
+  en: I'm full, thanks
+- id: so-my-name
+  kind: say
+  th: ผมชื่อจอนนี่ครับ
+  rom: pǒm chûe jon-nîi káp
+  en: My name's Jonny
+- id: so-how-are-you
+  kind: say
+  th: สบายดีไหมครับ
+  rom: sà-baai dee mǎi káp
+  en: How are you?
+  replies: []
+- id: so-fine
+  kind: say
+  th: สบายดีครับ
+  rom: sà-baai dee káp
+  en: I'm fine
+- id: so-off-now
+  kind: say
+  th: ไปก่อนนะครับ
+  rom: pai gòn ná káp
+  en: I'm off, see you
+- id: so-see-later
+  kind: say
+  th: แล้วเจอกันครับ
+  rom: láew joe gan káp
+  en: See you later
+- id: so-rain
+  kind: say
+  th: ฝนจะตกไหมครับ
+  rom: fǒn jà tòk mǎi káp
+  en: Is it going to rain?
+- id: so-hot-today
+  kind: say
+  th: วันนี้ร้อนมากครับ
+  rom: wan-níi rón mâak káp
+  en: It's really hot today
+- id: so-sorry-bother
+  kind: say
+  th: ขอโทษที่รบกวนครับ
+  rom: kǒr-tôht tîi róp-guan káp
+  en: Sorry to bother you

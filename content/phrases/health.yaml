@@ -1,0 +1,124 @@
+# Pharmacy & health.
+- id: he-whats-wrong
+  kind: hear
+  th: เป็นอะไรคะ
+  rom: pen à-rai ká
+  en: What's the matter?
+  replies: [he-headache, he-stomach, he-diarrhoea, he-fever]
+- id: he-how-long
+  kind: hear
+  th: เป็นมากี่วันแล้วคะ
+  rom: pen maa gìi wan láew ká
+  en: How many days have you had it?
+- id: he-allergic-q
+  kind: hear
+  th: แพ้ยาอะไรไหมคะ
+  rom: páe yaa à-rai mǎi ká
+  en: Are you allergic to any medicine?
+  replies: [he-not-allergic]
+- id: he-after-meals
+  kind: hear
+  th: กินหลังอาหารนะคะ
+  rom: gin lǎng aa-hǎan ná ká
+  en: Take it after meals
+- id: he-before-meals
+  kind: hear
+  th: กินก่อนอาหารค่ะ
+  rom: gin gòn aa-hǎan kâ
+  en: Take it before meals
+- id: he-three-times
+  kind: hear
+  th: วันละสามครั้งค่ะ
+  rom: wan lá sǎam kráng kâ
+  en: Three times a day
+- id: he-one-tablet
+  kind: hear
+  th: ครั้งละหนึ่งเม็ดค่ะ
+  rom: kráng lá nùeng mét kâ
+  en: One tablet each time
+- id: he-insurance
+  kind: hear
+  th: มีประกันไหมคะ
+  rom: mee prà-gan mǎi ká
+  en: Do you have insurance?
+  note: At clinic and hospital reception.
+  replies: [s-have, s-dont-have]
+- id: he-passport
+  kind: hear
+  th: ขอดูพาสปอร์ตค่ะ
+  rom: kǒr duu páat-sà-pòrt kâ
+  en: Can I see your passport?
+  replies: [sc-here-you-are]
+
+- id: he-headache
+  kind: say
+  th: ปวดหัวครับ
+  rom: pùat hǔa káp
+  en: I have a headache
+- id: he-stomach
+  kind: say
+  th: ปวดท้องครับ
+  rom: pùat tóng káp
+  en: I have a stomach ache
+- id: he-diarrhoea
+  kind: say
+  th: ท้องเสียครับ
+  rom: tóng sǐa káp
+  en: I have diarrhoea
+- id: he-fever
+  kind: say
+  th: เป็นไข้ครับ
+  rom: pen kâi káp
+  en: I have a fever
+- id: he-cold
+  kind: say
+  th: เป็นหวัดครับ
+  rom: pen wàt káp
+  en: I have a cold
+- id: he-cough
+  kind: say
+  th: ไอครับ
+  rom: ai káp
+  en: I have a cough
+- id: he-throat
+  kind: say
+  th: เจ็บคอครับ
+  rom: jèp kor káp
+  en: I have a sore throat
+- id: he-painkillers
+  kind: say
+  th: มียาแก้ปวดไหมครับ
+  rom: mee yaa gâe pùat mǎi káp
+  en: Do you have painkillers?
+- id: he-ors
+  kind: say
+  th: ขอเกลือแร่ครับ
+  rom: kǒr gluea-râe káp
+  en: Rehydration salts, please
+  note: Ask for these after a bad stomach. Cheap, and they work.
+- id: he-for-diarrhoea
+  kind: say
+  th: ขอยาแก้ท้องเสียครับ
+  rom: kǒr yaa gâe tóng sǐa káp
+  en: Something for diarrhoea, please
+- id: he-not-allergic
+  kind: say
+  th: ไม่แพ้ยาครับ
+  rom: mâi páe yaa káp
+  en: I'm not allergic to anything
+- id: he-see-doctor
+  kind: say
+  th: ต้องหาหมอไหมครับ
+  rom: tông hǎa mǒr mǎi káp
+  en: Do I need to see a doctor?
+- id: he-dog-bite
+  kind: say
+  th: โดนหมากัดครับ
+  rom: doon mǎa gàt káp
+  en: I've been bitten by a dog
+  note: Go to a hospital the same day for rabies shots, even for a small bite.
+- id: he-fell-off
+  kind: say
+  th: ล้มรถครับ
+  rom: lóm rót káp
+  en: I came off my scooter

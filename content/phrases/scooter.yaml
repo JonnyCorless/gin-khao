@@ -1,0 +1,139 @@
+# Scooter life: repair shop, parking, checkpoint. Mechanic and police lines use the male voice.
+- id: sc-whats-wrong
+  kind: hear
+  voice: m
+  th: เป็นอะไรครับ
+  rom: pen à-rai káp
+  en: What's wrong with it?
+  replies: [sc-flat, sc-wont-start, sc-brakes]
+- id: sc-wait-q
+  kind: hear
+  voice: m
+  th: รอได้ไหมครับ
+  rom: ror dâi mǎi káp
+  en: Can you wait?
+  replies: [sc-can-wait, sc-come-back]
+- id: sc-tomorrow
+  kind: hear
+  voice: m
+  th: พรุ่งนี้มาเอานะครับ
+  rom: prûng-níi maa ao ná káp
+  en: Come and get it tomorrow
+- id: sc-new-tyre
+  kind: hear
+  voice: m
+  th: ต้องเปลี่ยนยางครับ
+  rom: tông plìan yaang káp
+  en: The tyre needs replacing
+  replies: [sc-how-much-cost]
+- id: sc-total
+  kind: hear
+  voice: m
+  th: ทั้งหมดสามร้อยครับ
+  rom: táng-mòt sǎam rói káp
+  en: That's 300 altogether
+- id: sc-no-parking
+  kind: hear
+  voice: m
+  th: จอดตรงนี้ไม่ได้ครับ
+  rom: jòt trong-níi mâi dâi káp
+  en: You can't park here
+  replies: [excuse-me]
+- id: sc-licence
+  kind: hear
+  voice: m
+  th: ขอดูใบขับขี่ครับ
+  rom: kǒr duu bai-kàp-kìi káp
+  en: Can I see your driving licence?
+  note: At checkpoints. Stay calm and polite. Keep your licence and the bike's green book with you.
+  replies: [sc-here-you-are]
+- id: sc-helmet
+  kind: hear
+  voice: m
+  th: หมวกกันน็อกล่ะครับ
+  rom: mùak-gan-nók lâ káp
+  en: Where's your helmet?
+- id: sc-where-going
+  kind: hear
+  voice: m
+  th: จะไปไหนครับ
+  rom: jà pai nǎi káp
+  en: Where are you going?
+  replies: [sc-going-home, sc-going-market]
+
+- id: sc-flat
+  kind: say
+  th: ยางแบนครับ
+  rom: yaang baen káp
+  en: I've got a flat tyre
+- id: sc-wont-start
+  kind: say
+  th: สตาร์ทไม่ติดครับ
+  rom: sà-táat mâi tìt káp
+  en: It won't start
+- id: sc-brakes
+  kind: say
+  th: เบรกไม่ค่อยดีครับ
+  rom: brèk mâi kôi dee káp
+  en: The brakes aren't great
+- id: sc-oil
+  kind: say
+  th: เปลี่ยนน้ำมันเครื่องครับ
+  rom: plìan náam-man-krûeang káp
+  en: An oil change, please
+- id: sc-air
+  kind: say
+  th: เติมลมยางด้วยครับ
+  rom: toem lom yaang dûai káp
+  en: Pump up the tyres too, please
+- id: sc-when-ready
+  kind: say
+  th: เสร็จกี่โมงครับ
+  rom: sèt gìi moong káp
+  en: What time will it be ready?
+- id: sc-take-long
+  kind: say
+  th: ใช้เวลานานไหมครับ
+  rom: chái wee-laa naan mǎi káp
+  en: Will it take long?
+- id: sc-how-much-cost
+  kind: say
+  th: ราคาเท่าไหร่ครับ
+  rom: raa-kaa tâo-rài káp
+  en: How much will it cost?
+- id: sc-can-wait
+  kind: say
+  th: รอได้ครับ
+  rom: ror dâi káp
+  en: I can wait
+- id: sc-come-back
+  kind: say
+  th: เดี๋ยวมาเอาครับ
+  rom: dǐao maa ao káp
+  en: I'll come back for it
+- id: sc-park-here
+  kind: say
+  th: จอดตรงนี้ได้ไหมครับ
+  rom: jòt trong-níi dâi mǎi káp
+  en: Can I park here?
+- id: sc-wash
+  kind: say
+  th: ล้างรถครับ
+  rom: láang rót káp
+  en: A wash, please
+  note: Scooter washes are cheap and quick at most car-wash places.
+- id: sc-here-you-are
+  kind: say
+  th: นี่ครับ
+  rom: nîi káp
+  en: Here you are
+- id: sc-going-home
+  kind: say
+  th: กลับบ้านครับ
+  rom: glàp bâan káp
+  en: Going home
+- id: sc-going-market
+  kind: say
+  th: ไปตลาดครับ
+  rom: pai tà-làat káp
+  en: Going to the market

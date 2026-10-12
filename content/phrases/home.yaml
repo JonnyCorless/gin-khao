@@ -1,0 +1,106 @@
+# Home & landlord: rent, repairs, deliveries.
+- id: hm-rent
+  kind: hear
+  th: ค่าเช่าเดือนนี้นะคะ
+  rom: kâa-châo duean níi ná ká
+  en: This month's rent
+  replies: [hm-pay-rent]
+- id: hm-pay-on
+  kind: hear
+  th: จ่ายวันที่ห้านะคะ
+  rom: jàai wan-tîi hâa ná ká
+  en: Pay on the 5th
+- id: hm-anything-broken
+  kind: hear
+  th: มีอะไรเสียไหมคะ
+  rom: mee à-rai sǐa mǎi ká
+  en: Is anything broken?
+  replies: [hm-aircon, hm-no-water, hm-power-out, s-dont-have]
+- id: hm-repairman
+  kind: hear
+  th: พรุ่งนี้ช่างจะมานะคะ
+  rom: prûng-níi châng jà maa ná ká
+  en: The repairman will come tomorrow
+- id: hm-delivery
+  kind: hear
+  voice: m
+  th: ส่งของครับ
+  rom: sòng kǒng káp
+  en: Delivery!
+  note: Shouted at the gate. Often followed by a call, so answer unknown numbers when you're expecting a parcel.
+- id: hm-name-q
+  kind: hear
+  voice: m
+  th: ชื่ออะไรครับ
+  rom: chûe à-rai káp
+  en: What's your name?
+  replies: [so-my-name]
+- id: hm-water-man
+  kind: hear
+  voice: m
+  th: น้ำมาส่งครับ
+  rom: náam maa sòng káp
+  en: Water delivery!
+  replies: [hm-two-water]
+
+- id: hm-aircon
+  kind: say
+  th: แอร์ไม่เย็นครับ
+  rom: ae mâi yen káp
+  en: The aircon isn't cold
+- id: hm-no-water
+  kind: say
+  th: น้ำไม่ไหลครับ
+  rom: náam mâi lǎi káp
+  en: There's no water coming out
+- id: hm-power-out
+  kind: say
+  th: ไฟดับครับ
+  rom: fai dàp káp
+  en: The power's out
+- id: hm-blocked
+  kind: say
+  th: ห้องน้ำตันครับ
+  rom: hông-náam tan káp
+  en: The toilet's blocked
+- id: hm-leak
+  kind: say
+  th: หลังคารั่วครับ
+  rom: lǎng-kaa rûa káp
+  en: The roof is leaking
+- id: hm-when-fix
+  kind: say
+  th: มาซ่อมได้วันไหนครับ
+  rom: maa sôm dâi wan nǎi káp
+  en: When can you come and fix it?
+- id: hm-pay-rent
+  kind: say
+  th: จ่ายค่าเช่าครับ
+  rom: jàai kâa-châo káp
+  en: I'm here to pay the rent
+- id: hm-two-water
+  kind: say
+  th: ขอน้ำสองถังครับ
+  rom: kǒr náam sǒng tǎng káp
+  en: Two bottles of water, please
+  note: The big refillable drinking-water bottles are counted in ถัง (tǎng).
+- id: hm-gas-out
+  kind: say
+  th: แก๊สหมดครับ
+  rom: gáet mòt káp
+  en: The gas has run out
+- id: hm-gas-swap
+  kind: say
+  th: ขอเปลี่ยนถังแก๊สครับ
+  rom: kǒr plìan tǎng gáet káp
+  en: Swap the gas bottle, please
+- id: hm-leave-it
+  kind: say
+  th: วางไว้หน้าบ้านได้เลยครับ
+  rom: waang wái nâa bâan dâi loei káp
+  en: Just leave it in front of the house
+- id: hm-rubbish-day
+  kind: say
+  th: วันไหนเก็บขยะครับ
+  rom: wan nǎi gèp kà-yà káp
+  en: Which day is rubbish collection?

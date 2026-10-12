@@ -1,0 +1,83 @@
+# Getting around on foot or by bike.
+- id: ar-left
+  kind: hear
+  th: เลี้ยวซ้ายค่ะ
+  rom: líao sáai kâ
+  en: Turn left
+- id: ar-right
+  kind: hear
+  th: เลี้ยวขวาค่ะ
+  rom: líao kwǎa kâ
+  en: Turn right
+- id: ar-straight
+  kind: hear
+  th: ตรงไปค่ะ
+  rom: trong pai kâ
+  en: Go straight on
+- id: ar-close
+  kind: hear
+  th: อยู่ใกล้ๆ ค่ะ
+  rom: yùu glâi glâi kâ
+  en: It's close by
+- id: ar-far
+  kind: hear
+  th: ไกลค่ะ
+  rom: glai kâ
+  en: It's far
+- id: ar-five-min
+  kind: hear
+  th: เดินไปห้านาทีค่ะ
+  rom: doen pai hâa naa-tee kâ
+  en: Five minutes' walk
+- id: ar-opposite
+  kind: hear
+  th: ตรงข้ามเซเว่นค่ะ
+  rom: trong-kâam se-wên kâ
+  en: Opposite the 7-Eleven
+- id: ar-next-temple
+  kind: hear
+  th: ข้างๆ วัดค่ะ
+  rom: kâang kâang wát kâ
+  en: Next to the temple
+
+- id: ar-where-market
+  kind: say
+  th: ตลาดอยู่ที่ไหนครับ
+  rom: tà-làat yùu tîi-nǎi káp
+  en: Where's the market?
+- id: ar-where-pharmacy
+  kind: say
+  th: ร้านขายยาอยู่ที่ไหนครับ
+  rom: ráan kǎai yaa yùu tîi-nǎi káp
+  en: Where's a pharmacy?
+- id: ar-where-atm
+  kind: say
+  th: ตู้เอทีเอ็มอยู่ที่ไหนครับ
+  rom: tûu ee-tee-em yùu tîi-nǎi káp
+  en: Where's an ATM?
+- id: ar-far-q
+  kind: say
+  th: ไกลไหมครับ
+  rom: glai mǎi káp
+  en: Is it far?
+  replies: []
+- id: ar-walk-q
+  kind: say
+  th: เดินไปได้ไหมครับ
+  rom: doen pai dâi mǎi káp
+  en: Can I walk there?
+- id: ar-this-way
+  kind: say
+  th: ทางนี้ใช่ไหมครับ
+  rom: taang níi châi mǎi káp
+  en: Is it this way?
+- id: ar-lost
+  kind: say
+  th: หลงทางครับ
+  rom: lǒng taang káp
+  en: I'm lost
+- id: ar-point
+  kind: say
+  th: ช่วยชี้ให้ดูหน่อยครับ
+  rom: chûai chíi hâi duu nòi káp
+  en: Could you point it out for me?

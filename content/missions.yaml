@@ -1,0 +1,97 @@
+# Real-life missions: do it out in Chiang Mai, then tick it off. phrases: what you'll need.
+- id: m-hello-first
+  title: Say hello first
+  detail: Greet a shop worker before they greet you.
+  phrases: [hello]
+- id: m-little-thai
+  title: Open with "a little Thai"
+  detail: Start a conversation with pûut tai dâi nít-nòi káp and watch them slow down.
+  phrases: [little-thai]
+- id: m-no-bag
+  title: No bag, thanks
+  detail: At 7-Eleven, turn down the bag in Thai.
+  phrases: [s-no-thanks-bag]
+- id: m-heat
+  title: Heat it up
+  detail: Buy something for the microwave and answer "ùn mǎi?" in Thai.
+  phrases: [s-heat-yes, s-heat-no]
+- id: m-water
+  title: Water without pointing
+  detail: Ask for water using words only. Hands in pockets.
+  phrases: [s-water]
+- id: m-thats-all
+  title: That's all
+  detail: When they ask "anything else?", answer kâe-níi káp.
+  phrases: [thats-all]
+- id: m-total
+  title: Catch the total
+  detail: Understand the price at the till before you look at the screen.
+  phrases: []
+- id: m-no-offal
+  title: Order with no offal
+  detail: At a noodle stall, ask for it without offal.
+  phrases: [f-no-offal]
+- id: m-usual
+  title: Your usual
+  detail: Order not spicy, less sweet, easy on the fish sauce, without using the Show card.
+  phrases: [f-my-way]
+- id: m-noodle
+  title: Pick your noodle
+  detail: Answer "sên à-rai?" at a noodle shop.
+  phrases: [f-sen-lek, f-sen-yai]
+- id: m-pay-stall
+  title: Pay at the stall
+  detail: Ask for the bill with gèp tang dûai káp.
+  phrases: [f-pay]
+- id: m-spot-offal
+  title: Spot it on a menu
+  detail: Find ไส้, ตับ or เลือด on a real menu board.
+  phrases: [w-intestine, w-liver, w-blood]
+- id: m-khao-soi
+  title: Khao soi
+  detail: Order khao soi in Thai at a local place, then tell them it's tasty.
+  phrases: [f-delicious]
+- id: m-full-tank
+  title: Full tank
+  detail: Fill up in Thai without pointing at the pump.
+  phrases: [p-95-full]
+- id: m-air
+  title: Air in the tyres
+  detail: Ask for air at the petrol station.
+  phrases: [p-air]
+- id: m-ready-when
+  title: When will it be ready?
+  detail: At a repair shop, ask what time it'll be done.
+  phrases: [sc-when-ready]
+- id: m-eaten
+  title: Eaten yet?
+  detail: Answer a neighbour's "gin kâao rǔe yang?" without thinking.
+  phrases: [so-eaten-yes, so-not-yet]
+- id: m-where-been
+  title: Where have you been?
+  detail: Tell a neighbour where you've just been.
+  phrases: [so-been-market]
+- id: m-directions
+  title: Ask the way
+  detail: Ask someone for directions in Thai and follow them.
+  phrases: [ar-where-pharmacy, ar-where-market]
+- id: m-ors
+  title: Stock the cupboard
+  detail: Buy rehydration salts in Thai, so you have a pack at home.
+  phrases: [he-ors]
+- id: m-slow-down
+  title: Slow down, please
+  detail: When someone talks fast, ask them to slow down instead of giving up.
+  phrases: [speak-slowly]
+- id: m-same
+  title: Same as usual
+  detail: Become a regular somewhere and order "ao mǔean doem".
+  phrases: [f-same-as-usual]
+- id: m-water-man
+  title: The water man
+  detail: Order your drinking-water bottles in Thai.
+  phrases: [hm-two-water]
+- id: m-rubbish
+  title: Rubbish day
+  detail: Ask a neighbour which day the rubbish is collected.
+  phrases: [hm-rubbish-day]

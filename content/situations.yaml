@@ -24,4 +24,29 @@
   title: Petrol
   th: ปั๊มน้ำมัน
   icon: fuel
-  blurb: You already do this one. Use it as a warm-up.
+  blurb: The same pattern as every other counter, with a scooter twist.
+- id: scooter
+  title: Scooter life
+  th: มอเตอร์ไซค์
+  icon: scooter
+  blurb: The repair shop, parking, and the police checkpoint. Short, calm and polite gets you through all three.
+- id: home
+  title: Home & landlord
+  th: บ้านเช่า
+  icon: home
+  blurb: Rent, things that break, and everything that gets delivered to the gate.
+- id: health
+  title: Pharmacy & health
+  th: ร้านขายยา
+  icon: pill
+  blurb: Thai pharmacists help without a prescription. Say what's wrong, then listen for how often to take it.
+- id: around
+  title: Getting around
+  th: ถามทาง
+  icon: walk
+  blurb: On foot or by bike. Ask, then listen for left, right, straight and "close by".
+- id: social
+  title: Neighbours
+  th: เพื่อนบ้าน
+  icon: people
+  blurb: The same few friendly questions, every day. Have your answers ready.

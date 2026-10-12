@@ -1,0 +1,65 @@
+# The regulars. avatar: a drawing in app/ui/avatars.tsx. color: their soft background.
+- id: may
+  name: Nong May
+  th: น้องเมย์
+  role: 7-Eleven till
+  situation: shop
+  avatar: may
+  color: '#DCEFE3'
+  about: Works the morning shift at the 7-Eleven on your soi. Asks the same five questions every time, quickly.
+- id: noi
+  name: Pa Noi
+  th: ป้าน้อย
+  role: Khao soi stall
+  situation: food
+  avatar: noi
+  color: '#FBEBD3'
+  about: Has run the khao soi stall by the market for thirty years. Warm, talks fast, remembers everyone's order.
+- id: ploy
+  name: Nong Ploy
+  th: น้องพลอย
+  role: Petrol station
+  situation: petrol
+  avatar: ploy
+  color: '#F8DEDB'
+  about: Fills up scooters at the station on the main road. Always asks you to lift the seat.
+- id: tum
+  name: Pi Tum
+  th: พี่ตั้ม
+  role: Scooter repair shop
+  situation: scooter
+  avatar: tum
+  color: '#DDE4F3'
+  about: Fixes scooters in an open-front shop full of tyres. Quiet, honest, never in a hurry.
+- id: fon
+  name: Phi Fon
+  th: พี่ฝน
+  role: Pharmacy
+  situation: health
+  avatar: fon
+  color: '#E3EEF1'
+  about: The pharmacist two streets over. Patient, careful, and will tell you when to see a doctor.
+- id: ying
+  name: Khun Ying
+  th: คุณหญิง
+  role: Your landlady
+  situation: home
+  avatar: ying
+  color: '#E9E1F3'
+  about: Owns your house and the one next door. Comes round on the 5th for the rent.
+- id: mon
+  name: Lung Mon
+  th: ลุงมนต์
+  role: Next-door neighbour
+  situation: social
+  avatar: mon
+  color: '#E6EDDC'
+  about: Retired, sweeps the soi every morning, and asks if you've eaten every single day.
+- id: chai
+  name: Officer Chai
+  th: จ่าชัย
+  role: Police checkpoint
+  situation: scooter
+  avatar: chai
+  color: '#EEE7D6'
+  about: Runs the helmet checkpoint near the ring road. Polite if you are.
