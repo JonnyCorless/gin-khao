@@ -10,4 +10,9 @@
     <string name="sc_food_long">Check a menu for offal</string>
     <string name="sc_today">Today</string>
     <string name="sc_today_long">Today\'s session</string>
+    <string name="widget_name">Phrase of the day</string>
+    <string name="widget_desc">A Thai phrase each day. Tap play to hear it.</string>
+    <string name="widget_label">Phrase of the day</string>
+    <string name="widget_play">Play</string>
+    <string name="share_menu">Check menu for offal</string>
 </resources>
