@@ -70,6 +70,7 @@ export function Today() {
         title="Quick check"
         exs={PLACEMENT}
         useHearts={false}
+        dontKnow
         onAnswer={({ ex, ok }) => { if (ok && ex.type !== 'price') grade(ex.id, 'easy'); }}
         onDone={() => { update(p => { p.placementDone = true; p.session = null; }); setRun(null); }}
         onExit={() => { update(p => { p.placementDone = true; p.session = null; }); setRun(null); }}
@@ -116,11 +117,11 @@ export function Today() {
 
       {!p.placementDone && (
         <section class="card placement">
-          <h2>Already know some Thai?</h2>
-          <p class="muted">A 3-minute check so Today skips what you already know, like numbers and your petrol order.</p>
+          <h2>Where are you starting from?</h2>
+          <p class="muted">New to Thai? Start from the very first phrase. Know a few bits already? A 3-minute check skips them. Tap "Don't know" rather than guessing.</p>
           <div class="row">
-            <button class="btn primary" onClick={() => setRun({ kind: 'placement' })}>Start the check</button>
-            <button class="btn ghost" onClick={() => update(p => { p.placementDone = true; })}>Skip</button>
+            <button class="btn primary" onClick={() => update(p => { p.placementDone = true; p.session = null; })}>I'm new to Thai</button>
+            <button class="btn ghost" onClick={() => setRun({ kind: 'placement' })}>Take the check</button>
           </div>
         </section>
       )}

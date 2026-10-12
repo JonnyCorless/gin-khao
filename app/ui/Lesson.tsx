@@ -17,6 +17,8 @@ interface Props {
   exs: string[];
   start?: number;
   useHearts?: boolean;
+  /** Show a "Don't know" button (placement check), which counts as a wrong answer. */
+  dontKnow?: boolean;
   onAnswer?: (a: Answer) => void;
   onProgress?: (index: number) => void;
   onDone: () => void;
@@ -36,12 +38,13 @@ export function HeartsBar() {
 
 const mins = (ms: number) => Math.max(1, Math.ceil(ms / 60000));
 
-export function Lesson({ title, exs, start = 0, useHearts = true, onAnswer, onProgress, onDone, onExit }: Props) {
+export function Lesson({ title, exs, start = 0, useHearts = true, dontKnow = false, onAnswer, onProgress, onDone, onExit }: Props) {
   const p = useProgress();
   const [i, setI] = useState(start);
   const [picked, setPicked] = useState<number | null>(null);
   const [typed, setTyped] = useState('');
   const [verdict, setVerdict] = useState<null | boolean>(null);
+  const [skipped, setSkipped] = useState(false);
   const ex = useMemo(() => decode(exs[Math.min(i, exs.length - 1)]), [i, exs]);
   const it = item(ex.id);
   const choices = useMemo(() => (ex.type === 'meaning' || ex.type === 'recall' || ex.type === 'listen' ? options(ex) : []), [ex]);
@@ -52,6 +55,7 @@ export function Lesson({ title, exs, start = 0, useHearts = true, onAnswer, onPr
     setPicked(null);
     setTyped('');
     setVerdict(null);
+    setSkipped(false);
     if (ex.type === 'intro' || ex.type === 'listen' || ex.type === 'price' || ex.type === 'meaning') {
       const t = setTimeout(() => play(ex.id), 250);
       return () => clearTimeout(t);
@@ -107,10 +111,12 @@ export function Lesson({ title, exs, start = 0, useHearts = true, onAnswer, onPr
 
       {!outOfHearts && (ex.type === 'intro' ? (
         <footer class="lesson-foot"><button class="btn primary wide" onClick={next}>Next</button></footer>
-      ) : verdict !== null && (
+      ) : verdict === null ? (dontKnow && (
+        <footer class="lesson-foot"><button class="btn ghost wide" onClick={() => { setSkipped(true); answer(false); }}>Don't know</button></footer>
+      )) : (
         <footer class={`lesson-foot fb ${verdict ? 'ok' : 'no'}`}>
           <div class="fb-text">
-            <b>{verdict ? pickPraise() : 'Not quite'}</b>
+            <b>{verdict ? pickPraise() : skipped ? 'Here it is' : 'Not quite'}</b>
             {it && <span><span lang="th">{it.th}</span> · {it.rom} · {it.en}</span>}
             {ex.type === 'price' && <span>It was {ex.n!.toLocaleString('en-US')} baht</span>}
           </div>

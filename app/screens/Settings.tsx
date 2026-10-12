@@ -2,7 +2,7 @@ import { useState } from 'preact/hooks';
 import { C, item } from '../data';
 import { askPermission, scheduleReminders } from '../reminders';
 import { learnedCount } from '../srs';
-import { exportBackup, importBackup, update, useProgress } from '../store';
+import { exportBackup, importBackup, resetProgress, update, useProgress } from '../store';
 import { AppUpdates } from '../updates';
 import { openLink } from '../ui/ShowOverlay';
 import { SpeakCheck } from '../ui/Speak';
@@ -19,6 +19,8 @@ function Toggle({ id, on, onChange, label, hint }: { id: string; on: boolean; on
 export function Settings() {
   const p = useProgress();
   const [msg, setMsg] = useState('');
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetDone, setResetDone] = useState(false);
   const hello = item('hello');
 
   const setReminder = async (on: boolean) => {
@@ -76,6 +78,23 @@ export function Settings() {
             }} />
           </div>
           {msg && <p class="muted small">{msg}</p>}
+        </div>
+      </section>
+
+      <section class="block">
+        <h3>Start over</h3>
+        <div class="settings-group">
+          <p class="muted">Clears everything you've learned, your streak and today's session, so Gin Khao starts again from the first phrase. Your reminder, pinned cards and address stay.</p>
+          {resetDone ? (
+            <p class="good-text">Done. Go to Today to start from the beginning.</p>
+          ) : confirmReset ? (
+            <div class="row">
+              <button class="btn danger" onClick={() => { resetProgress(); setConfirmReset(false); setResetDone(true); }}>Yes, start over</button>
+              <button class="btn ghost" onClick={() => setConfirmReset(false)}>Cancel</button>
+            </div>
+          ) : (
+            <button class="btn ghost" onClick={() => { setConfirmReset(true); setResetDone(false); }}>Start over…</button>
+          )}
         </div>
       </section>
 

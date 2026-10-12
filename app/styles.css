@@ -76,6 +76,8 @@ button.card { width: 100%; }
 .btn { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 11px 20px; font-weight: 650; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .btn.primary { background: var(--indigo); border-color: var(--indigo); color: var(--indigo-ink); }
 .btn.ghost { background: transparent; }
+.btn.danger { background: var(--bad); border-color: var(--bad); color: var(--card); }
+.good-text { color: var(--good); font-weight: 650; }
 .btn.sm { padding: 7px 14px; font-size: 0.9rem; }
 .btn.lg { padding: 14px 28px; font-size: 1.05rem; }
 .btn.wide { width: 100%; }

@@ -166,6 +166,19 @@ export function loseHeart() {
   });
 }
 
+/** Wipes learning progress (cards, streak, sessions, hearts) but keeps settings, pins and address. */
+export function resetProgress() {
+  update(p => {
+    const d = defaults();
+    p.cards = {};
+    p.days = {};
+    p.streak = d.streak;
+    p.hearts = d.hearts;
+    p.session = null;
+    p.placementDone = false;
+  });
+}
+
 // ---- backup ----
 
 export async function exportBackup(): Promise<string> {
