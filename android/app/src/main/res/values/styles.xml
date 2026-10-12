@@ -13,6 +13,9 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- The status and navigation bar areas sit outside the web view; colour them like the app. -->
+        <item name="android:windowBackground">@color/gk_bars</item>
+        <item name="android:windowLightStatusBar">@bool/gk_light_bars</item>
     </style>
 
 

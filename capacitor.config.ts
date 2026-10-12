@@ -4,7 +4,8 @@ const config: CapacitorConfig = {
   appId: 'com.ginkhao.app',
   appName: 'Gin Khao',
   webDir: 'dist',
-  android: { allowMixedContent: false },
+  // Android 15 draws apps edge to edge; keep the web view clear of the status and navigation bars.
+  android: { allowMixedContent: false, adjustMarginsForEdgeToEdge: 'auto' },
 };
 
 export default config;

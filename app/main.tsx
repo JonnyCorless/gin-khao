@@ -160,9 +160,7 @@ function App() {
       <header class="hero">
         <div class="mark" lang="th">กินข้าว</div>
         <h1>Gin Khao</h1>
-        <p class="muted">Thai for daily life in Chiang Mai</p>
-        <p class="whatsnew">New: two 7-Eleven phrases, delivered without reinstalling</p>
-      </header>
+        <p class="muted">Thai for daily life in Chiang Mai</p>      </header>
 
       <section class="status">
         {failed && <span class="bad">Couldn't load content: {failed}</span>}
