@@ -49,20 +49,11 @@ jobs:
             echo "VITE_APP_VERSION=$NAME" >> "$GITHUB_ENV"
           fi
 
-      - name: Content (generates audio for new phrases)
+      # Audio is made on the PC (Microsoft blocks edge-tts from GitHub's servers); this only checks it's all there.
+      - name: Content
         run: |
-          pip install edge-tts pyyaml
-          python tools/build_content.py
-      - name: Save new audio back to the repo
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git config user.name "gin-khao-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add audio
-          if ! git diff --cached --quiet; then
-            git commit -m "Generate audio [skip ci]"
-            git push
-          fi
+          pip install pyyaml
+          python tools/build_content.py --check
 
       - run: npm ci
       - run: npm run build

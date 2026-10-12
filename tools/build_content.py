@@ -1,8 +1,10 @@
 """Build the content site: YAML -> content.json, generate missing audio, write manifest.json.
 
-Usage: python tools/build_content.py [--no-audio]
+Usage: python tools/build_content.py            (on the PC: makes missing audio, builds site/)
+       python tools/build_content.py --check    (in GitHub Actions: no audio generation, fails if any is missing)
 
-Audio lives in audio/ (committed) so it is generated once per phrase text.
+Microsoft blocks edge-tts from GitHub's servers, so audio is generated on the PC
+and committed in audio/. It is generated once per phrase text.
 audio/index.json remembers which text+voice each file was made from, so editing
 a phrase's Thai regenerates just that file.
 """
@@ -96,9 +98,21 @@ def build_site(phrases):
     print(f"Site built: {len(phrases)} phrases, manifest {manifest['version']}")
 
 
+def check_audio(phrases):
+    index_path = AUDIO / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {}
+    bad = [p["id"] for p in phrases
+           if not (AUDIO / f"{p['id']}.mp3").exists()
+           or index.get(p["id"]) != sha1(f"{VOICES[p.get('voice', 'm')]}|{p['th']}".encode("utf-8"))]
+    if bad:
+        sys.exit(f"Audio missing or out of date for: {', '.join(bad)}. Run 'npm run content' on the PC and commit audio/.")
+
+
 def main():
     phrases = load_phrases()
-    if "--no-audio" not in sys.argv:
+    if "--check" in sys.argv:
+        check_audio(phrases)
+    else:
         asyncio.run(make_audio(phrases))
     build_site(phrases)
 
