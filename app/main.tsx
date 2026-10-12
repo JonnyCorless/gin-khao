@@ -10,16 +10,19 @@ import './styles.css';
 import { setLoaded } from './data';
 import { onReminderTap, scheduleReminders } from './reminders';
 import { Browse } from './screens/Browse';
-import { Food } from './screens/Food';
+import { Food, receiveMenu } from './screens/Food';
 import { Settings } from './screens/Settings';
 import { ShowTab } from './screens/ShowTab';
 import { Today } from './screens/Today';
+import { initMine } from './mine';
 import { flushSave, loadProgress } from './store';
 import { loadContent } from './sync';
 import { Icon } from './ui/icons';
 import { closeShow, ShowOverlay } from './ui/ShowOverlay';
+import { closeLab, SpeakLab } from './ui/SpeakLab';
 import { checkUpdates, UpdateBanner } from './updates';
 import { confirmBoot } from './updater';
+import { updateWidget } from './widget';
 
 type Tab = 'today' | 'browse' | 'food' | 'show' | 'settings';
 const TABS: { id: Tab; label: string; icon: string }[] = [
@@ -31,6 +34,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 ];
 const isTab = (s: string): s is Tab => TABS.some(t => t.id === s);
 const routeOf = (url: string) => url.replace(/^ginkhao:\/\//, '').split(/[/?#]/)[0];
+const paramOf = (url: string, key: string) => { try { return new URL(url.replace(/^ginkhao:/, 'https:')).searchParams.get(key); } catch { return null; } };
 
 function Loading({ done, total, error }: { done: number; total: number; error: string }) {
   return (
@@ -55,8 +59,19 @@ function App() {
   const [tab, setTab] = useState<Tab>('today');
   const [openSit, setOpenSit] = useState<string | null>(null);
 
-  const go = (route: string) => {
+  const [menuKey, setMenuKey] = useState(0);
+  const go = (url: string) => {
+    const route = routeOf(url);
     closeShow();
+    closeLab();
+    if (route === 'menu') {
+      // text shared from Google Lens (or anywhere): open it in the menu checker
+      const text = paramOf(url, 'text');
+      if (text) receiveMenu(text);
+      setMenuKey(k => k + 1);
+      setTab('food');
+      return;
+    }
     if (isTab(route)) setTab(route);
   };
 
@@ -65,18 +80,20 @@ function App() {
       try {
         await loadProgress();
         setLoaded(await loadContent((done, total) => setProg({ done, total })));
+        await initMine();
         setReady(true);
         confirmBoot();
         checkUpdates();
         scheduleReminders();
+        updateWidget();
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       }
     })();
     if (!Capacitor.isNativePlatform()) return;
-    CapApp.getLaunchUrl().then(r => { if (r?.url) go(routeOf(r.url)); }).catch(() => {});
-    const h1 = CapApp.addListener('appUrlOpen', e => go(routeOf(e.url)));
-    onReminderTap(go);
+    CapApp.getLaunchUrl().then(r => { if (r?.url) go(r.url); }).catch(() => {});
+    const h1 = CapApp.addListener('appUrlOpen', e => go(e.url));
+    onReminderTap(route => go(`ginkhao://${route}`));
     const h2 = CapApp.addListener('resume', () => { checkUpdates(); });
     const h3 = CapApp.addListener('pause', () => { flushSave(); });
     return () => { h1.then(h => h.remove()); h2.then(h => h.remove()); h3.then(h => h.remove()); };
@@ -86,7 +103,7 @@ function App() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     const h = CapApp.addListener('backButton', () => {
-      if (closeShow()) return;
+      if (closeShow() || closeLab()) return;
       if (tab === 'browse' && openSit) { setOpenSit(null); return; }
       if (tab !== 'today') { setTab('today'); return; }
       CapApp.minimizeApp();
@@ -104,7 +121,7 @@ function App() {
       <main class="app">
         {tab === 'today' && <Today />}
         {tab === 'browse' && <Browse open={openSit} setOpen={setOpenSit} />}
-        {tab === 'food' && <Food />}
+        {tab === 'food' && <Food key={menuKey} />}
         {tab === 'show' && <ShowTab />}
         {tab === 'settings' && <Settings />}
       </main>
@@ -117,6 +134,7 @@ function App() {
           </button>
         ))}
       </nav>
+      <SpeakLab />
       <ShowOverlay />
     </>
   );

@@ -1,0 +1,100 @@
+# Story: My first month in Chiang Mai. Chapters unlock in order.
+# Each chapter teaches the lines its scenes need, plays the scenes, then sets a real mission.
+- id: ch-1
+  title: Day one
+  th: วันแรก
+  intro: You've just moved into a little rented house down a soi. The fridge is empty and it's 34 degrees. First job, water and something to eat from the 7-Eleven on the corner.
+  scenes: [may-1]
+  mission: m-hello-first
+  outro: One shop, one conversation, all in Thai. Tomorrow, real food.
+- id: ch-2
+  title: Lunch by the market
+  th: ข้าวซอยป้าน้อย
+  intro: Everyone says the khao soi by the market is the best in the city. The woman running it has been there thirty years.
+  scenes: [noi-1]
+  mission: m-khao-soi
+  outro: Pa Noi will remember your face. Now the scooter needs fuel.
+- id: ch-3
+  title: Fuel
+  th: เติมน้ำมัน
+  intro: The rental scooter's needle is on empty. The station on the main road has an attendant at every pump.
+  scenes: [ploy-1]
+  mission: m-full-tank
+  outro: Full tank. Back home, someone is sweeping outside the house next door.
+- id: ch-4
+  title: The neighbour
+  th: ลุงมนต์
+  intro: Lung Mon is retired, sweeps the soi every morning, and wants to know all about you.
+  scenes: [mon-1]
+  mission: m-eaten
+  outro: He'll ask if you've eaten every single day from now on. Now you know what to say.
+- id: ch-5
+  title: Ice, a straw, and that's all
+  th: เซเว่นอีกรอบ
+  intro: It's even hotter today. Back to Nong May for ice.
+  scenes: [may-2]
+  mission: m-thats-all
+  outro: Quick and easy now. Then the landlady messages. She's coming round.
+- id: ch-6
+  title: Rent day
+  th: วันจ่ายค่าเช่า
+  intro: It's the 5th. Khun Ying comes for the rent, and the aircon has been dripping since Tuesday.
+  scenes: [ying-1]
+  mission: m-water-man
+  outro: Rent paid, aircon booked. The next morning, the scooter has other ideas.
+- id: ch-7
+  title: Flat tyre
+  th: ยางแบน
+  intro: A pop, a wobble, and the back tyre is flat. There's a repair shop two hundred metres back.
+  scenes: [tum-1]
+  mission: m-ready-when
+  outro: New tyre, fair price. That night, the som tam from the night market doesn't sit well.
+- id: ch-8
+  title: A bad stomach
+  th: ปวดท้อง
+  intro: You've been up half the night. The pharmacy opens at eight.
+  scenes: [fon-1]
+  mission: m-ors
+  outro: Phi Fon sorts you out. Lesson learned. From now on you check what's in the bowl.
+- id: ch-9
+  title: No offal, please
+  th: ไม่ใส่เครื่องใน
+  intro: Pa Noi does noodle soup too, but her pot has liver and intestines in it. Time to be clear.
+  scenes: [noi-2]
+  mission: m-no-offal
+  outro: A clean bowl. Riding home, you see cones across the ring road.
+- id: ch-10
+  title: The checkpoint
+  th: ด่านตรวจ
+  intro: Helmet on, licence in your wallet. Officer Chai waves you over.
+  scenes: [chai-1]
+  mission: m-directions
+  outro: Polite and quick. Then a bill arrives at the gate.
+- id: ch-11
+  title: Bills and oil
+  th: จ่ายบิล
+  intro: The electricity bill came through the gate, and the scooter is due an oil change.
+  scenes: [may-3, tum-2]
+  mission: m-rubbish
+  outro: Life admin done in Thai. Then Lung Mon starts talking in a way you don't recognise.
+- id: ch-12
+  title: Kam mueang
+  th: กำเมือง
+  intro: Lung Mon has switched to Northern. The words are different and the tones shift. Don't panic. You only need to catch a few.
+  scenes: [mon-2]
+  mission: m-hear-jao
+  outro: "Your first Northern conversation. Pa Noi has heard about it."
+- id: ch-13
+  title: A regular now
+  th: ขาประจำ
+  intro: Pa Noi knows your order, and now she wants to test your kam mueang.
+  scenes: [noi-3, noi-4]
+  mission: m-lam
+  outro: A month in, and the soi knows your name. One more thing. It's April.
+- id: ch-14
+  title: Songkran
+  th: สงกรานต์
+  intro: The Northern New Year. Three days of water, blessings and very loud music. You will get wet.
+  scenes: [mon-3]
+  mission: m-lanna-thanks
+  outro: That's your first month. The regulars know you, and you know what they're saying. Keep coming back each morning.

@@ -1,14 +1,14 @@
 // Runs a list of exercises: intro cards, multiple choice, listening, prices.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { play } from '../audio';
-import { item, phrase } from '../data';
+import { category, item, phrase, scriptItem, scriptLessonOf, soundSetOf } from '../data';
 import { decode, options, type Ex } from '../lesson';
 import { hearts, loseHeart, MAX_HEARTS, useProgress } from '../store';
 import type { Item } from '../types';
 import { bad, good, tap } from './haptics';
 import { Icon } from './icons';
 import { PlayButton } from './PhraseCard';
-import { SpeakCheck } from './Speak';
+import { SpeakCheck, SpeakLabButton } from './Speak';
 
 /** first: the first time this question was asked in this lesson (repeats after a miss aren't graded again) */
 export interface Answer { ex: Ex; ok: boolean; first: boolean }
@@ -56,7 +56,8 @@ export function Lesson({ title, exs, start = 0, useHearts = true, dontKnow = fal
   // keyed on position too, so a repeated question still resets the screen
   const ex = useMemo(() => decode(raw), [raw, i]);
   const it = item(ex.id);
-  const choices = useMemo(() => (ex.type === 'meaning' || ex.type === 'recall' || ex.type === 'listen' ? options(ex) : []), [ex]);
+  const isChoice = ex.type === 'meaning' || ex.type === 'recall' || ex.type === 'listen' || ex.type === 'read' || ex.type === 'sound';
+  const choices = useMemo(() => (isChoice ? options(ex) : []), [ex]);
   const h = hearts(p);
   const outOfHearts = useHearts && p.settings.hearts && h.n <= 0 && verdict === null;
 
@@ -65,7 +66,8 @@ export function Lesson({ title, exs, start = 0, useHearts = true, dontKnow = fal
     setTyped('');
     setVerdict(null);
     setSkipped(false);
-    if (ex.type === 'intro' || ex.type === 'listen' || ex.type === 'price' || ex.type === 'meaning') {
+    // reading questions stay silent until answered, or the sound would give it away
+    if (ex.type === 'intro' || ex.type === 'listen' || ex.type === 'price' || ex.type === 'meaning' || ex.type === 'sound') {
       const t = setTimeout(() => play(ex.id), 250);
       return () => clearTimeout(t);
     }
@@ -78,7 +80,7 @@ export function Lesson({ title, exs, start = 0, useHearts = true, dontKnow = fal
     const first = !asked.current.has(raw);
     asked.current.add(raw);
     onAnswer?.({ ex, ok, first });
-    if (!ok && ex.type !== 'price') play(ex.id);
+    if ((!ok || ex.type === 'read') && ex.type !== 'price') play(ex.id);
     if (!ok && requeue && ex.type !== 'price') {
       // ask it again a few cards later; new phrases get their intro card again first
       const hadIntro = queue.slice(0, i).includes(`intro:${ex.id}`);
@@ -118,7 +120,7 @@ export function Lesson({ title, exs, start = 0, useHearts = true, dontKnow = fal
         <div class="lesson-body">
           <div class="eyebrow">{title}</div>
           {ex.type === 'intro' && it && <Intro it={it} />}
-          {(ex.type === 'meaning' || ex.type === 'listen' || ex.type === 'recall') && it && (
+          {isChoice && it && (
             <Choice ex={ex} it={it} choices={choices} picked={picked} reveal={verdict !== null}
               onPick={k => { if (verdict !== null) return; setPicked(k); answer(choices[k].id === it.id); }} />
           )}
@@ -152,44 +154,69 @@ const pickPraise = () => PRAISE[Math.floor(Math.random() * PRAISE.length)];
 
 function Intro({ it }: { it: Item }) {
   const p = phrase(it.id);
+  const cat = category(it.id);
+  const s = scriptItem(it.id);
+  const les = scriptLessonOf(it.id);
+  const set = soundSetOf(it.id);
+  const label = s ? (les?.type === 'letter' ? 'New letter' : les?.type === 'vowel' ? 'New vowel' : les?.type === 'digit' ? 'Thai digit' : 'New sign')
+    : set ? 'Sound-alike' : p?.kind === 'hear' ? 'You will hear' : p?.kind === 'word' ? 'New word' : 'New phrase';
   return (
     <div class="intro">
-      <div class="who">{p?.kind === 'hear' ? 'You will hear' : p?.kind === 'word' ? 'New word' : 'New phrase'}</div>
-      <div class="intro-th" lang="th">{it.th}</div>
+      <div class="who">{label}</div>
+      <div class={`intro-th${s ? ` script-${les?.type}` : ''}`} lang="th">{it.th}</div>
       <div class="intro-rom">{it.rom}</div>
-      <div class="intro-en">{it.en}</div>
+      <div class="intro-en">{s?.word ? <>{it.en} <span class="muted">· as in {s.word}</span></> : it.en}</div>
+      {s?.cls && <span class={`cls-chip ${s.cls}`}>{s.cls} class</span>}
       {it.note && <p class="note">{it.note}</p>}
+      {set && <p class="note">{set.tip}</p>}
       <div class="intro-acts">
         <PlayButton id={it.id} size="lg" />
         <button class="btn ghost" onClick={() => play(it.id, 0.7)}>Slow</button>
-        {p?.kind !== 'hear' && <SpeakCheck it={it} />}
+        {(cat === 'phrase' || cat === 'food') && p?.kind !== 'hear' && <SpeakCheck it={it} />}
+        {(cat === 'phrase' || cat === 'sound' || cat === 'food') && <SpeakLabButton it={it} />}
       </div>
     </div>
   );
 }
 
 function Choice({ ex, it, choices, picked, reveal, onPick }: { ex: Ex; it: Item; choices: Item[]; picked: number | null; reveal: boolean; onPick: (k: number) => void }) {
+  const les = scriptLessonOf(it.id);
+  const thaiOpts = ex.type === 'recall' || ex.type === 'sound';
   const prompt =
     ex.type === 'recall' ? <div class="q-en">{it.en}</div>
+    : ex.type === 'read' ? <div class={`q-sign script-${les?.type ?? 'sign'}`} lang="th">{it.th}</div>
+    : ex.type === 'sound' ? (
+      <div class="q-listen">
+        <PlayButton id={it.id} size="lg" />
+        <span class="muted">Which one did you hear?</span>
+        <button class="mini-btn" onClick={() => play(it.id, 0.7)}>slow</button>
+      </div>
+    )
     : ex.type === 'listen' && !reveal ? <div class="q-listen"><PlayButton id={it.id} size="lg" /><span class="muted">Listen, then pick what it means</span></div>
     : <div class="q-th" lang="th">{it.th}</div>;
   return (
     <div class="choice">
       <div class="q-prompt">
         {prompt}
-        {reveal && ex.type !== 'recall' && <div class="rom">{it.rom}</div>}
-        {ex.type === 'meaning' && <PlayButton id={it.id} size="sm" />}
+        {reveal && ex.type !== 'recall' && ex.type !== 'sound' && <div class="rom">{it.rom}</div>}
+        {(ex.type === 'meaning' || (ex.type === 'read' && reveal)) && <PlayButton id={it.id} size="sm" />}
       </div>
-      <div class={`q-opts${ex.type === 'recall' ? ' thai' : ''}`}>
+      {ex.type === 'read' && !reveal && <p class="muted center small">Read it, then pick. You'll hear it after.</p>}
+      <div class={`q-opts${thaiOpts ? ' thai' : ''}`}>
         {choices.map((c, k) => {
           const cls = reveal ? (c.id === it.id ? ' right' : k === picked ? ' wrong' : ' dim') : '';
           return (
             <button key={c.id} class={`q-opt${cls}`} onClick={() => { if (ex.type === 'recall' && !reveal) play(c.id); onPick(k); }} disabled={reveal}>
-              {ex.type === 'recall' ? <><span class="th" lang="th">{c.th}</span><span class="rom">{c.rom}</span></> : c.en}
+              {thaiOpts ? <><span class="th" lang="th">{c.th}</span><span class="rom">{c.rom}</span>{ex.type === 'sound' && <span class="en small">{c.en}</span>}</> : c.en}
             </button>
           );
         })}
       </div>
+      {reveal && ex.type === 'sound' && (
+        <div class="replay-row">
+          {choices.map(c => <button key={c.id} class="rchip" onClick={() => play(c.id)}><span class="th" lang="th">{c.th}</span><span class="rom">{c.rom}</span></button>)}
+        </div>
+      )}
     </div>
   );
 }

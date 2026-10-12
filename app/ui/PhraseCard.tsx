@@ -1,10 +1,11 @@
-import { play, usePlaying } from '../audio';
+import { hasAudio, play, usePlaying } from '../audio';
 import { item } from '../data';
 import { P, update, useProgress } from '../store';
 import type { Item, Phrase } from '../types';
 import { tap } from './haptics';
 import { Icon } from './icons';
 import { openShow } from './ShowOverlay';
+import { SpeakLabButton } from './Speak';
 
 export function PlayButton({ id, size = 'md' }: { id: string; size?: 'sm' | 'md' | 'lg' }) {
   const on = usePlaying(id);
@@ -42,6 +43,7 @@ export function PhraseCard({ it, they = false, showReplies = true }: { it: Item 
       <div class="pcard-tools">
         <button class="tool" onClick={() => openShow(it.id)}><Icon name="expand" size={16} />Show</button>
         <button class={`tool${pinned ? ' on' : ''}`} onClick={() => togglePin(it.id)}><Icon name={pinned ? 'pinned' : 'pin'} size={16} />{pinned ? 'Pinned' : 'Pin'}</button>
+        {hasAudio(it.id) && <SpeakLabButton it={it} small />}
       </div>
       {replies.length > 0 && (
         <div class="replies">

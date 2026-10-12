@@ -67,7 +67,20 @@ def fail(msg):
 
 
 def read(path):
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+
+    # An unquoted comma inside {...} splits a value in two and leaves an empty key behind.
+    def walk(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if v is None:
+                    fail(f"{path.name}: '{k}' has no value. Is there an unquoted comma in a {{...}} line? Quote that text.")
+                walk(v)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v)
+    walk(data)
+    return data
 
 
 def load():
@@ -112,8 +125,23 @@ def load():
             add(item, f"food.yaml {section}", "m")
     add(food["basil"], "food.yaml basil", "m")
 
-    all_ids = seen.copy()
     optional = lambda name: read(CONTENT / name) if (CONTENT / name).exists() else []
+
+    sounds = optional("sounds.yaml")
+    for group in sounds:
+        if len(group.get("words", [])) < 2:
+            fail(f"sounds.yaml '{group.get('id')}': needs at least two words")
+        for w in group["words"]:
+            add(w, f"sounds.yaml {group['id']}", "f")
+
+    script = optional("script.yaml")
+    for lesson in script:
+        if lesson.get("type") not in {"sign", "digit", "letter", "vowel"}:
+            fail(f"script.yaml '{lesson.get('id')}': type must be sign, digit, letter or vowel")
+        for it in lesson["items"]:
+            add(it, f"script.yaml {lesson['id']}", "f")
+
+    all_ids = seen.copy()
     characters = optional("characters.yaml")
     who = {c["id"] for c in characters}
     scenes = optional("scenes.yaml")
@@ -136,6 +164,14 @@ def load():
         for r in m.get("phrases", []):
             if r not in all_ids:
                 fail(f"mission '{m['id']}': unknown phrase '{r}'")
+    mission_ids = {m["id"] for m in missions}
+    story = optional("story.yaml")
+    for ch in story:
+        for s in ch.get("scenes", []):
+            if s not in scene_ids:
+                fail(f"story '{ch['id']}': unknown scene '{s}'")
+        if ch.get("mission") and ch["mission"] not in mission_ids:
+            fail(f"story '{ch['id']}': unknown mission '{ch['mission']}'")
 
     prices = []
     for n in PRICES:
@@ -143,7 +179,8 @@ def load():
         add(item, "prices", "f")
         prices.append(n)
 
-    extra = {"characters": characters, "scenes": scenes, "missions": missions}
+    extra = {"characters": characters, "scenes": scenes, "missions": missions, "story": story,
+             "sounds": [clean_group(g, "words") for g in sounds], "script": [clean_group(l, "items") for l in script]}
     return situations, phrases, food, prices, speak, extra
 
 
@@ -156,7 +193,8 @@ def clips(items):
     for item in items:
         for speed, rate in SPEEDS.items():
             name = f"{item['id']}.{speed}" if speed else item["id"]
-            yield {"key": name, "file": f"{name}.mp3", "th": item["th"], "voice": item["voice"], "rate": rate, "speed": speed}
+            # "say" is what the voice reads when it differs from the text shown (letter names, digits)
+            yield {"key": name, "file": f"{name}.mp3", "th": item.get("say", item["th"]), "voice": item["voice"], "rate": rate, "speed": speed}
 
 
 def audio_key(clip, voice=None):
@@ -240,7 +278,11 @@ def git_sha():
 
 
 def clean(item):
-    return {k: v for k, v in item.items() if k != "voice"}
+    return {k: v for k, v in item.items() if k not in ("voice", "say")}
+
+
+def clean_group(group, key):
+    return {**group, key: [clean(i) for i in group[key]]}
 
 
 def build_site(situations, phrases, food, prices, speak, extra):

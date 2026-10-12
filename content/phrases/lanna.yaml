@@ -1,0 +1,226 @@
+# Chiang Mai ear: kam mueang, the Northern dialect. Mostly for understanding older locals,
+# plus a few lines to say that make people smile. The voices are Bangkok voices reading
+# Northern spelling, so the tones are close but not perfect Northern.
+- id: lm-eaten
+  kind: hear
+  voice: m
+  th: กิ๋นข้าวแล้วกา
+  rom: gǐn kâao láew gaa
+  en: Have you eaten yet? (Northern)
+  note: The Northern "gin kâao rǔe yang". Same answers.
+  replies: [so-eaten-yes, so-not-yet]
+- id: lm-where-been
+  kind: hear
+  voice: m
+  th: ไปแอ่วไหนมา
+  rom: pai àew nǎi maa
+  en: Where've you been out to?
+  note: แอ่ว (àew) is going out for fun. A greeting, not a real question.
+  replies: [so-been-market, so-out-about]
+- id: lm-what-doing
+  kind: hear
+  voice: m
+  th: ยะหยังอยู่
+  rom: yá yǎng yùu
+  en: What are you up to?
+- id: lm-speak-northern
+  kind: hear
+  voice: m
+  th: อู้กำเมืองได้ก่
+  rom: ûu gam-mueang dâi gòr
+  en: Can you speak Northern?
+  note: ก่ (gòr) on the end makes it a question, like ไหม.
+  replies: [lm-little]
+- id: lm-understand-q
+  kind: hear
+  th: ฮู้เรื่องก่
+  rom: húu rûeang gòr
+  en: Do you understand?
+  note: Northern ฮ (h) often stands where Bangkok has ร (r).
+  replies: [lm-dont-get]
+- id: lm-really-hot
+  kind: hear
+  voice: m
+  th: ฮ้อนแต้เนาะ
+  rom: hón tâe nó
+  en: Really hot, isn't it?
+  note: ฮ้อน (hón) is ร้อน, hot. เนาะ (nó) is "isn't it?".
+  replies: [lm-so-hot]
+- id: lm-come-eat
+  kind: hear
+  voice: m
+  th: มากิ๋นข้าวเน่อ
+  rom: maa gǐn kâao nôe
+  en: Come and eat!
+  note: Often meant. Thank them, or say you're full.
+  replies: [thank-you, so-full]
+- id: lm-eat-what
+  kind: hear
+  th: จะกิ๋นหยังเจ้า
+  rom: jà gǐn yǎng jâo
+  en: What will you have?
+  note: เจ้า (jâo) is how Northern women end a polite sentence.
+- id: lm-tasty-q
+  kind: hear
+  th: ลำก่เจ้า
+  rom: lam gòr jâo
+  en: Is it tasty?
+  note: ลำ (lam) is the Northern อร่อย.
+  replies: [lm-super-tasty]
+- id: lm-come-again
+  kind: hear
+  th: มาแอ่วใหม่เน่อเจ้า
+  rom: maa àew mài nôe jâo
+  en: Come again!
+- id: lm-new-year-h
+  kind: hear
+  voice: m
+  th: สวัสดีปี๋ใหม่เมืองเน่อ
+  rom: sà-wàt-dee pǐi mài mueang nôe
+  en: Happy Northern New Year!
+  note: What Chiang Mai calls Songkran, in April.
+  replies: [lm-new-year]
+- id: lm-play-water
+  kind: hear
+  voice: m
+  th: จะเล่นน้ำก่
+  rom: jà lên náam gòr
+  en: You playing with water?
+  note: At Songkran this means "you're about to get wet".
+- id: lm-cold-q
+  kind: hear
+  voice: m
+  th: หนาวก่
+  rom: nǎao gòr
+  en: Cold?
+
+- id: lm-little
+  kind: say
+  th: อู้ได้หน้อยเดียวครับ
+  rom: ûu dâi nôi diao káp
+  en: Just a tiny bit
+  note: หน้อย (nôi) is Northern for "a little".
+- id: lm-dont-get
+  kind: say
+  th: บ่ฮู้เรื่องครับ
+  rom: bòr húu rûeang káp
+  en: I don't get it (Northern)
+- id: lm-super-tasty
+  kind: say
+  th: ลำขนาดครับ
+  rom: lam kà-nàat káp
+  en: Super tasty!
+  note: Say this to Pa Noi and watch her face.
+- id: lm-how-much
+  kind: say
+  th: เต้าใดครับ
+  rom: tâo dai káp
+  en: How much? (Northern)
+- id: lm-thanks
+  kind: say
+  th: ขอบใจ๋ครับ
+  rom: kòp jǎi káp
+  en: Thanks (Northern)
+  note: ขอบคุณ is always fine. This one makes people smile.
+- id: lm-no-worries
+  kind: say
+  th: บ่เป็นหยังครับ
+  rom: bòr pen yǎng káp
+  en: No worries (Northern)
+- id: lm-so-hot
+  kind: say
+  th: ฮ้อนขนาดครับ
+  rom: hón kà-nàat káp
+  en: So hot!
+- id: lm-fun
+  kind: say
+  th: ม่วนขนาดครับ
+  rom: mûan kà-nàat káp
+  en: So much fun!
+- id: lm-new-year
+  kind: say
+  th: สวัสดีปี๋ใหม่เมืองครับ
+  rom: sà-wàt-dee pǐi mài mueang káp
+  en: Happy Northern New Year
+- id: lm-songkran
+  kind: say
+  th: สุขสันต์วันสงกรานต์ครับ
+  rom: sùk-sǎn wan sǒng-graan káp
+  en: Happy Songkran
+
+- id: lm-jao
+  kind: word
+  th: เจ้า
+  rom: jâo
+  en: Yes / polite ending (women)
+  note: Northern women say เจ้า where Bangkok says ค่ะ. You'll hear it all day.
+- id: lm-bor
+  kind: word
+  th: บ่
+  rom: bòr
+  en: Not
+  note: The Northern ไม่. บ่มี is "don't have".
+- id: lm-gor
+  kind: word
+  th: ก่
+  rom: gòr
+  en: (makes a question)
+  note: Goes on the end, like ไหม.
+- id: lm-noe
+  kind: word
+  th: เน่อ
+  rom: nôe
+  en: (softener, like นะ)
+- id: lm-kanaat
+  kind: word
+  th: ขนาด
+  rom: kà-nàat
+  en: Very, so much
+  note: After the word. ลำขนาด, ฮ้อนขนาด.
+- id: lm-tae
+  kind: word
+  th: แต้
+  rom: tâe
+  en: Really, truly
+- id: lm-gin
+  kind: word
+  th: กิ๋น
+  rom: gǐn
+  en: Eat
+  note: Bangkok กิน (gin) with a rising tone.
+- id: lm-aew
+  kind: word
+  th: แอ่ว
+  rom: àew
+  en: Go out, visit, have fun
+- id: lm-uu
+  kind: word
+  th: อู้
+  rom: ûu
+  en: Speak, talk
+- id: lm-yang
+  kind: word
+  th: หยัง
+  rom: yǎng
+  en: What
+- id: lm-pai
+  kind: word
+  th: ไผ
+  rom: pǎi
+  en: Who
+- id: lm-huu
+  kind: word
+  th: ฮู้
+  rom: húu
+  en: Know
+- id: lm-muan
+  kind: word
+  th: ม่วน
+  rom: mûan
+  en: Fun
+- id: lm-kam-mueang
+  kind: word
+  th: กำเมือง
+  rom: gam-mueang
+  en: The Northern language
+  note: How Northerners say คำเมือง (kam mueang).

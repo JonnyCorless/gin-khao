@@ -1,0 +1,146 @@
+# Reading Thai. Sign words first (recognise the whole word by its shape), then the letters.
+# Each lesson becomes a reading drill: see it, pick what it means; the audio plays after you answer.
+# say: what the voice reads, when it differs from th (letter names, digits, lone vowels).
+# Letter cls: mid, low or high class. The class decides the tone later on.
+- id: doors
+  type: sign
+  title: Doors and toilets
+  blurb: The signs you need first.
+  items:
+    - {id: sg-toilet, th: ห้องน้ำ, rom: hông-náam, en: Toilet}
+    - {id: sg-men, th: ชาย, rom: chaai, en: Men}
+    - {id: sg-women, th: หญิง, rom: yǐng, en: Women}
+    - {id: sg-push, th: ผลัก, rom: plàk, en: Push}
+    - {id: sg-pull, th: ดึง, rom: dueng, en: Pull}
+    - {id: sg-open, th: เปิด, rom: pòet, en: Open}
+    - {id: sg-closed, th: ปิด, rom: pìt, en: Closed}
+    - {id: sg-in, th: ทางเข้า, rom: taang kâo, en: Entrance}
+    - {id: sg-out, th: ทางออก, rom: taang òk, en: Exit}
+- id: shops
+  type: sign
+  title: Shops and prices
+  blurb: Price tags, sale signs and shop fronts.
+  items:
+    - {id: sg-price, th: ราคา, rom: raa-kaa, en: Price}
+    - {id: sg-baht, th: บาท, rom: bàat, en: Baht}
+    - {id: sg-sale, th: ลดราคา, rom: lót raa-kaa, en: 'Sale, discount'}
+    - {id: sg-free, th: ฟรี, rom: frii, en: Free}
+    - {id: sg-pharmacy, th: ร้านขายยา, rom: ráan kǎai yaa, en: Pharmacy}
+    - {id: sg-market, th: ตลาด, rom: tà-làat, en: Market}
+    - {id: sg-water, th: น้ำดื่ม, rom: náam dùem, en: Drinking water}
+    - {id: sg-for-rent, th: ให้เช่า, rom: hâi châo, en: For rent}
+- id: menu
+  type: sign
+  title: Menu boards
+  blurb: Read the meat before you order.
+  items:
+    - {id: sg-pork, th: หมู, rom: mǔu, en: Pork}
+    - {id: sg-chicken, th: ไก่, rom: gài, en: Chicken}
+    - {id: sg-beef, th: เนื้อ, rom: núea, en: Beef}
+    - {id: sg-prawn, th: กุ้ง, rom: gûng, en: Prawn}
+    - {id: sg-rice, th: ข้าว, rom: kâao, en: Rice}
+    - {id: sg-noodles, th: ก๋วยเตี๋ยว, rom: gǔai-tǐao, en: Noodles}
+    - {id: sg-hot, th: ร้อน, rom: rón, en: Hot (drink)}
+    - {id: sg-iced, th: เย็น, rom: yen, en: 'Iced, cold'}
+    - {id: sg-blended, th: ปั่น, rom: pàn, en: Blended}
+- id: streets
+  type: sign
+  title: Streets and parking
+  blurb: For the scooter.
+  items:
+    - {id: sg-no-entry, th: ห้ามเข้า, rom: hâam kâo, en: No entry}
+    - {id: sg-no-park, th: ห้ามจอด, rom: hâam jòt, en: No parking}
+    - {id: sg-slow, th: ขับช้าๆ, rom: kàp cháa cháa, en: Drive slowly}
+    - {id: sg-danger, th: อันตราย, rom: an-tà-raai, en: Danger}
+    - {id: sg-soi, th: ซอย, rom: soi, en: Lane (soi)}
+    - {id: sg-road, th: ถนน, rom: tà-nǒn, en: Road}
+    - {id: sg-hospital, th: โรงพยาบาล, rom: roong pá-yaa-baan, en: Hospital}
+    - {id: sg-school, th: โรงเรียน, rom: roong rian, en: School}
+    - {id: sg-temple, th: วัด, rom: wát, en: Temple}
+- id: digits
+  type: digit
+  title: Thai digits
+  blurb: On some price tags, temple signs and old buses. Most prices use 1, 2, 3.
+  items:
+    - {id: dg-1, th: ๑, say: หนึ่ง, rom: nùeng, en: '1'}
+    - {id: dg-2, th: ๒, say: สอง, rom: sǒng, en: '2'}
+    - {id: dg-3, th: ๓, say: สาม, rom: sǎam, en: '3'}
+    - {id: dg-4, th: ๔, say: สี่, rom: sìi, en: '4'}
+    - {id: dg-5, th: ๕, say: ห้า, rom: hâa, en: '5'}
+    - {id: dg-6, th: ๖, say: หก, rom: hòk, en: '6'}
+    - {id: dg-7, th: ๗, say: เจ็ด, rom: jèt, en: '7'}
+    - {id: dg-8, th: ๘, say: แปด, rom: pàet, en: '8'}
+    - {id: dg-9, th: ๙, say: เก้า, rom: gâo, en: '9'}
+    - {id: dg-0, th: ๐, say: ศูนย์, rom: sǔun, en: '0'}
+- id: letters-1
+  type: letter
+  title: Letters 1 · seven easy ones
+  blurb: Mid-class letters. Each has a name word, like "a for apple". ก is gor gài, g for chicken.
+  items:
+    - {id: l-g, th: ก, say: กอ ไก่, rom: gor gài, en: g, word: chicken, cls: mid}
+    - {id: l-j, th: จ, say: จอ จาน, rom: jor jaan, en: j, word: plate, cls: mid}
+    - {id: l-d, th: ด, say: ดอ เด็ก, rom: dor dèk, en: d, word: child, cls: mid}
+    - {id: l-t, th: ต, say: ตอ เต่า, rom: tor tào, en: t (no puff), word: turtle, cls: mid}
+    - {id: l-b, th: บ, say: บอ ใบไม้, rom: bor bai-mái, en: b, word: leaf, cls: mid}
+    - {id: l-p, th: ป, say: ปอ ปลา, rom: por plaa, en: p (no puff), word: fish, cls: mid}
+    - {id: l-o, th: อ, say: ออ อ่าง, rom: or àang, en: '(silent, holds a vowel)', word: basin, cls: mid}
+- id: letters-2
+  type: letter
+  title: Letters 2 · the common low ones
+  blurb: Low-class letters. You'll see these in almost every word.
+  items:
+    - {id: l-k-low, th: ค, say: คอ ควาย, rom: kor kwaai, en: k, word: buffalo, cls: low}
+    - {id: l-ng, th: ง, say: งอ งู, rom: ngor nguu, en: ng, word: snake, cls: low}
+    - {id: l-ch-low, th: ช, say: ชอ ช้าง, rom: chor cháang, en: ch, word: elephant, cls: low}
+    - {id: l-t-low, th: ท, say: ทอ ทหาร, rom: tor tá-hǎan, en: t, word: soldier, cls: low}
+    - {id: l-n, th: น, say: นอ หนู, rom: nor nǔu, en: n, word: mouse, cls: low}
+    - {id: l-p-low, th: พ, say: พอ พาน, rom: por paan, en: p, word: tray, cls: low}
+    - {id: l-m, th: ม, say: มอ ม้า, rom: mor máa, en: m, word: horse, cls: low}
+    - {id: l-y, th: ย, say: ยอ ยักษ์, rom: yor yák, en: y, word: giant, cls: low}
+    - {id: l-r, th: ร, say: รอ เรือ, rom: ror ruea, en: r, word: boat, cls: low}
+    - {id: l-l, th: ล, say: ลอ ลิง, rom: lor ling, en: l, word: monkey, cls: low}
+    - {id: l-w, th: ว, say: วอ แหวน, rom: wor wǎen, en: w, word: ring, cls: low}
+- id: letters-3
+  type: letter
+  title: Letters 3 · the high ones
+  blurb: High-class letters. Their names rise in tone, which is a hint for later.
+  items:
+    - {id: l-k-high, th: ข, say: ขอ ไข่, rom: kǒr kài, en: k, word: egg, cls: high}
+    - {id: l-ch-high, th: ฉ, say: ฉอ ฉิ่ง, rom: chǒr chìng, en: ch, word: cymbals, cls: high}
+    - {id: l-t-high, th: ถ, say: ถอ ถุง, rom: tǒr tǔng, en: t, word: bag, cls: high}
+    - {id: l-p-high, th: ผ, say: ผอ ผึ้ง, rom: pǒr pûeng, en: p, word: bee, cls: high}
+    - {id: l-f-high, th: ฝ, say: ฝอ ฝา, rom: fǒr fǎa, en: f, word: lid, cls: high}
+    - {id: l-s-high, th: ส, say: สอ เสือ, rom: sǒr sǔea, en: s, word: tiger, cls: high}
+    - {id: l-h-high, th: ห, say: หอ หีบ, rom: hǒr hìip, en: h, word: chest, cls: high}
+- id: letters-4
+  type: letter
+  title: Letters 4 · the rest you'll meet
+  blurb: Less common, but on menus and signs.
+  items:
+    - {id: l-s-low, th: ซ, say: ซอ โซ่, rom: sor sôo, en: s, word: chain, cls: low}
+    - {id: l-f-low, th: ฟ, say: ฟอ ฟัน, rom: for fan, en: f, word: teeth, cls: low}
+    - {id: l-h-low, th: ฮ, say: ฮอ นกฮูก, rom: hor nók-hûuk, en: h, word: owl, cls: low}
+    - {id: l-y-2, th: ญ, say: ยอ หญิง, rom: yor yǐng, en: y, word: woman, cls: low}
+    - {id: l-p-3, th: ภ, say: พอ สำเภา, rom: por sǎm-pao, en: p, word: junk boat, cls: low}
+    - {id: l-t-3, th: ธ, say: ทอ ธง, rom: tor tong, en: t, word: flag, cls: low}
+    - {id: l-n-2, th: ณ, say: นอ เณร, rom: nor neen, en: n, word: novice monk, cls: low}
+    - {id: l-s-3, th: ศ, say: สอ ศาลา, rom: sǒr sǎa-laa, en: s, word: pavilion, cls: high}
+- id: vowels
+  type: vowel
+  title: Vowels
+  blurb: Vowels sit before, after, above or below the letter. Shown here on อ, the silent holder. The voice says each one the way Thai teachers do, sà-rà (vowel) then the sound.
+  items:
+    - {id: v-aa, th: อา, say: สระอา, rom: aa, en: aa (father)}
+    - {id: v-a, th: อะ, say: สระอะ, rom: a, en: a (short)}
+    - {id: v-ee, th: อี, say: สระอี, rom: ee, en: ee (see)}
+    - {id: v-i, th: อิ, say: สระอิ, rom: i, en: i (short ee)}
+    - {id: v-uu, th: อู, say: สระอู, rom: uu, en: uu (too)}
+    - {id: v-u, th: อุ, say: สระอุ, rom: u, en: u (short oo)}
+    - {id: v-e, th: เอ, say: สระเอ, rom: e, en: e (hey)}
+    - {id: v-ae, th: แอ, say: สระแอ, rom: ae, en: ae (cat)}
+    - {id: v-oo, th: โอ, say: สระโอ, rom: oo, en: oo (go)}
+    - {id: v-ai, th: ไอ, say: สระไอ, rom: ai, en: ai (Thai)}
+    - {id: v-ao, th: เอา, say: สระเอา, rom: ao, en: ao (how)}
+    - {id: v-am, th: อำ, say: สระอำ, rom: am, en: am (sum)}
+    - {id: v-or, th: ออ, say: สระออ, rom: or, en: or (law)}
+    - {id: v-ue, th: อือ, say: สระอือ, rom: ue, en: ue (oo with a smile)}

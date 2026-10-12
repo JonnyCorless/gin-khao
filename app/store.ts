@@ -40,6 +40,17 @@ export interface SessionState {
   steps: { key: string; ids: string[] }[];
 }
 
+/** A phrase a local taught you, saved on the phone. audio: the file extension of your recording, if any. */
+export interface MyPhrase {
+  id: string;
+  en: string;
+  th: string;
+  rom: string;
+  note?: string;
+  audio?: string;
+  added: string;
+}
+
 export interface ProgressData {
   v: 1;
   cards: Record<string, SavedCard>;
@@ -59,6 +70,10 @@ export interface ProgressData {
   missionPick: { date: string; id: string } | null;
   /** phrase id -> how many times you've missed it recently (the "Tricky ones") */
   misses: Record<string, number>;
+  /** phrases you've added yourself */
+  mine: MyPhrase[];
+  /** the last "what's new" card you dismissed */
+  newsSeen: string;
 }
 
 export const MAX_HEARTS = 5;
@@ -81,6 +96,8 @@ const defaults = (): ProgressData => ({
   missions: {},
   missionPick: null,
   misses: {},
+  mine: [],
+  newsSeen: '',
 });
 
 let state: ProgressData = defaults();
@@ -203,7 +220,7 @@ export function loseHeart() {
   });
 }
 
-/** Wipes learning progress (cards, streak, sessions, hearts) but keeps settings, pins and address. */
+/** Wipes learning progress (cards, streak, sessions, hearts) but keeps settings, pins, address and your own phrases. */
 export function resetProgress() {
   update(p => {
     const d = defaults();

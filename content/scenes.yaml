@@ -170,3 +170,45 @@
     - {narrate: He checks it and hands it back.}
     - {you: Say thank you., reply: [thank-you], wrong: [so-off-now]}
   end: Polite, quick, on your way. That's how checkpoints go.
+- id: mon-2
+  title: Lung Mon goes Northern
+  who: mon
+  needs: [mon-1]
+  setup: Lung Mon is in a chatty mood today, and he's switched to kam mueang.
+  steps:
+    - {they: lm-eaten, reply: [so-eaten-yes, so-not-yet], wrong: [so-full, so-from-england]}
+    - {they: lm-where-been, reply: [so-been-market, so-out-about], wrong: [so-just-arrived]}
+    - {they: lm-speak-northern, reply: [lm-little], wrong: [so-from-england, lm-so-hot]}
+    - {narrate: He laughs and slaps his knee.}
+    - {they: lm-really-hot, check: true}
+    - {you: Agree. It's so hot., reply: [lm-so-hot, so-hot-today], wrong: [so-rain, lm-fun]}
+    - {they: lm-come-eat, reply: [thank-you, so-full], wrong: [so-off-now, lm-dont-get]}
+  end: By lunchtime the whole soi knows you speak a little Northern.
+- id: noi-4
+  title: Pa Noi goes Northern
+  who: noi
+  needs: [noi-3]
+  setup: Pa Noi heard you've been learning kam mueang. She's testing you.
+  steps:
+    - {they: lm-eat-what, reply: [f-same-as-usual, take-this], wrong: [lm-dont-get, f-pay]}
+    - {they: f-here-or-away, reply: [f-eat-here, f-take-away], wrong: [f-soup]}
+    - {narrate: The khao soi arrives. It's as good as ever.}
+    - {they: lm-tasty-q, reply: [lm-super-tasty, f-delicious], wrong: [lm-dont-get, lm-so-hot]}
+    - {you: "Ask how much, the Northern way.", reply: [lm-how-much], wrong: [lm-thanks, lm-no-worries]}
+    - {they: s-total, check: true}
+    - {you: Thank her the Northern way., reply: [lm-thanks], wrong: [lm-no-worries, lm-fun]}
+    - {they: lm-come-again}
+  end: Pa Noi only speaks kam mueang to you now. You understand about half, which is twice what you did.
+- id: mon-3
+  title: Songkran in the soi
+  who: mon
+  needs: [mon-2]
+  setup: April, and it's 38 degrees. The whole soi is out with buckets, and Lung Mon has a water pistol.
+  steps:
+    - {narrate: First he pours a little scented water over your hands. It's a blessing for the new year.}
+    - {they: lm-new-year-h, reply: [lm-new-year, lm-songkran], wrong: [so-off-now, hello]}
+    - {they: lm-play-water, check: true}
+    - {narrate: A bucket of iced water lands on your back. Everyone cheers.}
+    - {they: lm-cold-q, reply: [lm-fun, lm-so-hot], wrong: [lm-dont-get, so-full]}
+    - {you: Wish everyone a happy Songkran., reply: [lm-songkran, lm-new-year], wrong: [so-see-later]}
+  end: Soaked, laughing, and part of the soi.

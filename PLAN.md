@@ -148,6 +148,14 @@ The regulars and line-art · role-play scenes (about 12) with hearts · understo
 **Phase 3: deeper**
 Story path · Chiang Mai ear and Northern phrases · script recognition and alphabet course · pitch line · home-screen widget · sharing from Google Lens into the menu checker · sound-alike drill expansion.
 
+**Status (2026-10-12)**: Phases 0 to 3 built. Web and content ship by pushing to main. The widget, Lens sharing and the mic in the web view (record & compare, pitch line, recording My phrases) need APK 0.3.0, and the app says so on older APKs.
+- Story: `content/story.yaml`, 14 chapters over the existing scenes plus three Northern ones (mon-2, noi-4, mon-3).
+- Chiang Mai ear: `content/phrases/lanna.yaml` (situation `lanna`).
+- Reading: `content/script.yaml` (sign words, digits, four letter lessons, vowels). Reading joins the daily session after 16 phrases.
+- Sound-alikes: `content/sounds.yaml` (Browse › Ears).
+- Speaking lab: record & compare with pitch lines, and shadowing. The pitch is worked out on the phone (YIN).
+- My phrases: on the Show tab, saved in progress.json, with recordings in `mine/`.
+
 ---
 
 ## 6. Notes and limits

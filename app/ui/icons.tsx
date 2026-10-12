@@ -30,6 +30,13 @@ const P: Record<string, string> = {
   ear: 'M7 9a5 5 0 0 1 10 0c0 3-2.5 3.5-2.5 6.5a3 3 0 0 1-6 .5M10 9.5a2 2 0 0 1 4 0',
   search: 'M10.5 17a6.5 6.5 0 1 0 0-13a6.5 6.5 0 0 0 0 13zM15.5 15.5L20 20',
   edit: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4',
+  wave: 'M3 12h1.5M7 8.5v7M10.5 5v14M14 9v6M17.5 7v10M21 12h-.5',
+  mountain: 'M2.5 19.5L9 9l3.5 5.5L15 11l6.5 8.5zM16.5 6.5a1.8 1.8 0 1 0 0-.1',
+  story: 'M5 4.5h9.5a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h9.5M9 8h5',
+  read: 'M4.5 19L10 5h1l5.5 14M6.8 13.5h7.4M17.5 19v-6.5a2 2 0 0 1 4 0V19',
+  plus: 'M12 5v14M5 12h14',
+  trash: 'M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13',
+  lock: 'M7 11V8a5 5 0 0 1 10 0v3M5.5 11h13v9h-13z',
 };
 
 export function Icon({ name, size = 22, fill = false }: { name: string; size?: number; fill?: boolean }) {

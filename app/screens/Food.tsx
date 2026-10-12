@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { play } from '../audio';
 import { C, item } from '../data';
 import { shuffle } from '../lesson';
@@ -14,7 +14,14 @@ const LVL: Record<Lvl, string> = { avoid: 'Offal', care: 'Ask first', ok: 'Usual
 export const LvlChip = ({ l }: { l: Lvl }) => <span class={`lvl ${l}`}>{LVL[l]}</span>;
 
 const MENU_KEY = 'gk.menu';
-const loadMenu = () => { try { return localStorage.getItem(MENU_KEY) ?? SAMPLE_MENU; } catch { return SAMPLE_MENU; } };
+let shared: string | null = null;
+const loadMenu = () => { if (shared !== null) return shared; try { return localStorage.getItem(MENU_KEY) ?? SAMPLE_MENU; } catch { return SAMPLE_MENU; } };
+
+/** Text shared into Gin Khao: the menu checker opens with it. */
+export function receiveMenu(text: string) {
+  shared = text;
+  try { localStorage.setItem(MENU_KEY, text); } catch { /* ignore */ }
+}
 
 function Tile({ it }: { it: Item }) {
   return (
@@ -54,12 +61,21 @@ function Mini({ it }: { it: Item }) {
 
 function MenuChecker() {
   const [text, setText] = useState(loadMenu);
+  const [fromShare] = useState(shared !== null);
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (shared === null) return;
+    shared = null;
+    setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  }, []);
   const save = (t: string) => { setText(t); try { localStorage.setItem(MENU_KEY, t); } catch { /* ignore */ } };
   const results = checkMenu(text);
   return (
-    <section class="block">
+    <section class="block" ref={ref} id="menu-checker">
       <h3>Menu checker</h3>
-      <p class="muted">Paste Thai menu text, one dish per line. Point Google Lens at a menu, tap Text, copy, and paste it here. An example menu is loaded.</p>
+      {fromShare
+        ? <p class="good-text">Menu received. Each dish gets a verdict below.</p>
+        : <p class="muted">Point Google Lens at a menu, tap Text, select it all, then Share › Gin Khao. Or copy and paste it here, one dish per line. An example menu is loaded.</p>}
       <label class="eyebrow" for="menu-in">Menu text</label>
       <textarea id="menu-in" lang="th" spellcheck={false} value={text} onInput={e => save((e.target as HTMLTextAreaElement).value)} />
       <div class="row">

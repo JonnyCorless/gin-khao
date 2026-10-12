@@ -1,12 +1,13 @@
 // Exercises and today's session. An exercise is stored as "type:id" (or "price:85") so a
 // half-finished session survives closing the app.
-import { C, item, phrase } from './data';
+import { C, category, item, phrase, poolFor } from './data';
 import { sessionScene } from './scenes';
-import { curriculum, dueIds, isLearned, nextNew } from './srs';
+import { curriculum, dueIds, isLearned, learnedCount, nextNew } from './srs';
 import { P, today, update, type SessionState } from './store';
 import type { Item, Phrase } from './types';
 
-export type ExType = 'intro' | 'meaning' | 'recall' | 'listen' | 'price';
+// read: see Thai script, pick the meaning (audio after). sound: hear one of a sound-alike set, pick which.
+export type ExType = 'intro' | 'meaning' | 'recall' | 'listen' | 'price' | 'read' | 'sound';
 export interface Ex { type: ExType; id: string; n?: number }
 
 export const decode = (s: string): Ex => {
@@ -26,6 +27,17 @@ function quizType(p: Phrase): ExType {
   return pick<ExType>(['meaning', 'listen']);
 }
 
+/** A review question for anything with a card: phrases, script, sound-alikes, food words. */
+export function quizFor(id: string): string | null {
+  const cat = category(id);
+  if (!cat) return null;
+  if (cat === 'phrase') return `${quizType(phrase(id)!)}:${id}`;
+  if (cat === 'script') return `read:${id}`;
+  if (cat === 'sound') return `sound:${id}`;
+  if (cat === 'mine') return item(id)?.th ? `meaning:${id}` : null;
+  return `meaning:${id}`;
+}
+
 /** Realistic prices: mostly small amounts, some hundreds, a few thousands. */
 export function randomPrice(): number {
   const all = C().prices;
@@ -39,6 +51,7 @@ export const STEPS: Record<string, StepInfo> = {
   review: { key: 'review', title: 'Warm-up review', blurb: 'Phrases due today', icon: 'sparkle' },
   learn: { key: 'learn', title: 'New phrases', blurb: 'Hear, say, then check', icon: 'browse' },
   listen: { key: 'listen', title: 'Listening', blurb: 'What staff say to you', icon: 'ear' },
+  read: { key: 'read', title: 'Reading', blurb: 'Signs and letters', icon: 'read' },
   scene: { key: 'scene', title: 'Scene', blurb: 'Role-play with one of your regulars', icon: 'people' },
   prices: { key: 'prices', title: 'Prices', blurb: 'Catch the number', icon: 'coins' },
 };
@@ -55,21 +68,51 @@ export function newPerDay(): number {
   return NEW_PER_DAY;
 }
 
+/** Teaching new phrases: an intro and a first quiz for each, then a final round in a new order.
+ *  The final quiz is the one that's graded (see isFinalLearnQuiz). */
+export function learnExercises(fresh: Phrase[]): string[] {
+  const out: string[] = [];
+  for (const p of fresh) out.push(`intro:${p.id}`, `${p.kind === 'say' ? 'meaning' : 'listen'}:${p.id}`);
+  for (const p of shuffle(fresh)) out.push(`${p.kind === 'say' ? 'recall' : 'meaning'}:${p.id}`);
+  return out;
+}
+
+/** The last quiz for a new phrase decides how well it went. */
+export const isFinalLearnQuiz = (ex: Ex) => {
+  const p = phrase(ex.id);
+  return !!p && ((p.kind === 'say' && ex.type === 'recall') || (p.kind !== 'say' && ex.type === 'meaning'));
+};
+
+/** Teaching script or sound-alike items: intro, an easier first quiz (with the sound), then the real
+ *  one in a final round: reading in silence, or picking which sound-alike you heard. The final one is graded. */
+export function itemExercises(ids: string[], type: 'read' | 'sound'): string[] {
+  const out: string[] = [];
+  for (const id of ids) out.push(`intro:${id}`, `${type === 'read' ? 'meaning' : 'listen'}:${id}`);
+  for (const id of shuffle(ids)) out.push(`${type}:${id}`);
+  return out;
+}
+
+/** The next script items to learn, in course order (signs first, then digits, letters, vowels). */
+export const nextScript = (n: number) =>
+  (C().script ?? []).flatMap(l => l.items).filter(i => !isLearned(i.id)).slice(0, n).map(i => i.id);
+
+/** Reading joins the daily session once you have a few phrases. */
+export const READ_FROM = 16;
+
 export function buildSession(): SessionState {
-  const review = dueIds(25).map(id => phrase(id)).filter((p): p is Phrase => !!p).map(p => `${quizType(p)}:${p.id}`);
-  const fresh = nextNew(newPerDay());
-  const learn: string[] = [];
-  for (const p of fresh) learn.push(`intro:${p.id}`, `${p.kind === 'say' ? 'meaning' : 'listen'}:${p.id}`);
-  for (const p of shuffle(fresh)) learn.push(`${p.kind === 'say' ? 'recall' : 'meaning'}:${p.id}`);
+  const review = dueIds(25).map(quizFor).filter((x): x is string => !!x);
+  const learn = learnExercises(nextNew(newPerDay()));
   const hearLearned = C().phrases.filter(p => p.kind === 'hear' && isLearned(p.id));
   const hearPool = hearLearned.length >= 4 ? hearLearned : curriculum().filter(p => p.kind === 'hear').slice(0, 10);
   const listen = shuffle(hearPool).slice(0, 5).map(p => `listen:${p.id}`);
   const prices = Array.from({ length: 4 }, () => `price:${randomPrice()}`);
+  const read = learnedCount() >= READ_FROM ? itemExercises(nextScript(3), 'read') : [];
   const scene = sessionScene();
   const steps = [
     { key: 'review', ids: review },
     { key: 'learn', ids: learn },
     { key: 'listen', ids: listen },
+    { key: 'read', ids: read },
     { key: 'scene', ids: scene ? [`scene:${scene.id}`] : [] },
     { key: 'prices', ids: prices },
   ].filter(s => s.ids.length > 0);
@@ -98,16 +141,19 @@ export function options(ex: Ex): Item[] {
   const target = item(ex.id);
   if (!target) return [];
   const p = phrase(ex.id);
-  const key = (x: Item) => (ex.type === 'recall' ? x.th : x.en);
+  const key = (x: Item) => (ex.type === 'recall' || ex.type === 'sound' ? x.th : x.en);
   let pools: Item[][];
-  if (p && p.situation) {
+  const pool = poolFor(ex.id);
+  if (ex.type === 'sound' && pool) return shuffle(pool); // the whole sound-alike set
+  if (pool) {
+    pools = [pool];
+  } else if (p) {
     const all = C().phrases;
     const kind = ex.type === 'recall' ? 'say' : p.kind;
     // same situation and kind first, then same kind anywhere, then anything
     pools = [all.filter(x => x.situation === p.situation && x.kind === kind), all.filter(x => x.kind === kind), all];
   } else {
-    const f = C().food; // food words and dishes
-    pools = [[...f.spot, ...f.dishes, ...f.northern, ...f.safe, ...f.meats]];
+    pools = [C().phrases];
   }
   const seen = new Set([key(target)]);
   const out: Item[] = [];

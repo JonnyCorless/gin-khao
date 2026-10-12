@@ -1,0 +1,95 @@
+# Sound-alikes: words that differ only by tone, vowel length or a puff of air.
+# Each set becomes a listening drill: hear one, pick which.
+- id: chicken-egg
+  title: Chicken or egg
+  tip: Same tone. ไข่ has a puff of air on the k; ไก่ has none (closer to g). Hold a hand in front of your mouth.
+  words:
+    - {id: sa-gai, th: ไก่, rom: gài, en: Chicken}
+    - {id: sa-kai, th: ไข่, rom: kài, en: Egg}
+- id: near-far
+  title: Near or far
+  tip: Only the tone differs. Near falls (glâi); far stays flat (glai). Matters when asking directions.
+  words:
+    - {id: sa-glai-near, th: ใกล้, rom: glâi, en: Near}
+    - {id: sa-glai-far, th: ไกล, rom: glai, en: Far}
+- id: put-intestine
+  title: Put in or intestines
+  tip: ใส่ is low and short (sài); ไส้ falls (sâi). "mâi sài" means don't put it in; ไส้ is the offal.
+  words:
+    - {id: sa-sai-put, th: ใส่, rom: sài, en: Put in}
+    - {id: sa-sai-gut, th: ไส้, rom: sâi, en: Intestines}
+    - {id: sa-sai-clear, th: ใส, rom: sǎi, en: Clear (soup)}
+- id: rice-white
+  title: Rice, white, knee
+  tip: Rice falls (kâao), white rises (kǎao), knee is low and short (kào).
+  words:
+    - {id: sa-kao-rice, th: ข้าว, rom: kâao, en: Rice}
+    - {id: sa-kao-white, th: ขาว, rom: kǎao, en: White}
+    - {id: sa-kao-knee, th: เข่า, rom: kào, en: Knee}
+- id: mai
+  title: Not, new, question, wood
+  tip: The classic. mâi falls, mài is low, mǎi rises, mái is high.
+  words:
+    - {id: sa-mai-not, th: ไม่, rom: mâi, en: Not}
+    - {id: sa-mai-new, th: ใหม่, rom: mài, en: New}
+    - {id: sa-mai-q, th: ไหม, rom: mǎi, en: (question word)}
+    - {id: sa-mai-wood, th: ไม้, rom: mái, en: Wood}
+- id: spicy-duck
+  title: Spicy or duck
+  tip: Same tone again. เผ็ด (spicy) has the puff; เป็ด (duck) has none, almost a b.
+  words:
+    - {id: sa-pet-spicy, th: เผ็ด, rom: pèt, en: Spicy}
+    - {id: sa-pet-duck, th: เป็ด, rom: pèt, en: Duck}
+- id: nine-enter-old
+  title: Nine, enter, old
+  tip: Nine and enter both fall; nine has no puff (gâo), enter has one (kâo). Old is low (gào).
+  words:
+    - {id: sa-gao-nine, th: เก้า, rom: gâo, en: Nine}
+    - {id: sa-kao-enter, th: เข้า, rom: kâo, en: Enter}
+    - {id: sa-gao-old, th: เก่า, rom: gào, en: Old}
+- id: four-ten
+  title: Four or ten
+  tip: Both low tone. สี่ (four) ends open; สิบ (ten) is clipped short with a closed p.
+  words:
+    - {id: sa-sii, th: สี่, rom: sìi, en: Four}
+    - {id: sa-sip, th: สิบ, rom: sìp, en: Ten}
+- id: come-dog-horse
+  title: Come, dog, horse
+  tip: Flat (maa), rising (mǎa), high (máa).
+  words:
+    - {id: sa-maa-come, th: มา, rom: maa, en: Come}
+    - {id: sa-maa-dog, th: หมา, rom: mǎa, en: Dog}
+    - {id: sa-maa-horse, th: ม้า, rom: máa, en: Horse}
+- id: tiger-shirt
+  title: Tiger or shirt
+  tip: Tiger rises (sǔea); shirt falls (sûea).
+  words:
+    - {id: sa-suea-tiger, th: เสือ, rom: sǔea, en: Tiger}
+    - {id: sa-suea-shirt, th: เสื้อ, rom: sûea, en: Shirt}
+- id: pretty-unlucky
+  title: Beautiful or unlucky
+  tip: Get this one right. สวย rises (sǔai, beautiful); ซวย is flat (suai, unlucky).
+  words:
+    - {id: sa-suay, th: สวย, rom: sǔai, en: Beautiful}
+    - {id: sa-suai, th: ซวย, rom: suai, en: Unlucky}
+- id: leg-galangal-cost
+  title: Leg, galangal, cost
+  tip: Rising (kǎa), low (kàa), falling (kâa). ค่า is in every bill, like ค่าไฟ, the electricity bill.
+  words:
+    - {id: sa-kaa-leg, th: ขา, rom: kǎa, en: Leg}
+    - {id: sa-kaa-galangal, th: ข่า, rom: kàa, en: Galangal}
+    - {id: sa-kaa-cost, th: ค่า, rom: kâa, en: 'Cost, fee'}
+- id: face-field-thick-aunt
+  title: Face, field, thick, aunt
+  tip: Falling (nâa), flat (naa), rising (nǎa), high (náa).
+  words:
+    - {id: sa-naa-face, th: หน้า, rom: nâa, en: 'Face, front'}
+    - {id: sa-naa-field, th: นา, rom: naa, en: Rice field}
+    - {id: sa-naa-thick, th: หนา, rom: nǎa, en: Thick}
+    - {id: sa-naa-aunt, th: น้า, rom: náa, en: Aunt (mum's younger sister)}
+- id: medicine-grass
+  title: Medicine or grass
+  tip: Medicine is flat (yaa); grass falls (yâa). Useful at the pharmacy.
+  words:
+    - {id: sa-yaa-medicine, th: ยา, rom: yaa, en: Medicine}
+    - {id: sa-yaa-grass, th: หญ้า, rom: yâa, en: Grass}

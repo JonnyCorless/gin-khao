@@ -95,3 +95,23 @@
   title: Rubbish day
   detail: Ask a neighbour which day the rubbish is collected.
   phrases: [hm-rubbish-day]
+- id: m-lanna-thanks
+  title: Northern thanks
+  detail: Thank a stall holder with kòp jǎi káp and watch for the smile.
+  phrases: [lm-thanks]
+- id: m-lam
+  title: Super tasty
+  detail: Tell a cook their food is lam kà-nàat.
+  phrases: [lm-super-tasty]
+- id: m-hear-jao
+  title: Hear a jâo
+  detail: Notice someone ending a sentence with เจ้า (jâo). Northern, and polite.
+  phrases: [lm-jao]
+- id: m-read-sign
+  title: Read a sign
+  detail: Read a real sign in Thai script before you look at the English (or the picture).
+  phrases: [sg-toilet, sg-push, sg-pull]
+- id: m-read-menu
+  title: Read the meat
+  detail: On a Thai-only menu board, find หมู, ไก่ or เนื้อ by reading it.
+  phrases: [sg-pork, sg-chicken, sg-beef]

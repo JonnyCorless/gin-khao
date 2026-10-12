@@ -72,6 +72,38 @@ export interface Mission {
   phrases: string[];
 }
 
+/** Words that differ only by tone, vowel length or a puff of air. */
+export interface SoundSet {
+  id: string;
+  title: string;
+  tip: string;
+  words: Item[];
+}
+
+export type ScriptType = 'sign' | 'digit' | 'letter' | 'vowel';
+export interface ScriptItem extends Item {
+  /** letters: the name word ("chicken") and consonant class */
+  word?: string;
+  cls?: 'mid' | 'low' | 'high';
+}
+export interface ScriptLesson {
+  id: string;
+  type: ScriptType;
+  title: string;
+  blurb: string;
+  items: ScriptItem[];
+}
+
+export interface Chapter {
+  id: string;
+  title: string;
+  th: string;
+  intro: string;
+  scenes: string[];
+  mission?: string;
+  outro: string;
+}
+
 export interface Content {
   schema: number;
   situations: Situation[];
@@ -81,4 +113,7 @@ export interface Content {
   characters?: Character[];
   scenes?: Scene[];
   missions?: Mission[];
+  story?: Chapter[];
+  sounds?: SoundSet[];
+  script?: ScriptLesson[];
 }

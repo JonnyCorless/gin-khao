@@ -1,8 +1,9 @@
 import { useState } from 'preact/hooks';
 import { judge, listenThai, type Judgement } from '../speech';
 import type { Item } from '../types';
-import { bad, good } from './haptics';
+import { bad, good, tap } from './haptics';
 import { Icon } from './icons';
+import { openLab } from './SpeakLab';
 
 /** Tap, say the phrase, see whether a Thai ear would have understood you. */
 export function SpeakCheck({ it, onResult }: { it: Item; onResult?: (ok: boolean) => void }) {
@@ -34,5 +35,14 @@ export function SpeakCheck({ it, onResult }: { it: Item; onResult?: (ok: boolean
       )}
       {err && <p class="bad small">{err}</p>}
     </div>
+  );
+}
+
+/** Opens the speaking lab: record & compare with pitch lines, or shadowing. */
+export function SpeakLabButton({ it, small = false }: { it: Item; small?: boolean }) {
+  return (
+    <button class={small ? 'tool' : 'btn ghost'} onClick={e => { e.stopPropagation(); tap(); openLab(it); }}>
+      <Icon name="wave" size={small ? 16 : 18} />{small ? 'Practise' : 'Compare'}
+    </button>
   );
 }

@@ -12,13 +12,13 @@ spot:
   - {id: w-gizzard, lvl: avoid, th: กึ๋น, rom: gǔen, en: Gizzard}
   - {id: w-mixed, lvl: care, th: รวม, rom: ruam, en: '"Mixed"', note: In noodle shops this usually means meat plus offal.}
   - {id: w-feet, lvl: care, th: ตีน, rom: teen, en: Feet, note: ตีนไก่ is chicken feet.}
-  - {id: w-tendon, lvl: care, th: เอ็น, rom: en, en: Tendon, note: Chewy, common in beef noodles.}
+  - {id: w-tendon, lvl: care, th: เอ็น, rom: en, en: Tendon, note: "Chewy, common in beef noodles."}
   - {id: w-raw, lvl: care, th: ดิบ, rom: dìp, en: Raw, note: Raw meat is the usual cause of a bad stomach.}
-  - {id: w-plaa-raa, lvl: care, th: ปลาร้า, rom: plaa-ráa, en: Fermented fish, note: Strong, and hard on new stomachs.}
+  - {id: w-plaa-raa, lvl: care, th: ปลาร้า, rom: plaa-ráa, en: Fermented fish, note: "Strong, and hard on new stomachs."}
 basil: {id: w-basil, lvl: ok, th: กะเพรา, rom: gà-prao, en: Holy basil}
 dishes:
   - {id: d-guay-jap, lvl: avoid, th: ก๋วยจั๊บ, rom: gǔai-jáp, en: Rolled noodles in pepper broth, note: Comes with intestines and liver.}
-  - {id: d-tom-lueat, lvl: avoid, th: ต้มเลือดหมู, rom: tôm lûeat mǔu, en: Pork blood soup, note: Blood cubes, liver and intestines.}
+  - {id: d-tom-lueat, lvl: avoid, th: ต้มเลือดหมู, rom: tôm lûeat mǔu, en: Pork blood soup, note: "Blood cubes, liver and intestines."}
   - {id: d-khao-tom-kn, lvl: avoid, th: ข้าวต้มเครื่องใน, rom: kâao-tôm krûeang-nai, en: Rice soup with offal}
   - {id: d-sai-yang, lvl: avoid, th: ไส้ย่าง, rom: sâi yâang, en: Grilled intestines, note: Street skewers that look like sausage.}
   - {id: d-boat, lvl: care, th: ก๋วยเตี๋ยวเรือ, rom: gǔai-tǐao ruea, en: Boat noodles, note: The dark broth has blood in it. Liver is often added.}
@@ -27,13 +27,13 @@ dishes:
   - {id: d-palo, lvl: care, th: พะโล้, rom: pá-ló, en: Five-spice pork stew, note: Some stalls add intestines.}
   - {id: d-larb, lvl: care, th: ลาบ, rom: lâap, en: Minced meat salad, note: Usually fine in Bangkok style. Northern versions can be raw or mixed with blood.}
 northern:
-  - {id: d-khao-soi, lvl: ok, th: ข้าวซอย, rom: kâao-soi, en: Curry noodle soup, note: Chiang Mai's dish. Chicken or beef, no offal.}
-  - {id: d-sai-ua, lvl: ok, th: ไส้อั่ว, rom: sâi-ùa, en: Northern herb sausage, note: Fine, despite the ไส้ in the name.}
+  - {id: d-khao-soi, lvl: ok, th: ข้าวซอย, rom: kâao-soi, en: Curry noodle soup, note: "Chiang Mai's dish. Chicken or beef, no offal."}
+  - {id: d-sai-ua, lvl: ok, th: ไส้อั่ว, rom: sâi-ùa, en: Northern herb sausage, note: "Fine, despite the ไส้ in the name."}
   - {id: d-hang-le, lvl: ok, th: แกงฮังเล, rom: gaeng hang-le, en: Pork belly curry (Burmese style)}
   - {id: d-prik-num, lvl: ok, th: น้ำพริกหนุ่ม, rom: náam-prík nùm, en: Roasted green chilli dip}
   - {id: d-kaep-mu, lvl: ok, th: แคบหมู, rom: kâep mǔu, en: Crispy pork rind}
   - {id: d-ngiao, lvl: care, th: น้ำเงี้ยว, rom: náam-ngíao, en: Northern tomato noodle soup, note: Often has blood cubes. Ask for it without (mâi ao lûeat).}
-  - {id: d-larb-mueang, lvl: care, th: ลาบเมือง, rom: lâap mueang, en: Northern-style larb, note: Often raw, with blood and offal mixed in.}
+  - {id: d-larb-mueang, lvl: care, th: ลาบเมือง, rom: lâap mueang, en: Northern-style larb, note: "Often raw, with blood and offal mixed in."}
   - {id: d-gaeng-om, lvl: care, th: แกงอ่อม, rom: gaeng òm, en: Northern herb curry, note: Often made with offal.}
   - {id: d-jin-som, lvl: care, th: จิ๊นส้ม, rom: jín sôm, en: Fermented raw pork, note: Not cooked. Risky for new stomachs.}
   - {id: d-larb-dip, lvl: avoid, th: ลาบดิบ, rom: lâap dìp, en: Raw larb, note: Raw meat with blood.}

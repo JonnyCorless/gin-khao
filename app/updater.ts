@@ -15,6 +15,7 @@ interface UpdaterPlugin {
   info(): Promise<NativeInfo>;
   bootOk(): Promise<void>;
   install(o: { url: string }): Promise<void>;
+  setWidget(o: { items: string }): Promise<void>;
   addListener(event: 'apkStatus', cb: (s: { message: string; busy: boolean }) => void): Promise<PluginListenerHandle>;
 }
 export const Updater = registerPlugin<UpdaterPlugin>('Updater');

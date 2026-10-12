@@ -3,7 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { KeepAwake } from '@capacitor-community/keep-awake';
-import { play } from '../audio';
+import { hasAudio, play } from '../audio';
 import { item } from '../data';
 import type { Item } from '../types';
 import { Icon } from './icons';
@@ -40,7 +40,7 @@ export function ShowOverlay() {
   useEffect(() => {
     isOpen = !!it;
     if (!it) return;
-    if (it.id !== 'my-address') play(it.id);
+    if (it.id !== 'my-address' && hasAudio(it.id)) play(it.id);
     if (Capacitor.isNativePlatform()) KeepAwake.keepAwake().catch(() => {});
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIt(null); };
     window.addEventListener('keydown', onKey);
@@ -51,6 +51,7 @@ export function ShowOverlay() {
   }, [it]);
   if (!it) return null;
   const address = it.id === 'my-address';
+  const sound = !address && hasAudio(it.id);
   return (
     <div class="overlay" role="dialog" aria-modal="true" aria-label="Show this phrase">
       <button class="ov-close" onClick={() => setIt(null)} aria-label="Close"><Icon name="close" size={26} /></button>
@@ -60,8 +61,8 @@ export function ShowOverlay() {
         <div class="ov-en">{it.en}</div>
       </div>
       <div class="ov-foot">
-        {!address && <button class="btn primary lg" onClick={() => play(it.id)}><Icon name="play" size={18} />Play</button>}
-        {!address && <button class="link-btn" onClick={() => openLink(reportUrl(it))}><Icon name="flag" size={14} />Report this phrase</button>}
+        {sound && <button class="btn primary lg" onClick={() => play(it.id)}><Icon name="play" size={18} />Play</button>}
+        {!address && !it.id.startsWith('mine-') && <button class="link-btn" onClick={() => openLink(reportUrl(it))}><Icon name="flag" size={14} />Report this phrase</button>}
       </div>
     </div>
   );

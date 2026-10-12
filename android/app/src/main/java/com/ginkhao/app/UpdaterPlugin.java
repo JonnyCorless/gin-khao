@@ -86,6 +86,15 @@ public class UpdaterPlugin extends Plugin {
         call.resolve();
     }
 
+    /** The phrase-of-the-day widget: a JSON list of {date, id, th, rom, en} for the coming days. */
+    @PluginMethod
+    public void setWidget(PluginCall call) {
+        String items = call.getString("items", "[]");
+        prefs().edit().putString(PhraseWidget.KEY, items).apply();
+        PhraseWidget.refresh(getContext());
+        call.resolve();
+    }
+
     @PluginMethod
     public void install(PluginCall call) {
         final String url = call.getString("url");

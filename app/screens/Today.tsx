@@ -1,7 +1,8 @@
 import { useState } from 'preact/hooks';
-import { C, phrase } from '../data';
-import { PLACEMENT, randomPrice, shuffle, STEPS, todaysSession, type Ex } from '../lesson';
+import { C, item, phrase } from '../data';
+import { isFinalLearnQuiz, learnExercises, PLACEMENT, quizFor, randomPrice, shuffle, STEPS, todaysSession } from '../lesson';
 import { scheduleReminders } from '../reminders';
+import { updateWidget } from '../widget';
 import { grade, isLearned, learnedCount, dueIds } from '../srs';
 import { finishScene, scenes } from '../scenes';
 import { currentStreak, dayLog, finishDay, logDay, noteMiss, today, trickyIds, update, useProgress, type SessionState } from '../store';
@@ -11,6 +12,10 @@ import { HeartsBar, Lesson, type Answer } from '../ui/Lesson';
 import { MissionCard, MissionsView } from '../ui/Missions';
 import { RegularsRow, RegularView } from '../ui/Regulars';
 import { ScenePlayer } from '../ui/Scene';
+import { ChapterView, StoryCard, StoryView } from '../ui/Story';
+import type { Phrase } from '../types';
+
+const NEWS = 'phase3';
 
 type Run =
   | { kind: 'session' }
@@ -18,18 +23,16 @@ type Run =
   | { kind: 'practice'; title: string; exs: string[] }
   | { kind: 'regular'; who: string }
   | { kind: 'scene'; scene: Scene; back: string }
-  | { kind: 'missions' };
+  | { kind: 'missions' }
+  | { kind: 'story' }
+  | { kind: 'chapter'; index: number }
+  | { kind: 'chapter-learn'; index: number; exs: string[] }
+  | { kind: 'chapter-scene'; index: number; scene: Scene };
 
 function greeting() {
   const h = new Date().getHours();
   return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
 }
-
-/** The last quiz for a new phrase decides how well it went. */
-const isFinalLearnQuiz = (ex: Ex) => {
-  const p = phrase(ex.id);
-  return !!p && ((p.kind === 'say' && ex.type === 'recall') || (p.kind !== 'say' && ex.type === 'meaning'));
-};
 
 export function Today() {
   const p = useProgress();
@@ -41,7 +44,7 @@ export function Today() {
   const learned = learnedCount();
   const streak = currentStreak(p);
   const due = dueIds(99).length;
-  const tricky = trickyIds(p).filter(id => !!phrase(id));
+  const tricky = trickyIds(p).filter(id => !!item(id));
 
   // Every answer feeds the Tricky ones list; only first attempts move the review schedule.
   const onSessionAnswer = (stepKey: string) => ({ ex, ok, first }: Answer) => {
@@ -52,6 +55,7 @@ export function Today() {
     if (stepKey === 'review') { grade(ex.id, ok ? 'good' : 'again'); logDay(d => { d.reviews++; }); }
     if (stepKey === 'learn' && isFinalLearnQuiz(ex)) { grade(ex.id, ok ? 'good' : 'again'); logDay(d => { d.learned++; }); }
     if (stepKey === 'listen' && isLearned(ex.id)) grade(ex.id, ok ? 'good' : 'again');
+    if (stepKey === 'read' && ex.type === 'read') grade(ex.id, ok ? 'good' : 'again');
   };
 
   const onPracticeAnswer = ({ ex, ok, first }: Answer) => {
@@ -66,6 +70,7 @@ export function Today() {
     if (last) {
       finishDay();
       scheduleReminders();
+      updateWidget();
       setRun(null);
       setCelebrate(true);
     }
@@ -107,6 +112,34 @@ export function Today() {
     return <RegularView who={run.who} onBack={() => setRun(null)} onPlay={sc => setRun({ kind: 'scene', scene: sc, back: run.who })} />;
   }
   if (run?.kind === 'missions') return <MissionsView onBack={() => setRun(null)} />;
+
+  if (run?.kind === 'story') return <StoryView onBack={() => setRun(null)} onOpen={index => setRun({ kind: 'chapter', index })} />;
+  if (run?.kind === 'chapter') {
+    return (
+      <ChapterView
+        key={run.index}
+        index={run.index}
+        onBack={() => setRun({ kind: 'story' })}
+        onLearn={ids => {
+          const ps = ids.map(phrase).filter((x): x is Phrase => !!x);
+          const fresh = ps.filter(x => !isLearned(x.id));
+          // already learned: a quick practice round instead of the full teaching sequence
+          const exs = fresh.length ? learnExercises(fresh) : shuffle(ps).map(x => quizFor(x.id)!);
+          setRun({ kind: 'chapter-learn', index: run.index, exs });
+        }}
+        onScene={scene => setRun({ kind: 'chapter-scene', index: run.index, scene })}
+        onNext={index => setRun({ kind: 'chapter', index })}
+      />
+    );
+  }
+  if (run?.kind === 'chapter-learn') {
+    const back = () => setRun({ kind: 'chapter', index: run.index });
+    return <Lesson title="Learn the lines" exs={run.exs} onAnswer={onSessionAnswer('learn')} onDone={back} onExit={back} />;
+  }
+  if (run?.kind === 'chapter-scene') {
+    const back = () => setRun({ kind: 'chapter', index: run.index });
+    return <ScenePlayer key={run.scene.id} scene={run.scene} onDone={() => { finishScene(run.scene.id); back(); }} onExit={back} />;
+  }
 
   if (run?.kind === 'placement') {
     return (
@@ -160,6 +193,22 @@ export function Today() {
         </section>
       )}
 
+      {p.placementDone && p.newsSeen !== NEWS && (
+        <section class="card news">
+          <div class="news-head">
+            <span class="eyebrow">New in Gin Khao</span>
+            <button class="icon-btn" onClick={() => update(x => { x.newsSeen = NEWS; })} aria-label="Dismiss"><Icon name="close" size={18} /></button>
+          </div>
+          <ul class="news-list">
+            <li><Icon name="story" size={18} /><span><b>Story.</b> My first month in Chiang Mai, 14 chapters with your regulars. Below.</span></li>
+            <li><Icon name="read" size={18} /><span><b>Reading.</b> Signs, menu words, then the letters. Browse › Read.</span></li>
+            <li><Icon name="ear" size={18} /><span><b>Ears.</b> Sound-alikes (gài or kài?) and kam mueang, the Northern dialect. Browse › Ears.</span></li>
+            <li><Icon name="wave" size={18} /><span><b>Speaking lab.</b> Tap Practise on any phrase: record yourself, compare pitch lines, or shadow.</span></li>
+            <li><Icon name="plus" size={18} /><span><b>My phrases.</b> Save what locals teach you, in their voice. Show tab.</span></li>
+          </ul>
+        </section>
+      )}
+
       {!p.placementDone && (
         <section class="card placement">
           <h2>Where are you starting from?</h2>
@@ -183,7 +232,8 @@ export function Today() {
           {(steps.length ? steps : (['review', 'learn', 'listen', 'prices'].map(key => ({ key, ids: [] as string[] })))).map((st, k) => {
             const info = STEPS[st.key];
             const state = done || (session && k < session.step) ? 'done' : session && k === session.step ? 'now' : 'later';
-            const count = st.ids.length ? (st.key === 'learn' ? `${st.ids.filter(x => x.startsWith('intro:')).length} phrases` : `${st.ids.length} items`) : '';
+            const intros = st.ids.filter(x => x.startsWith('intro:')).length;
+            const count = !st.ids.length ? '' : st.key === 'learn' ? `${intros} phrases` : st.key === 'read' ? `${intros} new to read` : `${st.ids.length} items`;
             return (
               <li class={`step ${state}`} key={st.key}>
                 <span class="step-dot">{state === 'done' ? <Icon name="check" size={14} /> : <Icon name={info.icon} size={14} />}</span>
@@ -199,6 +249,8 @@ export function Today() {
         )}
       </section>
 
+      <StoryCard onOpen={index => setRun(index === null ? { kind: 'story' } : { kind: 'chapter', index })} />
+
       <MissionCard onAll={() => setRun({ kind: 'missions' })} />
 
       <RegularsRow onOpen={who => setRun({ kind: 'regular', who })} />
@@ -212,13 +264,18 @@ export function Today() {
         <h3>Extra practice</h3>
         <div class="practice">
           {tricky.length > 0 && (
-            <button class="tile-btn tricky" onClick={() => setRun({ kind: 'practice', title: 'Tricky ones', exs: shuffle(tricky).map(id => `${phrase(id)?.kind === 'say' ? 'recall' : 'meaning'}:${id}`) })}>
+            <button class="tile-btn tricky" onClick={() => setRun({ kind: 'practice', title: 'Tricky ones', exs: shuffle(tricky).map(id => (phrase(id) ? `${phrase(id)!.kind === 'say' ? 'recall' : 'meaning'}:${id}` : quizFor(id)!)) })}>
               <Icon name="flag" /><b>Tricky ones</b><span>{tricky.length} you've missed</span>
             </button>
           )}
           <button class="tile-btn" onClick={() => setRun({ kind: 'practice', title: 'Listening drill', exs: shuffle(C().phrases.filter(x => x.kind === 'hear')).slice(0, 8).map(x => `listen:${x.id}`) })}>
             <Icon name="ear" /><b>Listening drill</b><span>What staff say</span>
           </button>
+          {C().phrases.some(x => x.situation === 'lanna') && (
+            <button class="tile-btn" onClick={() => setRun({ kind: 'practice', title: 'Northern ear', exs: shuffle(C().phrases.filter(x => x.situation === 'lanna' && x.kind === 'hear')).slice(0, 8).map(x => `listen:${x.id}`) })}>
+              <Icon name="mountain" /><b>Northern ear</b><span>Kam mueang</span>
+            </button>
+          )}
           <button class="tile-btn" onClick={() => setRun({ kind: 'practice', title: 'Price drill', exs: Array.from({ length: 8 }, () => `price:${randomPrice()}`) })}>
             <Icon name="coins" /><b>Price drill</b><span>Catch the number</span>
           </button>
