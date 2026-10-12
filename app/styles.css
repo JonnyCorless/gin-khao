@@ -1,0 +1,57 @@
+/* Lanna calm: textile indigo ink, Doi Suthep mist, teak, a touch of temple gold. */
+:root {
+  --mist: #F2F4F3;
+  --card: #FFFFFF;
+  --ink: #1C2340;
+  --indigo: #2E3A87;
+  --indigo-ink: #FFFFFF;
+  --muted: #5E6672;
+  --line: #DCE1E0;
+  --teak: #8A5A3B;
+  --gold: #C9A227;
+  --good: #2F7A55;
+  --bad: #B23A2E;
+  --f-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-thai: "Noto Sans Thai Looped", "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mist: #12151F; --card: #1B2030; --ink: #E7E9F2; --indigo: #9AA6F2; --indigo-ink: #12151F;
+    --muted: #9AA0AE; --line: #2A3042; --teak: #D19A72; --gold: #E2C25A; --good: #7FD0A6; --bad: #FF8F82;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--mist); color: var(--ink); font-family: var(--f-ui); font-size: 16px; line-height: 1.5; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.wrap { max-width: 640px; margin: 0 auto; padding-inline: 18px; padding-block: calc(env(safe-area-inset-top, 0px) + 28px) calc(env(safe-area-inset-bottom, 0px) + 40px); display: grid; gap: 20px; }
+.hero { display: grid; gap: 2px; }
+.mark { font-family: var(--f-thai); font-size: 2.6rem; font-weight: 600; color: var(--indigo); line-height: 1.3; }
+h1 { margin: 0; font-size: 1.1rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teak); }
+h2 { margin: 0; font-size: 1.2rem; }
+.muted { color: var(--muted); }
+.mono { font-family: ui-monospace, monospace; font-size: 0.78rem; }
+.eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teak); }
+.status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.92rem; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+.dot.synced { background: var(--good); }
+.dot.cached, .dot.bundled { background: var(--gold); }
+.list { display: grid; gap: 10px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.card-text { min-width: 0; }
+.th { font-family: var(--f-thai); font-size: 1.5rem; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.rom { color: var(--indigo); font-weight: 600; }
+.en { color: var(--muted); }
+.card-acts { display: grid; justify-items: center; gap: 6px; }
+.play { width: 50px; height: 50px; border-radius: 50%; border: 0; background: var(--indigo); color: var(--indigo-ink); display: grid; place-items: center; transition: transform .15s, background-color .15s; }
+.play.on { background: var(--gold); color: #1C1600; transform: scale(1.06); }
+.slow { border: 0; background: transparent; color: var(--muted); font-size: 0.8rem; padding: 2px 6px; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 10px; justify-items: start; }
+.panel p { margin: 0; }
+.primary { border: 0; border-radius: 999px; background: var(--indigo); color: var(--indigo-ink); padding: 12px 22px; font-weight: 700; }
+.primary:disabled { opacity: 0.55; cursor: default; }
+.good { color: var(--good); font-family: var(--f-thai); font-size: 1.2rem; }
+.bad { color: var(--bad); }
+@media (prefers-reduced-motion: reduce) { .play { transition: none; } }

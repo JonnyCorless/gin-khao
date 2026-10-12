@@ -1,0 +1,15 @@
+node_modules/
+dist/
+site/
+public/bundled/
+*.keystore
+*.jks
+secrets/
+.DS_Store
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/src/main/assets/public/
+android/capacitor-cordova-android-plugins/
+__pycache__/

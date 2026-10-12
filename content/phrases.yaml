@@ -1,0 +1,33 @@
+# Phase 0 seed content. Each phrase becomes audio/<id>.mp3.
+# Romanisation: simple spelling (no g/k/kh split), accent marks show the tone direction.
+# voice: m = male (your lines), f = female (staff / regulars)
+- id: hello
+  th: สวัสดีครับ
+  rom: sà-wàt-dee káp
+  en: Hello
+  voice: m
+- id: little-thai
+  th: พูดไทยได้นิดหน่อยครับ
+  rom: pûut Thai dâi nít nòi káp
+  en: I speak a little Thai
+  voice: m
+- id: take-this
+  th: เอาอันนี้ครับ
+  rom: ao an níi káp
+  en: I'll take this one
+  voice: m
+- id: how-much
+  th: อันนี้เท่าไหร่ครับ
+  rom: an níi tâo-rài káp
+  en: How much is this?
+  voice: m
+- id: want-bag
+  th: รับถุงไหมคะ
+  rom: ráp tǔng mǎi ká
+  en: Do you want a bag?
+  voice: f
+- id: petrol-95
+  th: เก้าห้า เต็มถังครับ
+  rom: gâo hâa, tem tǎng káp
+  en: 95, full tank
+  voice: m

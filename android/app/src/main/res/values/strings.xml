@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gin Khao</string>
+    <string name="title_activity_main">Gin Khao</string>
+    <string name="package_name">com.ginkhao.app</string>
+    <string name="custom_url_scheme">com.ginkhao.app</string>
+</resources>
