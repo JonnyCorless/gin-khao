@@ -46,11 +46,13 @@ jobs:
 
       - name: Build signed APK
         env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          # Strip any Windows line endings/whitespace that came with the secret.
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '\r\n\t ' | base64 -d > "$RUNNER_TEMP/release.keystore"
           export KEYSTORE_PATH="$RUNNER_TEMP/release.keystore"
           cd android
           chmod +x gradlew
