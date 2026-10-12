@@ -20,8 +20,9 @@ interface UpdaterPlugin {
 export const Updater = registerPlugin<UpdaterPlugin>('Updater');
 export const native = Capacitor.isNativePlatform();
 
+// The query string skips GitHub Pages' 10-minute cache, so a push shows up straight away.
 const getJson = async <T>(url: string): Promise<T> => {
-  const r = await fetch(url, { cache: 'no-store' });
+  const r = await fetch(`${url}?t=${Date.now()}`, { cache: 'no-store' });
   if (!r.ok) throw new Error(`${r.status} for ${url}`);
   return r.json();
 };

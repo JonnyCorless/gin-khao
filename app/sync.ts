@@ -38,7 +38,8 @@ export async function blobToBase64(blob: Blob): Promise<string> {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const r = await fetch(url, { cache: 'no-store' });
+  // The query string skips GitHub Pages' 10-minute cache for the small index files.
+  const r = await fetch(url.startsWith('http') ? `${url}?t=${Date.now()}` : url, { cache: 'no-store' });
   if (!r.ok) throw new Error(`${r.status} for ${url}`);
   return r.json();
 }
