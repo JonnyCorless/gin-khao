@@ -1,6 +1,8 @@
 # One pipeline, LifeRPG-style updates:
-#   push to main  -> lessons + audio + web code published; the app downloads them on open
-#   push a v* tag -> also builds a signed APK; the app offers it in Settings > App updates
+#   push to main  -> lessons, audio and web code published; the app downloads them on open
+#   push a v* tag -> builds a signed APK release, then re-runs the main publish so the
+#                    app offers it in Settings > App updates
+# Only main deploys the site, so a tag build can never be overwritten by an older feed.
 # Everything is served from https://jonnycorless.github.io/gin-khao/
 name: Publish
 
@@ -14,20 +16,14 @@ permissions:
   contents: write
   pages: write
   id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
+  actions: write
 
 jobs:
-  publish:
+  apk:
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     env:
       GH_TOKEN: ${{ github.token }}
-      IS_TAG: ${{ github.ref_type == 'tag' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -37,35 +33,28 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
 
       - name: Versions
         run: |
+          NAME="${GITHUB_REF_NAME#v}"
+          IFS=. read -r MA MI PA <<< "$NAME"
+          echo "VERSION_NAME=$NAME" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$((MA * 10000 + MI * 100 + PA))" >> "$GITHUB_ENV"
+          echo "VITE_APP_VERSION=$NAME" >> "$GITHUB_ENV"
           echo "VITE_WEB_BUILD=${{ github.run_number }}" >> "$GITHUB_ENV"
-          if [[ "$IS_TAG" == "true" ]]; then
-            NAME="${GITHUB_REF_NAME#v}"
-            IFS=. read -r MA MI PA <<< "$NAME"
-            echo "VERSION_NAME=$NAME" >> "$GITHUB_ENV"
-            echo "VERSION_CODE=$((MA * 10000 + MI * 100 + PA))" >> "$GITHUB_ENV"
-            echo "VITE_APP_VERSION=$NAME" >> "$GITHUB_ENV"
-          fi
 
-      # Audio is made on the PC (Microsoft blocks edge-tts from GitHub's servers); this only checks it's all there.
       - name: Content
         run: |
           pip install pyyaml
           python tools/build_content.py --check
-
       - run: npm ci
       - run: npm run build
 
-      # ---- APK (tags only) ----
-      - uses: actions/setup-java@v5
-        if: env.IS_TAG == 'true'
-        with:
-          distribution: temurin
-          java-version: '21'
       - name: Build signed APK
-        if: env.IS_TAG == 'true'
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -79,13 +68,48 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
           cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/gin-khao-$VERSION_NAME.apk"
+
+      # Notes shown in the app: an annotated tag's message (git tag -a v0.1.2 -m "..."), else the commit subject.
       - name: GitHub release
-        if: env.IS_TAG == 'true'
         run: |
-          NOTES="$(git log -1 --format=%s)"
+          git fetch --force origin "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
+          NOTES="$(git for-each-ref "refs/tags/$GITHUB_REF_NAME" --format='%(contents)' | sed '/-----BEGIN/,$d')"
+          [[ -n "${NOTES// }" ]] || NOTES="$(git log -1 --format=%s)"
           gh release create "$GITHUB_REF_NAME" "gin-khao-$VERSION_NAME.apk" --title "$GITHUB_REF_NAME" --notes "$NOTES"
 
-      # ---- Assemble the site ----
+      - name: Re-publish the site with this APK
+        run: gh workflow run publish.yml --ref main
+
+  site:
+    if: github.ref_type != 'tag'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VITE_WEB_BUILD: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      # Audio is made on the PC (Microsoft blocks edge-tts from GitHub's servers); this only checks it's all there.
+      - name: Content
+        run: |
+          pip install pyyaml
+          python tools/build_content.py --check
+      - run: npm ci
+      - run: npm run build
+
       - name: Web update bundle
         run: |
           mkdir -p site/web
@@ -94,7 +118,7 @@ jobs:
       - name: Latest APK for Settings > App updates
         run: |
           mkdir -p site/apk
-          TAG="$(gh release list --limit 1 --json tagName --jq '.[0].tagName' || true)"
+          TAG="$(gh release list --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName' || true)"
           if [[ -n "$TAG" ]]; then
             NAME="${TAG#v}"
             IFS=. read -r MA MI PA <<< "$NAME"

@@ -89,8 +89,11 @@ function UpdateBanner({ build }: { build: number }) {
 function AppUpdates({ info, apk, contentVersion, check, checking, error }: {
   info: NativeInfo | null; apk: ApkLatest | null; contentVersion?: string; check: () => void; checking: boolean; error: string;
 }) {
-  const [status, setStatus] = useState(info?.status ?? '');
+  const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (info?.status) setStatus(info.status);
+  }, [info]);
   useEffect(() => {
     if (!native) return;
     const h = Updater.addListener('apkStatus', s => { setStatus(s.message); setBusy(s.busy); });
@@ -100,6 +103,7 @@ function AppUpdates({ info, apk, contentVersion, check, checking, error }: {
     <section class="panel">
       <div class="eyebrow">Settings</div>
       <h2>App updates</h2>
+      {info && !apk && !checking && !error && <p class="muted">The app is up to date.</p>}
       {apk && (
         <div class="apk-new">
           <b>New app version {apk.name}</b>
