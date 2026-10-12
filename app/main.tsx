@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { Capacitor } from '@capacitor/core';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { loadContent, type Loaded, type Phrase } from './sync';
-import { APP_VERSION } from './config';
+import { APP_VERSION, WEB_BUILD } from './config';
+import { applyWeb, checkApk, confirmBoot, installApk, native, nativeInfo, prepareWeb, Updater, type ApkLatest, type NativeInfo } from './updater';
 import './styles.css';
 
 function PhraseCard({ p, url }: { p: Phrase; url: string }) {
@@ -70,17 +71,92 @@ function MicTest() {
   );
 }
 
+function UpdateBanner({ build }: { build: number }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <section class="banner">
+      <div>
+        <b>Update ready</b>
+        <div class="muted">New version of Gin Khao downloaded (build {build}).</div>
+      </div>
+      <button class="primary" disabled={busy} onClick={() => { setBusy(true); applyWeb(build).catch(() => setBusy(false)); }}>
+        {busy ? 'Restarting…' : 'Restart now'}
+      </button>
+    </section>
+  );
+}
+
+function AppUpdates({ info, apk, contentVersion, check, checking, error }: {
+  info: NativeInfo | null; apk: ApkLatest | null; contentVersion?: string; check: () => void; checking: boolean; error: string;
+}) {
+  const [status, setStatus] = useState(info?.status ?? '');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!native) return;
+    const h = Updater.addListener('apkStatus', s => { setStatus(s.message); setBusy(s.busy); });
+    return () => { h.then(x => x.remove()); };
+  }, []);
+  return (
+    <section class="panel">
+      <div class="eyebrow">Settings</div>
+      <h2>App updates</h2>
+      {apk && (
+        <div class="apk-new">
+          <b>New app version {apk.name}</b>
+          {apk.notes && <div class="muted">{apk.notes}</div>}
+          <button class="primary" disabled={busy} onClick={() => { setBusy(true); installApk(apk).catch(e => { setStatus(String(e)); setBusy(false); }); }}>
+            {busy ? 'Working…' : 'Update app'}
+          </button>
+        </div>
+      )}
+      {status && <p class="muted">{status}</p>}
+      {info?.webReverted && <p class="bad">The last update didn't start, so Gin Khao went back to the built-in version.</p>}
+      {error && <p class="bad">Couldn't check for updates: {error}</p>}
+      <dl class="versions">
+        <dt>App</dt><dd>{info ? `${info.versionName} (${info.versionCode})` : APP_VERSION}</dd>
+        <dt>Web build</dt><dd>{WEB_BUILD || 'dev'}</dd>
+        <dt>Content</dt><dd>{contentVersion ?? '…'}</dd>
+      </dl>
+      <button class="ghost" onClick={check} disabled={checking}>{checking ? 'Checking…' : 'Check now'}</button>
+    </section>
+  );
+}
+
 function App() {
   const [data, setData] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
+  const [info, setInfo] = useState<NativeInfo | null>(null);
+  const [apk, setApk] = useState<ApkLatest | null>(null);
+  const [webReady, setWebReady] = useState<number | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [updErr, setUpdErr] = useState('');
+
+  const checkUpdates = async () => {
+    const ni = await nativeInfo();
+    setInfo(ni);
+    if (!ni) return;
+    setChecking(true);
+    setUpdErr('');
+    try {
+      setApk(await checkApk(ni));
+      setWebReady(await prepareWeb(ni));
+    } catch (e) {
+      setUpdErr(e instanceof Error ? e.message : String(e));
+    }
+    setChecking(false);
+  };
+
   useEffect(() => {
+    confirmBoot();
     loadContent().then(setData).catch(e => setFailed(String(e)));
+    checkUpdates();
   }, []);
 
   const sourceLabel = { synced: 'Up to date from GitHub', cached: 'Offline: using saved content', bundled: 'Offline: using built-in content' };
 
   return (
     <main class="wrap">
+      {webReady && <UpdateBanner build={webReady} />}
       <header class="hero">
         <div class="mark" lang="th">กินข้าว</div>
         <h1>Gin Khao</h1>
@@ -104,6 +180,8 @@ function App() {
       </section>
 
       <MicTest />
+
+      <AppUpdates info={info} apk={apk} contentVersion={data?.version} check={checkUpdates} checking={checking} error={updErr} />
     </main>
   );
 }

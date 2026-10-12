@@ -1,4 +1,4 @@
-# Gin Khao (กินข้าว) — build plan
+﻿# Gin Khao (กินข้าว) — build plan
 
 A calm, playful Android app for getting through daily life in Chiang Mai in Thai.
 You speak standard Central Thai, so it works in Bangkok too, and you learn to
@@ -25,7 +25,7 @@ Status: **plan v2, awaiting sign-off**. Nothing is built until it's approved.
 | Topic | Decision |
 |---|---|
 | Delivery | Hybrid: install the APK once; content and audio download from GitHub on open |
-| App updates | Signed APK on GitHub Releases, updated with one tap through **Obtainium** |
+| App updates | Same as LifeRPG: web code updates itself on open (asks to restart, falls back to the built-in copy if a build fails twice); native changes arrive as a new APK offered in **Settings › App updates** and installed in-app. No Obtainium |
 | Content releases | Straight to live on push |
 | Repo | Public |
 | Budget | Free only |
@@ -118,8 +118,7 @@ gin-khao/ (public GitHub repo)
 ├── audio/        Generated .mp3 per phrase ID
 ├── tools/        Audio generator (Python, edge-tts), manifest builder, content checker
 └── .github/workflows/
-    ├── content.yml   push to content/ → check content → generate missing audio → build manifest → publish to GitHub Pages
-    └── release.yml   version tag → build signed APK → GitHub Release → Obtainium updates the phone
+    (publish.yml: one pipeline. Push → content, audio and web code go live. v* tag → also a signed APK, offered in Settings › App updates)
 ```
 
 - **Capacitor** wraps the web app in a real APK, with plugins for mic, speech recognition, notifications, files, sharing and app shortcuts.
@@ -138,7 +137,7 @@ Clean and calm, rooted in Lanna: textile indigo, misty Doi Suthep green-grey, te
 ## 5. Phases
 
 **Phase 0: pipeline proof (1 session)**
-Install Node, GitHub CLI and Python. Create the repo **outside OneDrive** (see 6). Make the signing key and store its backup. Set up both Actions. Install Obtainium. Test edge-tts in Actions. Result: a "hello" APK on your Oppo showing a phrase pushed from git, plus a check that Thai speech recognition works on the phone.
+Install Node, GitHub CLI and Python. Create the repo **outside OneDrive** (see 6). Make the signing key and store its backup. Set up the Publish pipeline and LifeRPG-style in-app updates. Test edge-tts in Actions. Result: a "hello" APK on your Oppo showing a phrase pushed from git, plus a check that Thai speech recognition works on the phone.
 
 **Phase 1: useful every day**
 Design system and shell · placement check · Browse, phrase cards, audio, Show · Quick Show cards and shortcuts · **Shops & 7-Eleven fully polished**, then food and stalls · Food guard, menu checker, preference phrases · price trainer · smart review and streak · Today (review + new) · reminders · backup · Report this phrase. Content: about 250 phrases.

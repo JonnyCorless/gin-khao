@@ -52,6 +52,13 @@ h2 { margin: 0; font-size: 1.2rem; }
 .panel p { margin: 0; }
 .primary { border: 0; border-radius: 999px; background: var(--indigo); color: var(--indigo-ink); padding: 12px 22px; font-weight: 700; }
 .primary:disabled { opacity: 0.55; cursor: default; }
+.ghost { border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); padding: 10px 20px; }
+.ghost:disabled { opacity: 0.55; cursor: default; }
+.banner { background: var(--card); border: 2px solid var(--gold); border-radius: 18px; padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.apk-new { display: grid; gap: 8px; justify-items: start; padding: 12px; border-radius: 14px; background: var(--mist); width: 100%; }
+.versions { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; margin: 0; font-size: 0.9rem; }
+.versions dt { color: var(--muted); }
+.versions dd { margin: 0; font-family: ui-monospace, monospace; font-size: 0.82rem; overflow-wrap: anywhere; }
 .good { color: var(--good); font-family: var(--f-thai); font-size: 1.2rem; }
 .bad { color: var(--bad); }
 @media (prefers-reduced-motion: reduce) { .play { transition: none; } }

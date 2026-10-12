@@ -1,0 +1,123 @@
+# One pipeline, LifeRPG-style updates:
+#   push to main  -> lessons + audio + web code published; the app downloads them on open
+#   push a v* tag -> also builds a signed APK; the app offers it in Settings > App updates
+# Everything is served from https://jonnycorless.github.io/gin-khao/
+name: Publish
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      IS_TAG: ${{ github.ref_type == 'tag' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Versions
+        run: |
+          echo "VITE_WEB_BUILD=${{ github.run_number }}" >> "$GITHUB_ENV"
+          if [[ "$IS_TAG" == "true" ]]; then
+            NAME="${GITHUB_REF_NAME#v}"
+            IFS=. read -r MA MI PA <<< "$NAME"
+            echo "VERSION_NAME=$NAME" >> "$GITHUB_ENV"
+            echo "VERSION_CODE=$((MA * 10000 + MI * 100 + PA))" >> "$GITHUB_ENV"
+            echo "VITE_APP_VERSION=$NAME" >> "$GITHUB_ENV"
+          fi
+
+      - name: Content (generates audio for new phrases)
+        run: |
+          pip install edge-tts pyyaml
+          python tools/build_content.py
+      - name: Save new audio back to the repo
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "gin-khao-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audio
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate audio [skip ci]"
+            git push
+          fi
+
+      - run: npm ci
+      - run: npm run build
+
+      # ---- APK (tags only) ----
+      - uses: actions/setup-java@v5
+        if: env.IS_TAG == 'true'
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Build signed APK
+        if: env.IS_TAG == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          npx cap sync android
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '\r\n\t ' | base64 -d > "$RUNNER_TEMP/release.keystore"
+          export KEYSTORE_PATH="$RUNNER_TEMP/release.keystore"
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/gin-khao-$VERSION_NAME.apk"
+      - name: GitHub release
+        if: env.IS_TAG == 'true'
+        run: |
+          NOTES="$(git log -1 --format=%s)"
+          gh release create "$GITHUB_REF_NAME" "gin-khao-$VERSION_NAME.apk" --title "$GITHUB_REF_NAME" --notes "$NOTES"
+
+      # ---- Assemble the site ----
+      - name: Web update bundle
+        run: |
+          mkdir -p site/web
+          rsync -a --exclude bundled dist/ site/web/
+          node tools/web_version.mjs site/web "$VITE_WEB_BUILD"
+      - name: Latest APK for Settings > App updates
+        run: |
+          mkdir -p site/apk
+          TAG="$(gh release list --limit 1 --json tagName --jq '.[0].tagName' || true)"
+          if [[ -n "$TAG" ]]; then
+            NAME="${TAG#v}"
+            IFS=. read -r MA MI PA <<< "$NAME"
+            gh release download "$TAG" --pattern '*.apk' --dir site/apk
+            FILE="$(cd site/apk && ls *.apk | head -1)"
+            NOTES="$(gh release view "$TAG" --json body --jq .body | head -c 300)"
+            jq -n --argjson code $((MA * 10000 + MI * 100 + PA)) --arg name "$NAME" --arg file "$FILE" --arg notes "$NOTES" \
+              '{code: $code, name: $name, file: $file, notes: $notes}' > site/apk/latest.json
+            cat site/apk/latest.json
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
