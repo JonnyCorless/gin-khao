@@ -421,6 +421,11 @@ textarea.note-in { min-height: 70px; font-family: var(--f-ui); font-size: 1rem; 
 .field .btn { justify-self: start; }
 .pcard.mine { border-style: dashed; }
 
+/* ---- background sync ---- */
+.sync-pill { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(70px + env(safe-area-inset-bottom, 0px)); z-index: 22; background: var(--ink); color: var(--mist); font-size: 0.82rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; display: flex; gap: 8px; align-items: center; box-shadow: var(--shadow); white-space: nowrap; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.3; } }
+
 /* ---- settings ---- */
 .settings-group { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 12px; justify-items: start; }
 .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; width: 100%; }

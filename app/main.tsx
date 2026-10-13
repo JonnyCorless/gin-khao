@@ -16,7 +16,7 @@ import { ShowTab } from './screens/ShowTab';
 import { Today } from './screens/Today';
 import { initMine } from './mine';
 import { flushSave, loadProgress } from './store';
-import { loadContent } from './sync';
+import { loadContent, syncInBackground, useSyncState } from './sync';
 import { Icon } from './ui/icons';
 import { closeShow, ShowOverlay } from './ui/ShowOverlay';
 import { closeLab, SpeakLab } from './ui/SpeakLab';
@@ -52,6 +52,17 @@ function Loading({ done, total, error }: { done: number; total: number; error: s
   );
 }
 
+/** A small note while new phrases and audio download in the background. */
+function SyncPill() {
+  const s = useSyncState();
+  if (!s.active || s.total < 3) return null;
+  return (
+    <div class="sync-pill" role="status">
+      <span class="sync-dot" />Getting new phrases… {Math.round((s.done / s.total) * 100)}%
+    </div>
+  );
+}
+
 function App() {
   const [ready, setReady] = useState(false);
   const [prog, setProg] = useState({ done: 0, total: 0 });
@@ -60,6 +71,9 @@ function App() {
   const [openSit, setOpenSit] = useState<string | null>(null);
 
   const [menuKey, setMenuKey] = useState(0);
+  const [, setContentTick] = useState(0);
+  // new content finished downloading in the background: swap it in
+  const sync = () => syncInBackground(async l => { setLoaded(l); await initMine(); setContentTick(n => n + 1); });
   const go = (url: string) => {
     const route = routeOf(url);
     closeShow();
@@ -83,6 +97,7 @@ function App() {
         await initMine();
         setReady(true);
         confirmBoot();
+        setTimeout(sync, 1500); // after the first screen has settled
         checkUpdates();
         scheduleReminders();
         updateWidget();
@@ -94,7 +109,7 @@ function App() {
     CapApp.getLaunchUrl().then(r => { if (r?.url) go(r.url); }).catch(() => {});
     const h1 = CapApp.addListener('appUrlOpen', e => go(e.url));
     onReminderTap(route => go(`ginkhao://${route}`));
-    const h2 = CapApp.addListener('resume', () => { checkUpdates(); });
+    const h2 = CapApp.addListener('resume', () => { sync(); checkUpdates(); });
     const h3 = CapApp.addListener('pause', () => { flushSave(); });
     return () => { h1.then(h => h.remove()); h2.then(h => h.remove()); h3.then(h => h.remove()); };
   }, []);
@@ -118,6 +133,7 @@ function App() {
   return (
     <>
       <UpdateBanner />
+      <SyncPill />
       <main class="app">
         {tab === 'today' && <Today />}
         {tab === 'browse' && <Browse open={openSit} setOpen={setOpenSit} />}
