@@ -28,7 +28,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     port: Number(env.PORT ?? 8787),
     mode,
     rpcUrl: env.RPC_URL ?? "https://api.devnet.solana.com",
-    programId: env.PROGRAM_ID ?? "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS",
+    programId: env.PROGRAM_ID ?? "3WPvDvnKhi4gKCJreiGGFDX4XTJSKp6yzrCZmL1itRWd",
     authoritySecret: env.AUTHORITY_SECRET ?? null,
     treasury: env.TREASURY ?? null,
     feeBps,

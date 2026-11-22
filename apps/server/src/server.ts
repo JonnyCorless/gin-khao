@@ -25,7 +25,8 @@ export function makeChain(cfg: Config): ChainAdapter {
   return new SolanaChain(cfg.rpcUrl, cfg.programId, cfg.authoritySecret, cfg.treasury);
 }
 
-export function startServer(cfg: Config = loadConfig(), chain: ChainAdapter = makeChain(cfg)) {
+export async function startServer(cfg: Config = loadConfig(), chain: ChainAdapter = makeChain(cfg)) {
+  await chain.preflight?.();
   const sessions = new Map<string, Session>(); // pubkey -> live session
   const queue: Conn[] = [];
 

@@ -15,12 +15,16 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("3WPvDvnKhi4gKCJreiGGFDX4XTJSKp6yzrCZmL1itRWd");
 
 /// Hard ceiling on the house fee: 10%.
 pub const MAX_FEE_BPS: u16 = 1_000;
 /// If the server hasn't settled this long after the match started, anyone can refund both players.
+#[cfg(not(feature = "short-timeout"))]
 pub const SETTLE_TIMEOUT_SECS: i64 = 20 * 60;
+/// TEST BUILDS ONLY (used by apps/server/scripts/onchain-test.sh). Never deploy with this feature.
+#[cfg(feature = "short-timeout")]
+pub const SETTLE_TIMEOUT_SECS: i64 = 6;
 pub const STATUS_OPEN: u8 = 0;
 pub const STATUS_ACTIVE: u8 = 1;
 

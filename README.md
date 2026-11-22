@@ -58,10 +58,21 @@ CHAIN_MODE=solana PROGRAM_ID=<id> TREASURY=<fee wallet> AUTHORITY_SECRET="$(cat 
 VITE_WS_URL=ws://localhost:8787 npm run dev:client     # set Phantom to Devnet
 ```
 
+Price feed: the server quotes $1 via Pyth Hermes (`HERMES_URL`, optional `HERMES_HEADERS` JSON for auth). From the build sandbox the public endpoint returned HTTP 401, so **verify the feed works from your server** or set `FALLBACK_SOL_USD` (in `solana` mode with neither, matchmaking refuses to quote rather than guess).
+
 Server env: `PORT, CHAIN_MODE (mock|solana), RPC_URL, PROGRAM_ID, AUTHORITY_SECRET, TREASURY, FEE_BPS (330), STAKE_USD (1), FALLBACK_SOL_USD, ALLOWED_ORIGINS, DATA_DIR, GRACE_MS`.
+
+## On-chain test (real validator)
+
+```bash
+apps/server/scripts/onchain-test.sh   # needs the Solana CLI; builds the program, boots solana-test-validator, runs 11 tests
+```
+It covers create/join/cancel/settle/void/timeout-refund, attack cases (stranger settling, fee redirection, non-player winner, double settle, self-play, dust stakes), exact lamport conservation, and the **full server flow in `solana` mode** with two keypair bots signing the server-built transactions. The test binary uses a 6s timeout (`short-timeout` feature) and is written to a temp dir so it can't be deployed by accident.
 
 ## Honest status
 
-Verified here: sim (deterministic, 10 tests), whole queue→stake→fight→settle→forfeit/reconnect flow against the **mock** chain (5 e2e tests, money conservation checked), instruction/account encoding against the Rust layout, the escrow program **compiles on host and its fee tests pass**, client builds and plays in a real browser.
+Verified here: deterministic sim (10 tests), full match flow on the mock chain (5 e2e), instruction/account encoding, escrow Rust tests (4), **the SBF program on a real local validator (11 on-chain tests incl. attacks, refunds and a full server+wallet-bot match with exact balances)**, and the client in a real browser.
 
-**Not verified**: the SBF build and any on-chain execution (Solana toolchain and RPC were blocked in the build sandbox), the live Pyth fetch, and Phantom signing. Treat the escrow program as unaudited. Add Anchor/bankrun integration tests and get an independent review before it ever holds real value.
+**Found by the on-chain run**: an empty treasury can't receive the first fee payout (rent-exemption), so the server now runs a startup preflight (program deployed, config matches, treasury/authority funded) and refuses to start otherwise.
+
+**Not verified**: devnet itself (I tested on a local validator; deploy steps above), Phantom signing in a real wallet, and a live price feed (see above). Treat the escrow program as unaudited. Get an independent review before it ever holds real value.

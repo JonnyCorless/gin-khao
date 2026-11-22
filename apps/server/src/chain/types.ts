@@ -17,6 +17,8 @@ export interface ChainAdapter {
   prepareTx(action: TxAction, matchId: bigint, player: string, stake: bigint): Promise<string | null>;
   /** Current on-chain state; null if the account doesn't exist (not created, or closed). */
   getMatch(matchId: bigint): Promise<OnChainMatch | null>;
+  /** Startup sanity checks; throws with an actionable message if the deployment is misconfigured. */
+  preflight?(): Promise<void>;
   settle(matchId: bigint, winner: string): Promise<Settlement>;
   voidMatch(matchId: bigint): Promise<string>;
 }

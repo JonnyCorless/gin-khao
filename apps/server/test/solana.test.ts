@@ -5,7 +5,7 @@ import { computeSplit } from "@solanasmash/sim";
 import { ixInitialize, disc, decodeMatch, u64le, matchPda, configPda, ixCreate, ixSettle } from "../src/chain/solana.ts";
 import { usdToLamports, quoteStake } from "../src/price.ts";
 
-const PROGRAM = new PublicKey("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+const PROGRAM = new PublicKey("3WPvDvnKhi4gKCJreiGGFDX4XTJSKp6yzrCZmL1itRWd");
 
 test("anchor discriminator matches the well-known value for `initialize`", () => {
   assert.equal(disc("initialize").toString("hex"), "afaf6d1f0d989bed");
