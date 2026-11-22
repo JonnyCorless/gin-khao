@@ -1,0 +1,50 @@
+# SolanaSmash plan and decision log
+
+## Decisions (from the planning Q&A)
+
+| Topic | Decision | Alternatives considered |
+|---|---|---|
+| Format | 1v1 first; settlement is pairwise now, N-player later | FFA, 2v2 (payout + netcode complexity) |
+| Custody | On-chain Anchor escrow, stake held in match PDA | custodial balance (legal/security risk), per-match wallets (server holds keys) |
+| Legality | **Devnet/testnet only** until proven fun and legally cleared | geo-block global launch |
+| Stack | TypeScript, canvas, pixel art, original characters (no Nintendo IP) | Phaser, Godot, 3D |
+| Netcode | Server-authoritative 60Hz + client prediction/reconciliation | P2P rollback + server verification (best feel, much harder), trust-the-clients (cheatable) |
+| Stake pricing | $1 quoted in lamports at match creation (Pyth, 60s staleness limit), rounded to 0.00001 SOL | on-chain oracle check, fixed SOL, USDC |
+| Accounts | Wallet-only login (signed nonce), instant queue | profiles/ELO, lobby, link duels |
+| Disconnects | 10s grace then forfeit; countdown-phase disconnect refunds | refund-always (exploitable) |
+| Combat | Damage %, knockback scaling by weight, stocks, shield + roll, double jump, drop-through, sudden death | simplified / HP bar |
+| Content | 2 characters (Pounce rushdown, Bork zoner), 1 stage, 3 stocks, 5 min | mirror match |
+| Input | Keyboard + gamepad; input abstraction ready for touch | |
+| Escrow flow | A creates+deposits, B joins+deposits; A can cancel; timeout refund | atomic co-signed deposit, pre-funded vault |
+| Result signing | Single server authority key, program-enforced payout destinations; void for draws | multisig, co-signed results |
+| Fee | 330 bps in a config PDA, hard cap 10%, snapshotted at join | hard-coded |
+| Repo | npm workspaces monorepo (pnpm wasn't needed) | |
+
+## Architecture notes
+
+- **Determinism**: integer fixed-point (256/px), no trig/random/time. `step(state, inputs)` is pure. Tests assert identical hashes across replays and cloned continuation.
+- **Prediction**: client tags every input with a frame counter `cf`; server acks the latest `cf` applied per seat inside each snapshot (30Hz). Client rewinds to the snapshot and replays unacked local inputs; opponent uses last known input.
+- **Money maths** (`computeSplit`, Rust `fee_for`): `fee = floor(pot*bps/10000)`, rounding favours the winner. At $1 ≈ 0.00667 SOL: pot 0.01334, fee 0.00044022, payout 0.01289978.
+- **Audit trail**: input log per match + `results.jsonl` with final state hash.
+
+## Risks / open items before any real money
+
+1. **Legal** (biggest): real-money skill gaming is restricted or licensed in many jurisdictions (e.g. many US states, UK, much of the EU). Needs counsel, geo-blocking, age/KYC decisions, ToS. Not legal advice.
+2. **Escrow audit**: unaudited program; needs integration tests (Anchor/bankrun) and external review. Specific areas: lamport accounting on close, duplicate-account passing, rent handling.
+3. **Cheating**: authoritative server removes state hacking; remaining threats are input automation (macros/bots), collusion/win-trading between two wallets (costs only the 3.3% fee, but matters if rewards are added), and multi-accounting. Mitigations: input-pattern heuristics, rate limits per wallet, ELO matchmaking, replay review.
+4. **Server key**: single hot authority key. Rotate through `update_config`; move to KMS/multisig before mainnet. Cap matches/stakes at start.
+5. **Latency/fairness**: server in one region favours nearby players. Add regional servers, ping caps in matchmaking, input-delay equalisation.
+6. **Availability**: if the server is down mid-match, funds return only after 20 minutes via `refund_expired`. Consider shorter timeouts + a keeper bot.
+7. **Single-process server**: sessions are in memory; a restart voids in-flight matches (they refund via timeout). Persist session state before scale-out.
+8. **Pyth**: staleness-checked, but a price jump between quote and deposit changes the dollar value slightly; acceptable for $1.
+9. **IP**: fighters are original (cat/dog). Don't ship Nintendo characters, names, or stages.
+
+## Roadmap
+
+1. (done) Deterministic sim, mock-chain full flow, playable client, escrow program source.
+2. Build + deploy program to devnet, Anchor integration tests, Phantom devnet playtest.
+3. Fun pass: balance, hitstop, ledge grab, more moves, audio, more characters/stage, sprite animation frames.
+4. Matchmaking: ELO, rematch, private challenge links, spectate.
+5. Hardening: anti-automation, replay verifier service, monitoring, regional servers, persistence.
+6. Legal review → decide on mainnet, USDC option, multisig, audit.
+7. FFA: N-player settlement (the program's winner-pays model extends to placement splits).

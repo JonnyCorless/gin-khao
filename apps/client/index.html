@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SolanaSmash</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game" width="1280" height="720"></canvas>
+
+    <div id="hud-top"><span id="net"></span></div>
+
+    <!-- Lobby -->
+    <section id="lobby" class="panel">
+      <h1>Solana<span>Smash</span></h1>
+      <p class="tag">1v1 platform fighter. Stake <b>$1 of SOL</b> each. Winner takes the pot.</p>
+      <div id="devnet-banner">DEVNET PROTOTYPE: no real money. Test SOL only.</div>
+
+      <div id="wallet-row">
+        <button id="btn-phantom" class="primary">Connect Phantom</button>
+        <button id="btn-dev">Use dev wallet</button>
+      </div>
+      <div id="wallet-info" hidden></div>
+
+      <div id="pick" hidden>
+        <div class="chars">
+          <button class="char sel" data-char="0"><canvas width="64" height="64" id="pv0"></canvas><b>Pounce</b><small>Fast rushdown cat</small></button>
+          <button class="char" data-char="1"><canvas width="64" height="64" id="pv1"></canvas><b>Bork</b><small>Heavy zoner, throws bones</small></button>
+        </div>
+        <button id="btn-queue" class="primary big">Stake &amp; find match</button>
+        <div class="fee" id="fee-line">House cut 3.3%. Winner receives ~1.934 stakes.</div>
+      </div>
+      <button id="btn-practice">Practice vs bot (free, no stake)</button>
+
+      <details class="controls">
+        <summary>Controls</summary>
+        <table>
+          <tr><td>Move</td><td>A / D or ← →</td></tr>
+          <tr><td>Jump (x2)</td><td>W, ↑ or Space</td></tr>
+          <tr><td>Fast fall / drop through</td><td>S or ↓</td></tr>
+          <tr><td>Attack (+ direction)</td><td>J or Z</td></tr>
+          <tr><td>Special</td><td>K or X</td></tr>
+          <tr><td>Shield (+ left/right = roll)</td><td>L, C or Shift</td></tr>
+          <tr><td>Gamepad</td><td>stick, A/B jump, X attack, Y special, bumpers shield</td></tr>
+        </table>
+      </details>
+    </section>
+
+    <!-- Match status -->
+    <section id="status" class="panel small" hidden>
+      <div id="status-title"></div>
+      <div id="status-detail"></div>
+      <div id="status-actions"></div>
+    </section>
+
+    <!-- Result -->
+    <section id="result" class="panel small" hidden>
+      <h2 id="result-title"></h2>
+      <div id="result-detail"></div>
+      <button id="btn-again" class="primary">Back to lobby</button>
+    </section>
+
+    <div id="countdown" hidden></div>
+    <div id="opp-banner" hidden></div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
