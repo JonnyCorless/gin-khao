@@ -1,78 +1,67 @@
 # SolanaSmash
 
-Browser platform fighter where two players each stake **$1 of SOL**, fight a 1v1, and the winner takes the pot minus a **3.3% house cut**. **Devnet prototype**: no real money until the checklist in `docs/PLAN.md` is done.
+Browser platform fighter where two players each stake **0.01 SOL**, fight a 1v1, and the winner takes the pot minus a **3.3% house cut** (winner gets 0.01934 SOL, house gets 0.00066 SOL). **Devnet prototype**: no real money until the checklist in `docs/PLAN.md` is done.
 
 ```
-packages/sim        deterministic fighting core (shared by client + server) + wire protocol + fee maths
-apps/server         Node + ws: matchmaking, 60Hz authoritative sim, settlement, audit log
-apps/client         Vite + canvas: pixel-art game, wallet connect, client-side prediction, practice bot
+packages/sim        deterministic fighting core (shared by client + server), wire protocol, fee maths
+apps/server         Node + ws: matchmaking, 60Hz authoritative sim, settlement, audit log, serves the client
+apps/client         Vite + canvas: pixel-art game, wallet connect, client-side prediction, sound, practice bot
 programs/escrow     Anchor program: holds both stakes, pays winner, takes the fee, refunds if stuck
+scripts/            deploy-devnet.sh (one command), apps/server/scripts/onchain-test.sh (real-validator tests)
 ```
 
-## Run it locally (no wallet, no chain needed)
+## Demo it in 2 minutes (no wallet, no chain, no money)
 
 ```bash
 npm install
-npm run dev:server        # mock chain on :8787 (stakes are simulated)
-npm run dev:client        # http://localhost:5173
+npm run build -w @solanasmash/client
+npm start                      # http://localhost:8787  (mock chain: stakes are simulated)
 ```
-Open the client in two browser windows, click **Use dev wallet** in each, **Stake & find match**. Or click **Practice vs bot** for a free solo match.
+Open it in two browser windows. In each: **Use dev wallet** → **Stake & find match**. Or **Practice vs bot** for a solo match.
+To let others play, put it behind any host that supports WebSockets (see Hosting below) or share your LAN address.
 
-Controls: move `A/D`, jump `W/Space` (x2), fast fall/drop through `S`, attack `J` (+direction), special `K`, shield `L/Shift` (+left/right to roll). Gamepads work. `F3` shows hitboxes.
+Controls: move `A/D`, jump `W/Space` (x2), fast fall / drop through `S`, attack `J` (+direction for tilts), special `K`, shield `L/Shift` (+left/right to roll), `M` mute, `F3` hitboxes. Gamepads work.
+Fighters: **Pounce** (fast cat, dash claw) and **Bork** (heavy dog, throws bones). Damage % builds up; higher % = farther launches; 3 stocks, 5 minutes, sudden death on a tie.
+
+## Real stakes on devnet
+
+Prereqs: Node 22, Rust, Solana CLI (`sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"`), Phantom set to **Devnet**.
 
 ```bash
-npm test                  # sim determinism/rules, full match flow on the mock chain, Solana encoding
-cargo test --manifest-path programs/escrow/Cargo.toml   # fee maths in the program
+scripts/deploy-devnet.sh       # creates keys in ./keys, deploys, sets fee to 3.3%, funds treasury + authority, writes .env.devnet
+npm run build -w @solanasmash/client
+set -a; . ./.env.devnet; set +a; npm start
 ```
+It needs ~4 SOL of devnet SOL for the deploy (airdrops, or https://faucet.solana.com; most is refunded if you close the program). **Back up `./keys`** (gitignored): `admin.json` controls the config, `authority.json` settles matches, `treasury.json` receives fees. To use your own fee wallet: `TREASURY=<pubkey> scripts/deploy-devnet.sh`.
+
+Server env: `CHAIN_MODE (mock|solana), RPC_URL, PROGRAM_ID, TREASURY, AUTHORITY_KEYPAIR_FILE | AUTHORITY_SECRET, FEE_BPS (330), STAKE_LAMPORTS (10000000), PORT, ALLOWED_ORIGINS, TRUST_PROXY, MAX_CONNS_PER_IP, DATA_DIR, GRACE_MS, CLIENT_DIR`.
+On start in `solana` mode the server **refuses to run** unless the program is deployed, the on-chain config matches your authority + treasury, the treasury holds the rent-exempt minimum and the authority can pay fees. It also **refunds any orphaned active matches** left by a crash.
+
+### Hosting
+`Dockerfile` builds one image (server + web client). Any host with WebSocket support works (Fly.io, Render, Railway, a VPS). Set `CHAIN_MODE` and the env above; keep `AUTHORITY_SECRET` in the host's secret store. One instance only (sessions are in memory).
 
 ## How a match works
 
-1. Wallet logs in by signing a server nonce (no passwords).
-2. Queue pairs two players. The server quotes the stake: **$1 in lamports at the current Pyth SOL/USD price**, locked for the match.
-3. Player A calls `create_match` (deposits), player B calls `join_match` (deposits). Funds sit in a PDA owned by the escrow program. The fee rate (330 bps) is snapshotted at join.
-4. 3-2-1, then the server runs the real game at 60Hz. Clients send inputs only and predict locally; the server's result is the one that counts.
-5. Winner is sent on chain via `settle`: **winner gets pot - 3.3%, treasury gets 3.3%**. Draw (sudden-death timeout) or server fault: `void_match` refunds both in full.
-6. Disconnects: 10s to reconnect, otherwise the leaver forfeits. If the server never settles, **anyone** can `refund_expired` after 20 minutes. Player A can `cancel_match` before anyone joins. Funds can't get stuck.
+1. Wallet login = signing a server nonce (no passwords).
+2. The queue pairs two players. Seat 1 calls `create_match` **naming the opponent** and deposits 0.01 SOL; the program only lets that opponent join, so nobody can front-run and hijack the match. Seat 2 calls `join_match` and deposits. Both stakes sit in a PDA owned by the program. The fee rate (330 bps) is locked at join.
+3. 3-2-1, then the **server runs the real game at 60Hz**; clients send inputs only and predict locally. The server's result is the one that counts.
+4. `settle` pays **winner = pot − 3.3%, treasury = 3.3%**. A draw (sudden-death timeout) or server fault calls `void_match`: both refunded in full, no fee.
+5. Disconnects: 10s to reconnect, then the leaver forfeits (a disconnect before the fight starts refunds both). If the server vanishes, **anyone** can `refund_expired` after 20 minutes; player A can `cancel_match` before the opponent joins. If a deposit lands late after an abort, the server voids it automatically.
 
-The settlement key can only pick between the two players of a match and the program computes the fee and destination itself, so a leaked key can't redirect funds elsewhere (it could still choose winners of in-progress matches, so keep it in a secrets manager and rotate via `update_config`).
+The server's signing key can only pick between the two players of a match; the program computes the fee and its destination itself, so a leaked key can't redirect funds (it could still choose winners of in-progress matches: keep it in a secret store and rotate via `update_config`).
+Every match's full input log + result is stored in `DATA_DIR` (`replays/<id>.bin`, `results.jsonl`), so any result can be re-derived by replaying inputs through `packages/sim`.
 
-Every match's full input log + result is written to `DATA_DIR` (`replays/<id>.bin`, `results.jsonl`) so any result can be re-derived by replaying inputs through `packages/sim`.
-
-## Devnet deployment (you run this; the sandbox I built it in couldn't reach Solana)
-
-Prereqs: Solana CLI + Anchor 0.31 (`avm install 0.31.1`), a devnet wallet with some test SOL.
+## Tests
 
 ```bash
-cd programs/escrow
-anchor build
-anchor keys sync          # writes a real program id into declare_id! and Anchor.toml
-anchor build && anchor deploy --provider.cluster devnet
-
-solana-keygen new -o keys/authority.json   # server's settlement key; fund with ~0.1 devnet SOL (it pays settle fees)
-solana-keygen new -o keys/admin.json       # can change fee/authority/treasury
-# pick a treasury address for the fee, then, from repo root:
-ADMIN_KEYPAIR=keys/admin.json AUTHORITY=$(solana-keygen pubkey keys/authority.json) TREASURY=<fee wallet> \
-PROGRAM_ID=<id> npx tsx apps/server/scripts/init-config.ts
-
-CHAIN_MODE=solana PROGRAM_ID=<id> TREASURY=<fee wallet> AUTHORITY_SECRET="$(cat keys/authority.json)" npm run dev:server
-VITE_WS_URL=ws://localhost:8787 npm run dev:client     # set Phantom to Devnet
+npm test                       # sim (10), mock-chain full flow + matchmaking + limits + Solana encoding (12)
+cargo test --manifest-path programs/escrow/Cargo.toml   # fee maths (4)
+npm run onchain-test           # builds the program, boots a local validator, runs 13 on-chain tests
 ```
+The on-chain suite covers create/join/cancel/settle/void/timeout refund, attacks (stranger settling, fee redirection, non-player winner, front-running the join, double settle, self-play, dust stake), exact lamport conservation, crash recovery, and the **full server flow in `solana` mode** with keypair bots signing server-built transactions. Its binary uses a 6s timeout (`short-timeout` feature) and goes to a temp dir so it can't be deployed by accident.
 
-Price feed: the server quotes $1 via Pyth Hermes (`HERMES_URL`, optional `HERMES_HEADERS` JSON for auth). From the build sandbox the public endpoint returned HTTP 401, so **verify the feed works from your server** or set `FALLBACK_SOL_USD` (in `solana` mode with neither, matchmaking refuses to quote rather than guess).
+## Verified vs not
 
-Server env: `PORT, CHAIN_MODE (mock|solana), RPC_URL, PROGRAM_ID, AUTHORITY_SECRET, TREASURY, FEE_BPS (330), STAKE_USD (1), FALLBACK_SOL_USD, ALLOWED_ORIGINS, DATA_DIR, GRACE_MS`.
+Verified: everything above, plus **real browsers → real server → real validator** with a wallet provider that signs and submits real transactions: winner net +9,335,000 lamports, loser −10,005,000, treasury +660,000 (= 3.3% of the 0.02 SOL pot; the 5,000 are tx fees). The deploy script was run end to end against a local validator.
 
-## On-chain test (real validator)
-
-```bash
-apps/server/scripts/onchain-test.sh   # needs the Solana CLI; builds the program, boots solana-test-validator, runs 11 tests
-```
-It covers create/join/cancel/settle/void/timeout-refund, attack cases (stranger settling, fee redirection, non-player winner, double settle, self-play, dust stakes), exact lamport conservation, and the **full server flow in `solana` mode** with two keypair bots signing the server-built transactions. The test binary uses a 6s timeout (`short-timeout` feature) and is written to a temp dir so it can't be deployed by accident.
-
-## Honest status
-
-Verified here: deterministic sim (10 tests), full match flow on the mock chain (5 e2e), instruction/account encoding, escrow Rust tests (4), **the SBF program on a real local validator (11 on-chain tests incl. attacks, refunds and a full server+wallet-bot match with exact balances)**, and the client in a real browser.
-
-**Found by the on-chain run**: an empty treasury can't receive the first fee payout (rent-exemption), so the server now runs a startup preflight (program deployed, config matches, treasury/authority funded) and refuses to start otherwise.
-
-**Not verified**: devnet itself (I tested on a local validator; deploy steps above), Phantom signing in a real wallet, and a live price feed (see above). Treat the escrow program as unaudited. Get an independent review before it ever holds real value.
+Not verified: a **real Phantom extension** (I used a provider that implements the same API), **devnet itself** (local validator only; RPC behaviour/latency may differ), and load beyond a handful of concurrent matches. The escrow program is **unaudited**: get an independent review before it ever holds real value. See `docs/PLAN.md` for risks (legal is the big one).

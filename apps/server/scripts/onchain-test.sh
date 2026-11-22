@@ -4,9 +4,10 @@ set -euo pipefail
 export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 KEY="${PROGRAM_KEYPAIR:-$ROOT/keys/program.json}"
-[ -f "$KEY" ] || { mkdir -p "$ROOT/keys"; solana-keygen new --no-bip39-passphrase -s -o "$KEY" >/dev/null; echo "generated $KEY: put its pubkey into declare_id!/Anchor.toml/PROGRAM_ID"; }
+[ -f "$KEY" ] || { mkdir -p "$ROOT/keys"; solana-keygen new --no-bip39-passphrase -s -o "$KEY" >/dev/null; echo "generated $KEY"; }
 PID="$(solana-keygen pubkey "$KEY")"
-grep -q "$PID" "$ROOT/programs/escrow/programs/escrow/src/lib.rs" || { echo "declare_id! does not match $KEY ($PID)"; exit 1; }
+# make the program source use this key's id (declare_id! must match the keypair the validator loads it under)
+sed -i "s/declare_id!(\"[1-9A-HJ-NP-Za-km-z]*\")/declare_id!(\"$PID\")/" "$ROOT/programs/escrow/programs/escrow/src/lib.rs"
 
 LEDGER="$(mktemp -d)"
 # test build has a 6s settle timeout and goes to a temp dir so it can never be deployed by mistake

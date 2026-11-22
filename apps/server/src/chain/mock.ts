@@ -14,12 +14,12 @@ export class MockChain implements ChainAdapter {
 
   constructor(private feeBps: number) {}
 
-  async prepareTx(action: TxAction, matchId: bigint, player: string, stake: bigint): Promise<string | null> {
-    // mock "wallet": apply the effect as soon as the client acks (done via applyDeposit)
-    this.pending.set(`${action}:${matchId}`, { player, stake });
+  async prepareTx(action: TxAction, matchId: bigint, player: string, stake: bigint, opponent: string): Promise<string | null> {
+    // mock "wallet": apply the effect as soon as the client acks (done via applyAck)
+    this.pending.set(`${action}:${matchId}`, { player, stake, opponent });
     return null;
   }
-  private pending = new Map<string, { player: string; stake: bigint }>();
+  private pending = new Map<string, { player: string; stake: bigint; opponent: string }>();
 
   /** Called when a mock client acks its tx. */
   applyAck(action: TxAction, matchId: bigint) {
@@ -27,12 +27,12 @@ export class MockChain implements ChainAdapter {
     if (!p) return;
     this.pending.delete(`${action}:${matchId}`);
     if (action === "create") {
-      this.matches.set(matchId, { matchId, playerA: p.player, playerB: null, stake: p.stake, status: "open", feeBps: 0 });
+      this.matches.set(matchId, { matchId, playerA: p.player, playerB: p.opponent, stake: p.stake, status: "open", feeBps: 0 });
       this.add(p.player, -p.stake);
     } else if (action === "join") {
       const m = this.matches.get(matchId);
-      if (!m || m.status !== "open") return;
-      m.playerB = p.player; m.status = "active"; m.feeBps = this.feeBps;
+      if (!m || m.status !== "open" || m.playerB !== p.player) return;
+      m.status = "active"; m.feeBps = this.feeBps;
       this.add(p.player, -p.stake);
     } else if (action === "cancel") {
       const m = this.matches.get(matchId);
@@ -57,7 +57,7 @@ export class MockChain implements ChainAdapter {
   async voidMatch(matchId: bigint): Promise<string> {
     const m = this.matches.get(matchId);
     if (!m || m.status !== "active") throw new Error("mock: not active");
-    this.add(m.playerA, m.stake); this.add(m.playerB!, m.stake);
+    this.add(m.playerA, m.stake); this.add(m.playerB, m.stake);
     this.matches.delete(matchId);
     this.log.push(`void ${matchId}`);
     return `mock-void-${matchId}`;

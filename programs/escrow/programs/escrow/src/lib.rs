@@ -56,13 +56,16 @@ pub mod escrow {
         Ok(())
     }
 
-    /// Player A opens a match and deposits their stake.
-    pub fn create_match(ctx: Context<CreateMatch>, match_id: u64, stake: u64) -> Result<()> {
+    /// Player A opens a match against a *designated* opponent and deposits their stake.
+    /// Pinning the opponent at creation means nobody watching the chain can front-run B and
+    /// hijack the match.
+    pub fn create_match(ctx: Context<CreateMatch>, match_id: u64, stake: u64, opponent: Pubkey) -> Result<()> {
         require!(stake >= ctx.accounts.config.min_stake && stake > 0, EscrowError::StakeTooSmall);
+        require!(opponent != Pubkey::default() && opponent != ctx.accounts.player_a.key(), EscrowError::SamePlayer);
         let m = &mut ctx.accounts.game_match;
         m.match_id = match_id;
         m.player_a = ctx.accounts.player_a.key();
-        m.player_b = Pubkey::default();
+        m.player_b = opponent;
         m.stake = stake;
         m.status = STATUS_OPEN;
         m.created_at = Clock::get()?.unix_timestamp;
@@ -77,7 +80,7 @@ pub mod escrow {
             ),
             stake,
         )?;
-        emit!(MatchCreated { match_id, player_a: ctx.accounts.player_a.key(), stake });
+        emit!(MatchCreated { match_id, player_a: ctx.accounts.player_a.key(), player_b: opponent, stake });
         Ok(())
     }
 
@@ -85,7 +88,6 @@ pub mod escrow {
     pub fn join_match(ctx: Context<JoinMatch>) -> Result<()> {
         let stake = ctx.accounts.game_match.stake;
         require!(ctx.accounts.game_match.status == STATUS_OPEN, EscrowError::BadStatus);
-        require!(ctx.accounts.player_b.key() != ctx.accounts.game_match.player_a, EscrowError::SamePlayer);
 
         transfer(
             CpiContext::new(
@@ -97,7 +99,6 @@ pub mod escrow {
 
         let fee_bps = ctx.accounts.config.fee_bps;
         let m = &mut ctx.accounts.game_match;
-        m.player_b = ctx.accounts.player_b.key();
         m.status = STATUS_ACTIVE;
         m.started_at = Clock::get()?.unix_timestamp;
         m.fee_bps = fee_bps;
@@ -248,7 +249,7 @@ pub struct CreateMatch<'info> {
 pub struct JoinMatch<'info> {
     #[account(seeds = [b"config"], bump = config.bump)]
     pub config: Account<'info, Config>,
-    #[account(mut, seeds = [b"match", game_match.match_id.to_le_bytes().as_ref()], bump = game_match.bump)]
+    #[account(mut, seeds = [b"match", game_match.match_id.to_le_bytes().as_ref()], bump = game_match.bump, has_one = player_b @ EscrowError::WrongOpponent)]
     pub game_match: Account<'info, GameMatch>,
     #[account(mut)]
     pub player_b: Signer<'info>,
@@ -324,7 +325,7 @@ pub struct RefundExpired<'info> {
 // ---------------------------------------------------------------------------------------------
 
 #[event]
-pub struct MatchCreated { pub match_id: u64, pub player_a: Pubkey, pub stake: u64 }
+pub struct MatchCreated { pub match_id: u64, pub player_a: Pubkey, pub player_b: Pubkey, pub stake: u64 }
 #[event]
 pub struct MatchStarted { pub match_id: u64, pub player_a: Pubkey, pub player_b: Pubkey, pub stake: u64, pub fee_bps: u16 }
 #[event]
@@ -342,7 +343,7 @@ pub enum EscrowError {
     StakeTooSmall,
     #[msg("Match is not in the right state for this action")]
     BadStatus,
-    #[msg("Opponent must be a different wallet")]
+    #[msg("Opponent must be a valid, different wallet")]
     SamePlayer,
     #[msg("Winner must be one of the two players")]
     InvalidWinner,
@@ -350,6 +351,8 @@ pub enum EscrowError {
     NotExpired,
     #[msg("Arithmetic overflow")]
     MathOverflow,
+    #[msg("Only the designated opponent can join this match")]
+    WrongOpponent,
 }
 
 #[cfg(test)]
@@ -358,7 +361,7 @@ mod tests {
 
     #[test]
     fn fee_is_3_3_percent() {
-        // $1 stake each ~ 0.01 SOL => pot 0.02 SOL
+        // 0.01 SOL stake each => pot 0.02 SOL
         let pot = 20_000_000u64;
         let fee = fee_for(pot, 330).unwrap();
         assert_eq!(fee, 660_000); // 3.3% of 0.02 SOL

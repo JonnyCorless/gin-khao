@@ -22,6 +22,7 @@ button.big { font-size:20px; padding:14px 28px; width:100%; margin:12px 0 4px; }
 #wallet-info { font-family:ui-monospace, monospace; color:var(--pri); margin:6px 0 10px; word-break:break-all; }
 .controls { text-align:left; margin-top:12px; color:var(--mut); font-size:14px; } .controls table { width:100%; margin-top:6px; } .controls td:first-child { color:var(--fg); padding-right:10px; }
 #hud-top { position:absolute; top:6px; right:10px; font-size:12px; color:var(--mut); }
+#hud-top button { font-size:12px; padding:2px 8px; margin:0; }
 #countdown { position:absolute; font-size:140px; font-weight:900; color:#fff; text-shadow:0 0 30px var(--pri2); pointer-events:none; }
 #opp-banner { position:absolute; top:70px; background:var(--bad); color:#fff; padding:6px 14px; border-radius:20px; font-weight:700; }
 #status-title { font-size:22px; font-weight:700; margin-bottom:6px; } #status-detail { color:var(--mut); margin-bottom:10px; }

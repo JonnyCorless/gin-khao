@@ -1,4 +1,6 @@
 import { createServer, type Server } from "node:http";
+import { readFile } from "node:fs/promises";
+import { extname, join, normalize, resolve } from "node:path";
 import { WebSocketServer, type WebSocket } from "ws";
 import { encodeMsg, type ClientMsg, type ServerMsg } from "@solanasmash/sim";
 import { verifyLogin, newNonce } from "./auth.ts";
@@ -6,10 +8,16 @@ import type { ChainAdapter } from "./chain/types.ts";
 import { MockChain } from "./chain/mock.ts";
 import { SolanaChain } from "./chain/solana.ts";
 import { loadConfig, type Config } from "./config.ts";
-import { quoteStake } from "./price.ts";
 import { Session, type Client } from "./session.ts";
 
+const MIME: Record<string, string> = {
+  ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml",
+  ".png": "image/png", ".ico": "image/x-icon", ".json": "application/json", ".map": "application/json",
+};
+
 class Conn implements Client {
+  alive = true;
+  ip = "";
   nonce = newNonce();
   pubkey: string | null = null;
   session: Session | null = null;
@@ -27,6 +35,10 @@ export function makeChain(cfg: Config): ChainAdapter {
 
 export async function startServer(cfg: Config = loadConfig(), chain: ChainAdapter = makeChain(cfg)) {
   await chain.preflight?.();
+  if (chain.voidAllActive) {
+    const n = await chain.voidAllActive();
+    if (n > 0) console.log(`recovery: voided ${n} orphaned active match(es); both players were refunded`);
+  }
   const sessions = new Map<string, Session>(); // pubkey -> live session
   const queue: Conn[] = [];
 
@@ -34,7 +46,18 @@ export async function startServer(cfg: Config = loadConfig(), chain: ChainAdapte
     if (req.url === "/health") {
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ ok: true, mode: cfg.mode, queued: queue.length, matches: new Set(sessions.values()).size }));
-    } else { res.writeHead(404); res.end(); }
+      return;
+    }
+    if (!cfg.clientDir) { res.writeHead(404); res.end(); return; }
+    // static client (single-service deploy). Path traversal safe: resolved path must stay inside clientDir.
+    const root = resolve(cfg.clientDir);
+    const urlPath = decodeURIComponent((req.url ?? "/").split("?")[0]);
+    let file = resolve(join(root, normalize(urlPath === "/" ? "/index.html" : urlPath)));
+    if (!file.startsWith(root)) { res.writeHead(403); res.end(); return; }
+    readFile(file).catch(() => { file = join(root, "index.html"); return readFile(file); }).then(
+      (buf) => { res.writeHead(200, { "content-type": MIME[extname(file)] ?? "application/octet-stream", "cache-control": file.includes("/assets/") ? "public, max-age=31536000, immutable" : "no-cache" }); res.end(buf); },
+      () => { res.writeHead(404); res.end(); },
+    );
   });
   const wss = new WebSocketServer({
     server: http, maxPayload: 4096,
@@ -43,31 +66,47 @@ export async function startServer(cfg: Config = loadConfig(), chain: ChainAdapte
 
   const dequeue = (c: Conn) => { const i = queue.indexOf(c); if (i >= 0) queue.splice(i, 1); c.queuedChar = null; };
 
-  async function tryMatch() {
-    while (queue.length >= 2) {
-      const i = queue.findIndex((c, idx) => idx > 0 && c.pubkey !== queue[0].pubkey);
-      if (i < 0) return;
-      let [a] = queue.splice(0, 1);
-      let [b] = queue.splice(i - 1, 1);
-      if (Math.random() < 0.5) [a, b] = [b, a]; // seat 0 deposits first; randomise who that is
-      try {
-        const quote = await quoteStake(cfg.stakeUsd, cfg.fallbackSolUsd);
-        const s = new Session(cfg, chain, quote, { client: a, char: a.queuedChar ?? 0 }, { client: b, char: b.queuedChar ?? 1 }, (done) => {
+  let matching = false;
+  /** Pair queued players. Skips dead sockets and wallets that are already in a match. */
+  function tryMatch() {
+    if (matching) return; // re-entrancy guard; the loop below drains the queue
+    matching = true;
+    try {
+      for (let guard = 0; guard < 100; guard++) {
+        for (let i = queue.length - 1; i >= 0; i--) {
+          if (!queue[i].alive || sessions.has(queue[i].pubkey!)) queue.splice(i, 1);
+        }
+        const bi = queue.findIndex((c, idx) => idx > 0 && c.pubkey !== queue[0].pubkey);
+        if (queue.length < 2 || bi < 0) return;
+        const first = queue.splice(0, 1)[0];
+        const second = queue.splice(bi - 1, 1)[0];
+        // one wallet may be queued from several tabs: drop the extra entries so it can't be double-booked
+        for (let i = queue.length - 1; i >= 0; i--) {
+          if (queue[i].pubkey === first.pubkey || queue[i].pubkey === second.pubkey) queue.splice(i, 1);
+        }
+        const [a, b] = Math.random() < 0.5 ? [second, first] : [first, second]; // seat 0 deposits first; randomise who
+        const s = new Session(cfg, chain, cfg.stakeLamports, { client: a, char: a.queuedChar ?? 0 }, { client: b, char: b.queuedChar ?? 1 }, (done) => {
           for (const pk of done.pubkeys) if (sessions.get(pk) === done) sessions.delete(pk);
         });
         a.queuedChar = b.queuedChar = null;
-        sessions.set(a.pubkey!, s); sessions.set(b.pubkey!, s);
+        sessions.set(a.pubkey!, s);
+        sessions.set(b.pubkey!, s);
         void s.run();
-      } catch (e) {
-        for (const c of [a, b]) { c.queuedChar = null; c.send({ t: "error", code: "quote", msg: "Couldn't price the stake right now. Try again shortly." }); }
-        console.error("quote failed", e);
       }
+    } finally {
+      matching = false;
     }
   }
 
-  wss.on("connection", (ws) => {
+  const perIp = new Map<string, number>();
+  wss.on("connection", (ws, req) => {
+    const fwd = cfg.trustProxy ? String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim() : "";
+    const ip = fwd || req.socket.remoteAddress || "?";
+    if ((perIp.get(ip) ?? 0) >= cfg.maxConnsPerIp) { ws.close(1013, "too many connections"); return; }
+    perIp.set(ip, (perIp.get(ip) ?? 0) + 1);
     const c = new Conn(ws);
-    c.send({ t: "challenge", nonce: c.nonce, mode: cfg.mode, feeBps: cfg.feeBps });
+    c.ip = ip;
+    c.send({ t: "challenge", nonce: c.nonce, mode: cfg.mode, feeBps: cfg.feeBps, stakeLamports: cfg.stakeLamports.toString() });
     let windowStart = Date.now();
 
     ws.on("message", (raw) => {
@@ -100,7 +139,7 @@ export async function startServer(cfg: Config = loadConfig(), chain: ChainAdapte
           c.queuedChar = m.char === 1 ? 1 : 0;
           queue.push(c);
           c.send({ t: "queued", waiting: queue.length });
-          void tryMatch();
+          tryMatch();
           return;
         }
         case "leave": dequeue(c); c.send({ t: "left" }); return;
@@ -109,7 +148,12 @@ export async function startServer(cfg: Config = loadConfig(), chain: ChainAdapte
       }
     });
 
-    ws.on("close", () => { dequeue(c); c.session?.detach(c); });
+    ws.on("close", () => {
+      c.alive = false;
+      perIp.set(ip, Math.max(0, (perIp.get(ip) ?? 1) - 1));
+      dequeue(c);
+      c.session?.detach(c);
+    });
     ws.on("error", () => ws.close());
   });
 

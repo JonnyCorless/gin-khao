@@ -53,7 +53,7 @@ class Bot {
 
 async function harness(overrides: Record<string, string> = {}) {
   const dir = mkdtempSync(join(tmpdir(), "smash-"));
-  const cfg = loadConfig({ PORT: "0", TICK_MS: "2", START_STOCKS: "1", COUNTDOWN_MS: "50", DEPOSIT_TIMEOUT_MS: "1500", GRACE_MS: "300", DATA_DIR: dir, FALLBACK_SOL_USD: "150", ...overrides } as any);
+  const cfg = loadConfig({ PORT: "0", TICK_MS: "2", START_STOCKS: "1", COUNTDOWN_MS: "50", DEPOSIT_TIMEOUT_MS: "1500", GRACE_MS: "300", DATA_DIR: dir, ...overrides } as any);
   const srv = await startServer(cfg);
   return { srv, chain: srv.chain as MockChain, url: `ws://127.0.0.1:${srv.port}` };
 }
@@ -71,21 +71,21 @@ test("full 1v1: queue -> stake -> fight -> 3.3% settlement", async () => {
   const { srv, chain, url } = await harness();
   try {
     const { a, b, ma } = await pair(url);
-    assert.equal(ma.stakeLamports, "6670000"); // $1 at $150/SOL, rounded to 10k lamports
-    assert.equal(ma.fee, "440220"); // 3.3% of 13,340,000
-    assert.equal(ma.payout, "12899780");
+    assert.equal(ma.stakeLamports, "10000000"); // 0.01 SOL each
+    assert.equal(ma.fee, "660000"); // 3.3% of 20,000,000
+    assert.equal(ma.payout, "19340000");
     const [seat0, seat1] = a.seat === 0 ? [a, b] : [b, a];
     seat1.autoInput = INPUT.LEFT; // seat 1 walks off the edge
     const [ra, rb] = await Promise.all([a.next("result", 15000), b.next("result", 15000)]);
     assert.equal(ra.winner, 0);
     assert.equal(rb.winner, 0);
-    assert.equal(ra.payout, "12899780");
-    assert.equal(ra.fee, "440220");
+    assert.equal(ra.payout, "19340000");
+    assert.equal(ra.fee, "660000");
     assert.ok(ra.sig);
     // ledger: winner nets stake - fee, loser loses stake, treasury got the fee
-    assert.equal(chain.balances.get(seat0.pubkey), 12899780n - 6670000n);
-    assert.equal(chain.balances.get(seat1.pubkey), -6670000n);
-    assert.equal(chain.treasury, 440220n);
+    assert.equal(chain.balances.get(seat0.pubkey), 19340000n - 10000000n);
+    assert.equal(chain.balances.get(seat1.pubkey), -10000000n);
+    assert.equal(chain.treasury, 660000n);
     const net = [...chain.balances.values()].reduce((x, y) => x + y, 0n) + chain.treasury;
     assert.equal(net, 0n, "no money created or destroyed");
     assert.equal(chain.matches.size, 0);
@@ -105,7 +105,7 @@ test("forfeit: leaving mid-fight past the grace window loses the pot", async () 
     const res = await stayer.next("result", 3000);
     assert.equal(res.winner, stayer.seat);
     assert.match(res.reason, /forfeit/);
-    assert.equal(chain.treasury, 440220n);
+    assert.equal(chain.treasury, 660000n);
   } finally { await srv.close(); }
 });
 
@@ -139,6 +139,40 @@ test("opponent never stakes: match aborts, nothing charged", async () => {
     assert.equal(r.winner, -1);
     assert.equal(chain.matches.size, 0);
     assert.equal([...chain.balances.values()].length, 0);
+  } finally { await srv.close(); }
+});
+
+test("same wallet in two tabs can't be double-booked; dead sockets are skipped", async () => {
+  const { srv, chain, url } = await harness({ START_STOCKS: "3" });
+  try {
+    const a = new Bot(url), a2 = new Bot(url), b = new Bot(url), c = new Bot(url);
+    a2.kp = a.kp; a2.pubkey = a.pubkey; // same wallet, second tab
+    for (const x of [a, a2, b, c]) { await x.connect(); await x.next("authed"); }
+    a.send({ t: "queue", char: 0 });
+    const e = await (async () => { a2.send({ t: "queue", char: 0 }); return a2.next("error", 2000).catch(() => null); })();
+    void e; // second tab is either rejected or ignored; either way it must not get its own match
+    b.ws.close(); // dead socket sitting in the queue
+    await new Promise((r) => setTimeout(r, 100));
+    c.send({ t: "queue", char: 1 });
+    const [ma, mc] = await Promise.all([a.next("matched", 4000), c.next("matched", 4000)]);
+    assert.equal(ma.opponent, c.pubkey);
+    assert.equal(mc.opponent, a.pubkey);
+    await new Promise((r) => setTimeout(r, 200));
+    assert.equal(a2.msgs.some((m) => m.t === "matched"), false, "second tab was not matched");
+    assert.equal(chain.matches.size >= 0, true);
+  } finally { await srv.close(); }
+});
+
+test("per-IP connection cap", async () => {
+  const { srv, url } = await harness({ MAX_CONNS_PER_IP: "2" });
+  try {
+    const open = (): Promise<string> => new Promise((res) => {
+      const ws = new WebSocket(url);
+      ws.on("open", () => setTimeout(() => res(ws.readyState === ws.OPEN ? "open" : "closed"), 150));
+      ws.on("close", () => res("closed"));
+    });
+    const r = await Promise.all([open(), open(), open()]);
+    assert.equal(r.filter((x) => x === "open").length, 2);
   } finally { await srv.close(); }
 });
 

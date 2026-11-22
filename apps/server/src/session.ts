@@ -8,7 +8,6 @@ import {
 import type { ChainAdapter } from "./chain/types.ts";
 import type { MockChain } from "./chain/mock.ts";
 import type { Config } from "./config.ts";
-import type { Quote } from "./price.ts";
 
 export interface Client {
   send(m: ServerMsg): void;
@@ -41,7 +40,7 @@ export class Session {
   private pendingEvents: GameEvent[] = [];
 
   constructor(
-    private cfg: Config, private chain: ChainAdapter, private quote: Quote,
+    private cfg: Config, private chain: ChainAdapter, private stake: bigint,
     a: { client: Client; char: number }, b: { client: Client; char: number },
     private onEnd: (s: Session) => void,
   ) {
@@ -62,11 +61,10 @@ export class Session {
   private status(phase: Phase, msg: string) { this.phase = phase; this.both({ t: "status", phase, msg }); }
 
   private matchedMsg(seat: 0 | 1): ServerMsg {
-    const split = computeSplit(this.quote.lamports, this.cfg.feeBps);
+    const split = computeSplit(this.stake, this.cfg.feeBps);
     return {
       t: "matched", matchId: this.matchId.toString(), seat, opponent: this.seats[1 - seat].pubkey,
-      chars: [this.seats[0].char, this.seats[1].char], stakeLamports: this.quote.lamports.toString(),
-      solUsd: this.quote.solUsd, feeBps: this.cfg.feeBps,
+      chars: [this.seats[0].char, this.seats[1].char], stakeLamports: this.stake.toString(), feeBps: this.cfg.feeBps,
       pot: split.pot.toString(), fee: split.fee.toString(), payout: split.payout.toString(),
     };
   }
@@ -79,11 +77,11 @@ export class Session {
       this.send(1, this.matchedMsg(1));
 
       // 1. player A creates the match on chain, 2. player B joins
-      const okA = await this.awaitDeposit(0, "create", (m) => m != null && m.status === "open" && m.playerA === this.seats[0].pubkey && m.stake === this.quote.lamports);
+      const okA = await this.awaitDeposit(0, "create", (m) => m != null && m.status === "open" && m.playerA === this.seats[0].pubkey && m.stake === this.stake);
       if (!okA) return this.abort("Opponent didn't deposit in time. Nothing was charged.");
-      const okB = await this.awaitDeposit(1, "join", (m) => m != null && m.status === "active" && m.playerB === this.seats[1].pubkey);
+      const okB = await this.awaitDeposit(1, "join", (m) => m != null && m.status === "active" && m.playerB === this.seats[1].pubkey && m.playerA === this.seats[0].pubkey && m.stake === this.stake);
       if (!okB) {
-        const tx = await this.chain.prepareTx("cancel", this.matchId, this.seats[0].pubkey, this.quote.lamports).catch(() => null);
+        const tx = await this.chain.prepareTx("cancel", this.matchId, this.seats[0].pubkey, this.stake, this.seats[1].pubkey).catch(() => null);
         this.setPending(0, { t: "tx", action: "cancel", tx });
         return this.abort("Opponent didn't deposit in time. Cancel your match to get your stake back.");
       }
@@ -108,9 +106,10 @@ export class Session {
 
   private async awaitDeposit(seat: 0 | 1, action: TxAction, ok: (m: Awaited<ReturnType<ChainAdapter["getMatch"]>>) => boolean): Promise<boolean> {
     const s = this.seats[seat];
-    const tx = await this.chain.prepareTx(action, this.matchId, s.pubkey, this.quote.lamports);
-    this.setPending(seat, { t: "tx", action, tx });
+    const tx = await this.chain.prepareTx(action, this.matchId, s.pubkey, this.stake, this.seats[1 - seat].pubkey);
+    // status first, then the prompt, so the status line can never replace the wallet prompt on the client
     this.status("deposit", seat === 0 ? "Waiting for player 1 to stake…" : "Waiting for player 2 to stake…");
+    this.setPending(seat, { t: "tx", action, tx });
     const deadline = Date.now() + this.cfg.depositTimeoutMs;
     while (Date.now() < deadline && !this.ended) {
       const m = await this.chain.getMatch(this.matchId).catch(() => null);
@@ -213,6 +212,23 @@ export class Session {
     this.status("done", reason);
     this.both({ t: "result", winner: -1, reason, payout: "0", fee: "0", sig: null });
     this.cleanup();
+    void this.reap();
+  }
+
+  /**
+   * After an abort the chain may still hold our match (e.g. a late deposit landing after the timeout).
+   * Watch it for a few minutes: if it ever becomes Active with nobody running it, void it so both
+   * players are refunded immediately instead of waiting for the 20-minute timeout.
+   */
+  private async reap() {
+    for (let i = 0; i < 60; i++) {
+      await sleep(5000);
+      try {
+        const m = await this.chain.getMatch(this.matchId);
+        if (!m) return;
+        if (m.status === "active") { await this.chain.voidMatch(this.matchId); return; }
+      } catch { /* transient RPC error: keep trying */ }
+    }
   }
 
   private async finish(winner: -1 | 0 | 1, reason: string) {
@@ -255,7 +271,7 @@ export class Session {
       writeFileSync(join(this.cfg.dataDir, "replays", `${this.matchId}.bin`), bytes);
       appendFileSync(join(this.cfg.dataDir, "results.jsonl"), JSON.stringify({
         matchId: this.matchId.toString(), players: this.pubkeys, chars: [this.seats[0].char, this.seats[1].char],
-        stake: this.quote.lamports.toString(), feeBps: this.cfg.feeBps, winner, reason, frames: this.state.frame,
+        stake: this.stake.toString(), feeBps: this.cfg.feeBps, winner, reason, frames: this.state.frame,
         stateHash: hashState(this.state), sig, settlementFailed: failed, at: new Date().toISOString(),
       }) + "\n");
     } catch (e) {

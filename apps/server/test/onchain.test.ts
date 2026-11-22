@@ -45,23 +45,23 @@ test("escrow on a real validator", { skip: !run }, async (t) => {
   await sendAndConfirmTransaction(c, new Transaction().add(ixInitialize(PROGRAM, admin.publicKey, authority.publicKey, treasury.publicKey, 330, 1000n)), [admin]);
   const chain = new SolanaChain(RPC, PROGRAM.toBase58(), JSON.stringify([...authority.secretKey]), treasury.publicKey.toBase58());
   await chain.preflight();
-  const STAKE = 6_670_000n;
+  const STAKE = 10_000_000n;
   let id = 1000n;
   const open = async (a: Keypair, b: Keypair, stake = STAKE) => {
     const mid = ++id;
-    await signSend(c, (await chain.prepareTx("create", mid, a.publicKey.toBase58(), stake))!, a);
-    await signSend(c, (await chain.prepareTx("join", mid, b.publicKey.toBase58(), stake))!, b);
+    await signSend(c, (await chain.prepareTx("create", mid, a.publicKey.toBase58(), stake, b.publicKey.toBase58()))!, a);
+    await signSend(c, (await chain.prepareTx("join", mid, b.publicKey.toBase58(), stake, a.publicKey.toBase58()))!, b);
     return mid;
   };
 
   await t.test("create + join lock both stakes; account decodes correctly", async () => {
     const mid = ++id;
     const before = await bal(c, alice.publicKey);
-    await signSend(c, (await chain.prepareTx("create", mid, alice.publicKey.toBase58(), STAKE))!, alice);
+    await signSend(c, (await chain.prepareTx("create", mid, alice.publicKey.toBase58(), STAKE, bob.publicKey.toBase58()))!, alice);
     let m = await chain.getMatch(mid);
-    assert.deepEqual([m!.status, m!.playerA, m!.playerB, m!.stake], ["open", alice.publicKey.toBase58(), null, STAKE]);
+    assert.deepEqual([m!.status, m!.playerA, m!.playerB, m!.stake], ["open", alice.publicKey.toBase58(), bob.publicKey.toBase58(), STAKE]);
     assert.ok(before - (await bal(c, alice.publicKey)) >= STAKE);
-    await signSend(c, (await chain.prepareTx("join", mid, bob.publicKey.toBase58(), STAKE))!, bob);
+    await signSend(c, (await chain.prepareTx("join", mid, bob.publicKey.toBase58(), STAKE, alice.publicKey.toBase58()))!, bob);
     m = await chain.getMatch(mid);
     assert.deepEqual([m!.status, m!.playerB, m!.feeBps], ["active", bob.publicKey.toBase58(), 330]);
     await chain.voidMatch(mid); // tidy
@@ -72,7 +72,7 @@ test("escrow on a real validator", { skip: !run }, async (t) => {
     const [w0, t0] = [await bal(c, bob.publicKey), await bal(c, treasury.publicKey)];
     const r = await chain.settle(mid, bob.publicKey.toBase58());
     const split = computeSplit(STAKE, 330);
-    assert.equal(r.fee, 440_220n);
+    assert.equal(r.fee, 660_000n);
     assert.equal((await bal(c, bob.publicKey)) - w0, split.payout);
     assert.equal((await bal(c, treasury.publicKey)) - t0, split.fee);
     assert.equal(await chain.getMatch(mid), null, "match account closed");
@@ -100,8 +100,8 @@ test("escrow on a real validator", { skip: !run }, async (t) => {
   await t.test("player A can cancel an un-joined match and gets everything back", async () => {
     const mid = ++id;
     const a0 = await bal(c, alice.publicKey);
-    await signSend(c, (await chain.prepareTx("create", mid, alice.publicKey.toBase58(), STAKE))!, alice);
-    await signSend(c, (await chain.prepareTx("cancel", mid, alice.publicKey.toBase58(), STAKE))!, alice);
+    await signSend(c, (await chain.prepareTx("create", mid, alice.publicKey.toBase58(), STAKE, bob.publicKey.toBase58()))!, alice);
+    await signSend(c, (await chain.prepareTx("cancel", mid, alice.publicKey.toBase58(), STAKE, bob.publicKey.toBase58()))!, alice);
     assert.equal(await chain.getMatch(mid), null);
     assert.ok(a0 - (await bal(c, alice.publicKey)) < 20_000n, "only tx fees lost");
   });
@@ -119,7 +119,7 @@ test("escrow on a real validator", { skip: !run }, async (t) => {
     // nobody can cancel an active match, or refund before the timeout
     await expectFail(send(ixCancel(PROGRAM, mid, alice.publicKey), [alice]), /BadStatus|6002|custom/i);
     // can't join twice / join own match
-    await expectFail(send(ixJoin(PROGRAM, mid, mallory.publicKey), [mallory]), /BadStatus|6002|custom/i);
+    await expectFail(send(ixJoin(PROGRAM, mid, mallory.publicKey), [mallory]), /WrongOpponent|6007|custom/i);
     // refund_expired too early
     const { default: _ } = { default: 0 };
     assert.ok((await chain.getMatch(mid))!.status === "active", "match untouched by failed attacks");
@@ -144,7 +144,7 @@ test("escrow on a real validator", { skip: !run }, async (t) => {
     const cfg = loadConfig({
       PORT: "0", CHAIN_MODE: "solana", RPC_URL: RPC, PROGRAM_ID: PROGRAM.toBase58(),
       AUTHORITY_SECRET: JSON.stringify([...authority.secretKey]), TREASURY: treasury.publicKey.toBase58(),
-      TICK_MS: "2", START_STOCKS: "1", COUNTDOWN_MS: "100", DEPOSIT_TIMEOUT_MS: "20000", FALLBACK_SOL_USD: "150",
+      TICK_MS: "2", START_STOCKS: "1", COUNTDOWN_MS: "100", DEPOSIT_TIMEOUT_MS: "20000",
       DATA_DIR: mkdtempSync(join(tmpdir(), "smash-chain-")),
     } as any);
     const srv = await startServer(cfg); // runs preflight against the validator
@@ -193,12 +193,31 @@ test("escrow on a real validator", { skip: !run }, async (t) => {
     } finally { await srv.close(); }
   });
 
+  await t.test("front-running: a stranger can't join an open match that names someone else", async () => {
+    const mid = ++id;
+    await signSend(c, (await chain.prepareTx("create", mid, alice.publicKey.toBase58(), STAKE, bob.publicKey.toBase58()))!, alice);
+    await expectFail(sendAndConfirmTransaction(c, new Transaction().add(ixJoin(PROGRAM, mid, mallory.publicKey)), [mallory]), /WrongOpponent|6007|custom/i);
+    assert.equal((await chain.getMatch(mid))!.status, "open");
+    await signSend(c, (await chain.prepareTx("cancel", mid, alice.publicKey.toBase58(), STAKE, bob.publicKey.toBase58()))!, alice);
+  });
+
+  await t.test("crash recovery: voidAllActive refunds orphaned active matches on startup", async () => {
+    const mid = await open(alice, bob);
+    const [a0, b0] = [await bal(c, alice.publicKey), await bal(c, bob.publicKey)];
+    const n = await chain.voidAllActive();
+    assert.ok(n >= 1);
+    assert.equal(await chain.getMatch(mid), null);
+    assert.ok((await bal(c, alice.publicKey)) - a0 >= STAKE);
+    assert.equal((await bal(c, bob.publicKey)) - b0, STAKE);
+  });
+
   await t.test("self-play and sub-minimum stakes rejected", async () => {
     const mid = ++id;
-    await signSend(c, (await chain.prepareTx("create", mid, alice.publicKey.toBase58(), STAKE))!, alice);
-    await expectFail(sendAndConfirmTransaction(c, new Transaction().add(ixJoin(PROGRAM, mid, alice.publicKey)), [alice]), /SamePlayer|6003|custom/i);
-    await signSend(c, (await chain.prepareTx("cancel", mid, alice.publicKey.toBase58(), STAKE))!, alice);
-    await expectFail(sendAndConfirmTransaction(c, new Transaction().add(ixCreate(PROGRAM, ++id, alice.publicKey, 10n)), [alice]), /StakeTooSmall|6001|custom/i);
+    await signSend(c, (await chain.prepareTx("create", mid, alice.publicKey.toBase58(), STAKE, bob.publicKey.toBase58()))!, alice);
+    await expectFail(sendAndConfirmTransaction(c, new Transaction().add(ixJoin(PROGRAM, mid, alice.publicKey)), [alice]), /WrongOpponent|6007|custom/i);
+    await signSend(c, (await chain.prepareTx("cancel", mid, alice.publicKey.toBase58(), STAKE, bob.publicKey.toBase58()))!, alice);
+    await expectFail(sendAndConfirmTransaction(c, new Transaction().add(ixCreate(PROGRAM, ++id, alice.publicKey, STAKE, alice.publicKey)), [alice]), /SamePlayer|6003|custom/i);
+    await expectFail(sendAndConfirmTransaction(c, new Transaction().add(ixCreate(PROGRAM, ++id, alice.publicKey, 10n, bob.publicKey)), [alice]), /StakeTooSmall|6001|custom/i);
   });
 });
 

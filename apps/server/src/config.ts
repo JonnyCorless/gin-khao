@@ -1,4 +1,8 @@
-import { DEFAULT_FEE_BPS, type ChainMode } from "@solanasmash/sim";
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { DEFAULT_FEE_BPS, DEFAULT_STAKE_LAMPORTS, type ChainMode } from "@solanasmash/sim";
+
+const DEFAULT_CLIENT_DIR = fileURLToPath(new URL("../../client/dist", import.meta.url));
 
 export interface Config {
   port: number;
@@ -8,8 +12,10 @@ export interface Config {
   authoritySecret: string | null; // JSON array of bytes, server's settlement key
   treasury: string | null;
   feeBps: number;
-  stakeUsd: number;
-  fallbackSolUsd: number | null;
+  stakeLamports: bigint;
+  clientDir: string | null;
+  trustProxy: boolean;
+  maxConnsPerIp: number;
   tickMs: number;
   startStocks: number | undefined;
   countdownMs: number;
@@ -29,11 +35,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     mode,
     rpcUrl: env.RPC_URL ?? "https://api.devnet.solana.com",
     programId: env.PROGRAM_ID ?? "3WPvDvnKhi4gKCJreiGGFDX4XTJSKp6yzrCZmL1itRWd",
-    authoritySecret: env.AUTHORITY_SECRET ?? null,
+    authoritySecret: env.AUTHORITY_SECRET ?? (env.AUTHORITY_KEYPAIR_FILE ? readFileSync(env.AUTHORITY_KEYPAIR_FILE, "utf8") : null),
     treasury: env.TREASURY ?? null,
     feeBps,
-    stakeUsd: Number(env.STAKE_USD ?? 1),
-    fallbackSolUsd: env.FALLBACK_SOL_USD ? Number(env.FALLBACK_SOL_USD) : mode === "mock" ? 150 : null,
+    stakeLamports: env.STAKE_LAMPORTS ? BigInt(env.STAKE_LAMPORTS) : DEFAULT_STAKE_LAMPORTS,
+    clientDir: env.CLIENT_DIR ?? (existsSync(DEFAULT_CLIENT_DIR) ? DEFAULT_CLIENT_DIR : null),
+    trustProxy: env.TRUST_PROXY === "1",
+    maxConnsPerIp: Number(env.MAX_CONNS_PER_IP ?? 10),
     tickMs: Number(env.TICK_MS ?? 1000 / 60),
     startStocks: env.START_STOCKS ? Number(env.START_STOCKS) : undefined,
     countdownMs: Number(env.COUNTDOWN_MS ?? 3000),

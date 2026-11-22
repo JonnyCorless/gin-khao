@@ -3,6 +3,7 @@ import type { GameEvent, GameState } from "./index.ts";
 
 export const LOGIN_PREFIX = "SolanaSmash login\nnonce:";
 export const DEFAULT_FEE_BPS = 330; // 3.3 %
+export const DEFAULT_STAKE_LAMPORTS = 10_000_000n; // 0.01 SOL each
 export const DISCONNECT_GRACE_MS = 10_000;
 
 /** Mirrors `fee_for` in programs/escrow. Winner gets pot - fee; rounding favours the winner. */
@@ -26,13 +27,13 @@ export type ClientMsg =
 export type TxAction = "create" | "join" | "cancel";
 
 export type ServerMsg =
-  | { t: "challenge"; nonce: string; mode: ChainMode; feeBps: number }
+  | { t: "challenge"; nonce: string; mode: ChainMode; feeBps: number; stakeLamports: string }
   | { t: "authed"; pubkey: string }
   | { t: "queued"; waiting: number }
   | { t: "left" }
   | {
       t: "matched"; matchId: string; seat: 0 | 1; opponent: string; chars: [number, number];
-      stakeLamports: string; solUsd: number; feeBps: number; pot: string; fee: string; payout: string;
+      stakeLamports: string; feeBps: number; pot: string; fee: string; payout: string;
     }
   | { t: "tx"; action: TxAction; tx: string | null } // base64 unsigned tx; null in mock mode
   | { t: "status"; phase: Phase; msg: string }

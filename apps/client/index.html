@@ -10,12 +10,12 @@
   <div id="stage">
     <canvas id="game" width="1280" height="720"></canvas>
 
-    <div id="hud-top"><span id="net"></span></div>
+    <div id="hud-top"><span id="net"></span> · <button id="btn-mute" title="Mute (M)">sound on</button></div>
 
     <!-- Lobby -->
     <section id="lobby" class="panel">
       <h1>Solana<span>Smash</span></h1>
-      <p class="tag">1v1 platform fighter. Stake <b>$1 of SOL</b> each. Winner takes the pot.</p>
+      <p class="tag">1v1 platform fighter. Stake <b id="stake-txt">0.01 SOL</b> each. Winner takes the pot.</p>
       <div id="devnet-banner">DEVNET PROTOTYPE: no real money. Test SOL only.</div>
 
       <div id="wallet-row">
@@ -29,7 +29,7 @@
           <button class="char sel" data-char="0"><canvas width="64" height="64" id="pv0"></canvas><b>Pounce</b><small>Fast rushdown cat</small></button>
           <button class="char" data-char="1"><canvas width="64" height="64" id="pv1"></canvas><b>Bork</b><small>Heavy zoner, throws bones</small></button>
         </div>
-        <button id="btn-queue" class="primary big">Stake &amp; find match</button>
+        <button id="btn-queue" class="primary big">Stake <span id="stake-btn">0.01 SOL</span> &amp; find match</button>
         <div class="fee" id="fee-line">House cut 3.3%. Winner receives ~1.934 stakes.</div>
       </div>
       <button id="btn-practice">Practice vs bot (free, no stake)</button>

@@ -7,6 +7,9 @@ import type { ChainAdapter, OnChainMatch, Settlement } from "./types.ts";
 
 // ---- pure encoding helpers (unit-tested offline; they must mirror programs/escrow/src/lib.rs) ----
 
+/** GameMatch account size: 8 disc + 8 + 32 + 32 + 8 + 1 + 8 + 8 + 2 + 1. Keep in sync with lib.rs. */
+export const GAME_MATCH_SIZE = 108;
+
 export const disc = (name: string) => createHash("sha256").update(`global:${name}`).digest().subarray(0, 8);
 
 export const u64le = (n: bigint) => { const b = Buffer.alloc(8); b.writeBigUInt64LE(n); return b; };
@@ -29,7 +32,7 @@ export function decodeMatch(data: Buffer): OnChainMatch {
   o += 16; // created_at, started_at
   const feeBps = data.readUInt16LE(o);
   return {
-    matchId, playerA: a.toBase58(), playerB: b.equals(PublicKey.default) ? null : b.toBase58(),
+    matchId, playerA: a.toBase58(), playerB: b.toBase58(),
     stake, status: status === 0 ? "open" : "active", feeBps,
   };
 }
@@ -47,7 +50,7 @@ export function ixInitialize(programId: PublicKey, admin: PublicKey, authority: 
   });
 }
 
-export function ixCreate(programId: PublicKey, matchId: bigint, playerA: PublicKey, stake: bigint) {
+export function ixCreate(programId: PublicKey, matchId: bigint, playerA: PublicKey, stake: bigint, opponent: PublicKey) {
   return new TransactionInstruction({
     programId,
     keys: [
@@ -56,7 +59,7 @@ export function ixCreate(programId: PublicKey, matchId: bigint, playerA: PublicK
       { pubkey: playerA, isSigner: true, isWritable: true },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
-    data: Buffer.concat([disc("create_match"), u64le(matchId), u64le(stake)]),
+    data: Buffer.concat([disc("create_match"), u64le(matchId), u64le(stake), opponent.toBuffer()]),
   });
 }
 export function ixJoin(programId: PublicKey, matchId: bigint, playerB: PublicKey) {
@@ -160,14 +163,26 @@ export class SolanaChain implements ChainAdapter {
 
   get authorityPubkey() { return this.authority.publicKey.toBase58(); }
 
-  async prepareTx(action: TxAction, matchId: bigint, player: string, stake: bigint): Promise<string> {
+  async prepareTx(action: TxAction, matchId: bigint, player: string, stake: bigint, opponent: string): Promise<string> {
     const pk = new PublicKey(player);
-    const ix = action === "create" ? ixCreate(this.programId, matchId, pk, stake)
+    const ix = action === "create" ? ixCreate(this.programId, matchId, pk, stake, new PublicKey(opponent))
       : action === "join" ? ixJoin(this.programId, matchId, pk)
       : ixCancel(this.programId, matchId, pk);
     const { blockhash } = await this.conn.getLatestBlockhash("confirmed");
     const tx = new Transaction({ feePayer: pk, recentBlockhash: blockhash }).add(ix);
     return tx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+  }
+
+  /** Crash recovery: sessions live in memory, so on startup any Active match is orphaned. Refund them all. */
+  async voidAllActive(): Promise<number> {
+    const accts = await this.conn.getProgramAccounts(this.programId, { commitment: "confirmed", filters: [{ dataSize: GAME_MATCH_SIZE }] });
+    let n = 0;
+    for (const { account } of accts) {
+      const m = decodeMatch(account.data as Buffer);
+      if (m.status !== "active") continue;
+      try { await this.voidMatch(m.matchId); n++; } catch (e) { console.error("recovery: could not void", m.matchId, (e as Error).message); }
+    }
+    return n;
   }
 
   async getMatch(matchId: bigint): Promise<OnChainMatch | null> {

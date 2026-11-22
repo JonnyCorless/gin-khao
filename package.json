@@ -7,6 +7,8 @@
   "scripts": {
     "dev:server": "npm run dev -w @solanasmash/server",
     "dev:client": "npm run dev -w @solanasmash/client",
+    "start": "npm run start -w @solanasmash/server",
+    "onchain-test": "apps/server/scripts/onchain-test.sh",
     "test": "npm test -w @solanasmash/sim && npm test -w @solanasmash/server",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspaces --if-present"

@@ -6,3 +6,4 @@ target/
 .env
 keys/
 *.keypair.json
+.env.*

@@ -19,3 +19,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --manifest-path programs/escrow/Cargo.toml
+  onchain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: dtolnay/rust-toolchain@stable
+      - run: sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+      - run: echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      - run: npm ci
+      - run: mkdir -p keys && solana-keygen new --no-bip39-passphrase -s -o keys/program.json && sed -i "s/declare_id!(\"[1-9A-HJ-NP-Za-km-z]*\")/declare_id!(\"$(solana-keygen pubkey keys/program.json)\")/" programs/escrow/programs/escrow/src/lib.rs
+      - run: apps/server/scripts/onchain-test.sh
