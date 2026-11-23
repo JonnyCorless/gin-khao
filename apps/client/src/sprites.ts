@@ -155,26 +155,49 @@ const MAINSPRING = [
 ];
 const SHEETS = [CAT, DOG, QUILL, NIGHT, RONIN, BUCCANEER, BOULDERKIN, MAINSPRING];
 
+/**
+ * Cosmetic skins: palette-swap recolors, zero gameplay effect (hitboxes/stats never change — see
+ * docs/CHARACTERS.md and docs/LEGAL.md on why monetization never touches stake/odds/payout). Each
+ * character gets 3: the original, plus "Noir" (desaturated/dark) and "Gold" (warm/bright) variants.
+ * Index 0 is always the original palette, so `sprite(char)` with no skin argument is unaffected.
+ */
+const SKINS: Record<string, string>[][] = SHEETS.map((_, char) => {
+  const base: Record<string, string> = {};
+  const noir: Record<string, string> = {};
+  const gold: Record<string, string> = {};
+  const used = new Set(SHEETS[char].join(""));
+  for (const ch of used) {
+    if (ch === "." || !PAL[ch]) continue;
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(PAL[ch].slice(i, i + 2), 16));
+    const lum = Math.round(0.3 * r + 0.59 * g + 0.11 * b);
+    noir[ch] = `rgb(${Math.round(lum * 0.55)},${Math.round(lum * 0.6)},${Math.round(lum * 0.75)})`;
+    gold[ch] = `rgb(${Math.min(255, Math.round(r * 0.5 + 180))},${Math.min(255, Math.round(g * 0.5 + 130))},${Math.round(b * 0.4)})`;
+  }
+  return [base, noir, gold];
+});
+export const SKIN_NAMES = ["Original", "Noir", "Gold"];
+
 const cache = new Map<string, HTMLCanvasElement>();
-export function sprite(char: number, flash = false): HTMLCanvasElement {
-  const key = `${char}:${flash}`;
+export function sprite(char: number, flash = false, skin = 0): HTMLCanvasElement {
+  const key = `${char}:${flash}:${skin}`;
   let c = cache.get(key);
   if (c) return c;
   c = document.createElement("canvas");
   c.width = c.height = 16;
   const g = c.getContext("2d")!;
+  const overrides = SKINS[char]?.[skin];
   SHEETS[char].forEach((row, y) => [...row].forEach((ch, x) => {
     if (ch === ".") return;
-    g.fillStyle = flash ? "#ffffff" : PAL[ch];
+    g.fillStyle = flash ? "#ffffff" : (overrides?.[ch] ?? PAL[ch]);
     g.fillRect(x, y, 1, 1);
   }));
   cache.set(key, c);
   return c;
 }
 
-export function drawPreview(canvas: HTMLCanvasElement, char: number) {
+export function drawPreview(canvas: HTMLCanvasElement, char: number, skin = 0) {
   const g = canvas.getContext("2d")!;
   g.imageSmoothingEnabled = false;
   g.clearRect(0, 0, canvas.width, canvas.height);
-  g.drawImage(sprite(char), 0, 0, canvas.width, canvas.height);
+  g.drawImage(sprite(char, false, skin), 0, 0, canvas.width, canvas.height);
 }

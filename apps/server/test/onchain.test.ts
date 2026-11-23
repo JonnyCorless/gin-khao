@@ -14,7 +14,7 @@ import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { loadConfig } from "../src/config.ts";
 import { startServer } from "../src/server.ts";
-import { SolanaChain, ixRefundExpired, ixInitialize, ixSettle, ixVoid, ixCancel, ixJoin, ixCreate, matchPda } from "../src/chain/solana.ts";
+import { SolanaChain, ixRefundExpired, ixInitialize, ixUpdateConfig, ixSettle, ixVoid, ixCancel, ixJoin, ixCreate, matchPda } from "../src/chain/solana.ts";
 
 const run = process.env.ONCHAIN === "1";
 const RPC = process.env.RPC_URL ?? "http://127.0.0.1:8899";
@@ -37,9 +37,13 @@ const expectFail = async (p: Promise<unknown>, re: RegExp) => {
   await assert.rejects(p, (e: any) => { assert.match(String(e?.message ?? e) + JSON.stringify(e?.logs ?? ""), re); return true; });
 };
 
+// Hoisted so the zero-fee preflight test below can call update_config with the real admin key.
+let suiteAdmin: Keypair;
+
 test("escrow on a real validator", { skip: !run }, async (t) => {
   const c = new Connection(RPC, "confirmed");
   const [admin, authority, treasury, alice, bob, mallory] = Array.from({ length: 6 }, () => Keypair.generate());
+  suiteAdmin = admin;
   for (const k of [admin, authority, alice, bob, mallory, treasury]) await fund(c, k);
 
   await sendAndConfirmTransaction(c, new Transaction().add(ixInitialize(PROGRAM, admin.publicKey, authority.publicKey, treasury.publicKey, 330, 1000n)), [admin]);
@@ -228,4 +232,20 @@ test("preflight catches an unfunded treasury and a wrong authority", { skip: !ru
   const wrong = new SolanaChain(RPC, PROGRAM.toBase58(), JSON.stringify([...authority.secretKey]), treasury.publicKey.toBase58());
   await assert.rejects(wrong.preflight(), /not the on-chain authority|Config account missing|differs/);
   void admin; void c;
+});
+
+test("at 0 bps (the shipped default), preflight does NOT require the treasury to be funded", { skip: !run }, async () => {
+  const c = new Connection(RPC, "confirmed");
+  const [newAuthority, neverFundedTreasury] = [Keypair.generate(), Keypair.generate()];
+  await fund(c, newAuthority, 1);
+  assert.equal(await bal(c, neverFundedTreasury.publicKey), 0n, "this treasury really has never received a lamport");
+  // Real admin flips the live config to 0 bps with that unfunded treasury — this is exactly what
+  // scripts/deploy-devnet.sh's default (no FEE_BPS set) produces, just via update_config instead of
+  // a fresh initialize since the config PDA is a singleton already created earlier in this suite.
+  await sendAndConfirmTransaction(
+    c, new Transaction().add(ixUpdateConfig(PROGRAM, suiteAdmin.publicKey, newAuthority.publicKey, neverFundedTreasury.publicKey, 0, 1000n)),
+    [suiteAdmin],
+  );
+  const chain = new SolanaChain(RPC, PROGRAM.toBase58(), JSON.stringify([...newAuthority.secretKey]), neverFundedTreasury.publicKey.toBase58());
+  await chain.preflight(); // must NOT throw — at 330 bps this would reject for an unfunded treasury
 });

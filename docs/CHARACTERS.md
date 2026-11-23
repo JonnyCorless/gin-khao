@@ -70,6 +70,14 @@ second one assuming this is already a real grab.
 | Boulderkin | Heavyweight | 1 | 5 | 5 | 3 | 1 | Seismic Slam — hardest hit and most punishable move in the cast |
 | Mainspring | All-rounder | 4 | 3 | 3 | 3 | 4 | Flywheel gear — shortest-cooldown projectile, no big payoff/risk either way |
 
+## Cosmetic skins
+
+Every character has 3 skins (`apps/client/src/sprites.ts`): the original palette, "Noir" (desaturated/dark) and "Gold" (warm/bright), generated as palette swaps over the same sprite shape. **Skins never touch gameplay** — same hitboxes, same stats, same everything but color — consistent with the monetization rule below. Picked per-character on the character-select screen, persisted in `localStorage`. Currently local-only: your skin renders for you, your opponent always sees their own choice render as whatever they picked (skin isn't sent over the wire, since it's purely cosmetic and adding it to the protocol is unnecessary surface for a v1). Syncing skins to the opponent's view is a reasonable later addition, not a gap in how matches work.
+
+## Monetization is separate from the wagering mechanic entirely
+
+Default house fee is **0 bps** — players stake, the winner takes the entire pot, the platform takes nothing (see `docs/LEGAL.md` for the real, partial legal effect of that). Revenue, if any, comes from things with zero connection to match outcome: cosmetic skins (above), an optional tip jar, a community link (`apps/client/src/community.ts` — both blank/hidden by default, fill in your own values). None of this may ever influence stake size, odds, or payout; the moment it does, it's just the house fee again under a different name, and undoes the point of zeroing it.
+
 ## IP note
 
 Every fighter here is an **original character riffing on a public-domain archetype** (a folklore

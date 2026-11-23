@@ -12,6 +12,10 @@ export class Renderer {
   private particles: Particle[] = [];
   private shake = 0;
   debug = false;
+  /** The local player's chosen cosmetic skin for their own fighter. Opponents always render with
+   * skin 0 — skin choice isn't sent over the wire (see docs/CHARACTERS.md: purely cosmetic, no
+   * protocol change needed). */
+  mySkin = 0;
   private stars: [number, number, number][] = [];
 
   constructor(private ctx: CanvasRenderingContext2D) {
@@ -106,7 +110,7 @@ export class Renderer {
     if (f.action === A.HITSTUN) g.rotate(f.facing * -0.15 * Math.min(1, f.hitstun / 12));
     const bob = f.action === A.IDLE && f.grounded && Math.abs(f.vx) > 64 ? Math.sin(s.frame / 2) * 2 : 0;
     const flash = f.action === A.HITSTUN && f.af < 3;
-    g.drawImage(sprite(f.char, flash), -32, -64 + bob, 64, 64);
+    g.drawImage(sprite(f.char, flash, isMe ? this.mySkin : 0), -32, -64 + bob, 64, 64);
     g.restore();
 
     // attack swoosh
@@ -162,7 +166,7 @@ export class Renderer {
       g.font = "13px system-ui"; g.fillStyle = "#cfcaf0"; g.textAlign = "left";
       g.fillText(`${CHARACTERS[f.char].name}${o.seat === i ? " (you)" : ""}`, x - 110, y - 38);
       for (let k = 0; k < f.stocks; k++) { g.fillStyle = TAG[i]; g.fillRect(x - 110 + k * 18, y + 6, 12, 12); }
-      g.drawImage(sprite(f.char), x - 112, y - 34, 32, 32 * 0 + 32);
+      g.drawImage(sprite(f.char, false, o.seat === i ? this.mySkin : 0), x - 112, y - 34, 32, 32);
     });
     g.fillStyle = "#9a96b8"; g.font = "12px system-ui"; g.textAlign = "right";
     if (o.ping != null) g.fillText(`${o.ping} ms`, 1270, 710);

@@ -7,7 +7,8 @@ import { readInput } from "./input.ts";
 import { Predictor } from "./predict.ts";
 import { Renderer } from "./render.ts";
 import { sfx } from "./sfx.ts";
-import { drawPreview } from "./sprites.ts";
+import { drawPreview, sprite, SKIN_NAMES } from "./sprites.ts";
+import { TIP_ADDRESS, COMMUNITY_URL } from "./community.ts";
 import { connectPhantom, devWallet, type Wallet } from "./wallet.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -24,7 +25,7 @@ let mode: Mode = "lobby";
 let wallet: Wallet | null = null;
 let ws: WebSocket | null = null;
 let serverMode: "mock" | "solana" = "mock";
-let feeBps = 330;
+let feeBps = 0;
 let chosenChar = 0;
 let seat: 0 | 1 = 0;
 let predictor: Predictor | null = null;
@@ -75,10 +76,54 @@ CHARACTERS.forEach((c, i) => {
   charsEl.appendChild(btn);
 });
 CHARACTERS.forEach((_, i) => drawPreview($(`pv${i}`) as HTMLCanvasElement, i));
+
+// ---------- cosmetic skins: palette-swap only, no gameplay effect (docs/CHARACTERS.md) ----------
+let skinPrefs: Record<number, number> = {};
+try { skinPrefs = JSON.parse(localStorage.getItem("smash.skins") ?? "{}"); } catch { /* ignore */ }
+const mySkin = () => skinPrefs[chosenChar] ?? 0;
+function renderSkinRow() {
+  const el = $("skin-swatches");
+  el.innerHTML = "";
+  for (let k = 0; k < SKIN_NAMES.length; k++) {
+    const b = document.createElement("button");
+    b.className = "skin-swatch" + (k === mySkin() ? " sel" : "");
+    b.title = SKIN_NAMES[k];
+    const cv = document.createElement("canvas"); cv.width = cv.height = 64;
+    const g = cv.getContext("2d")!; g.imageSmoothingEnabled = false;
+    g.drawImage(sprite(chosenChar, false, k), 0, 0, 64, 64);
+    b.appendChild(cv);
+    b.onclick = () => { skinPrefs[chosenChar] = k; try { localStorage.setItem("smash.skins", JSON.stringify(skinPrefs)); } catch { /* ignore */ } renderSkinRow(); };
+    el.appendChild(b);
+  }
+}
+renderSkinRow();
+
+// ---------- optional support row: tip jar + community link. Never touches stake/odds/payout. ----------
+{
+  const row = $("support-row");
+  if (TIP_ADDRESS) {
+    const b = document.createElement("button");
+    b.textContent = "☕ Tip the devs";
+    b.title = "Copy the tip wallet address — this is a separate wallet, not the match escrow";
+    b.onclick = async () => {
+      try { await navigator.clipboard.writeText(TIP_ADDRESS); b.textContent = "Copied!"; setTimeout(() => (b.textContent = "☕ Tip the devs"), 1500); }
+      catch { prompt("Tip address:", TIP_ADDRESS); }
+    };
+    row.appendChild(b);
+  }
+  if (COMMUNITY_URL) {
+    const a = document.createElement("a");
+    a.href = COMMUNITY_URL; a.target = "_blank"; a.rel = "noopener noreferrer";
+    a.textContent = "\u{1F4AC} Join the community";
+    row.appendChild(a);
+  }
+}
+
 document.querySelectorAll<HTMLButtonElement>(".char").forEach((b) => {
   b.onclick = () => {
     chosenChar = Number(b.dataset.char);
     document.querySelectorAll(".char").forEach((x) => x.classList.toggle("sel", x === b));
+    renderSkinRow();
   };
 });
 
@@ -126,7 +171,9 @@ async function onServer(m: ServerMsg) {
       serverMode = m.mode; feeBps = m.feeBps; stakeLamports = m.stakeLamports;
       const stakeSol = fmtSol(m.stakeLamports), win = fmtSol(BigInt(m.stakeLamports) * 2n * BigInt(10000 - m.feeBps) / 10000n);
       $("stake-txt").textContent = `${stakeSol} SOL`; $("stake-btn").textContent = `${stakeSol} SOL`;
-      $("fee-line").textContent = `Pot ${fmtSol(BigInt(m.stakeLamports) * 2n)} SOL. House cut ${(m.feeBps / 100).toFixed(1)}%. Winner receives ${win} SOL.`;
+      $("fee-line").textContent = m.feeBps === 0
+        ? `Pot ${fmtSol(BigInt(m.stakeLamports) * 2n)} SOL. No house fee — winner takes the entire pot.`
+        : `Pot ${fmtSol(BigInt(m.stakeLamports) * 2n)} SOL. House cut ${(m.feeBps / 100).toFixed(1)}%. Winner receives ${win} SOL.`;
       $("devnet-banner").textContent = m.mode === "mock" ? "MOCK CHAIN: simulated stakes, no real funds move." : "DEVNET PROTOTYPE: test SOL only. Set your wallet to Devnet.";
       try {
         const sig = await wallet!.signMessage(new TextEncoder().encode(LOGIN_PREFIX + m.nonce));
@@ -139,7 +186,9 @@ async function onServer(m: ServerMsg) {
     case "matched": {
       matchInfo = m; seat = m.seat; mode = "online";
       setStatus("Opponent found",
-        `Stake <b>${fmtSol(m.stakeLamports)} SOL</b> each.<br>Pot ${fmtSol(m.pot)} SOL · house ${(m.feeBps / 100).toFixed(1)}% = ${fmtSol(m.fee)} SOL<br>Winner gets <b class="win">${fmtSol(m.payout)} SOL</b>`);
+        `Stake <b>${fmtSol(m.stakeLamports)} SOL</b> each.<br>Pot ${fmtSol(m.pot)} SOL` +
+        (m.feeBps > 0 ? ` · house ${(m.feeBps / 100).toFixed(1)}% = ${fmtSol(m.fee)} SOL` : " · no house fee") +
+        `<br>Winner gets <b class="win">${fmtSol(m.payout)} SOL</b>`);
       return;
     }
     case "tx": {
@@ -184,7 +233,8 @@ async function onServer(m: ServerMsg) {
       if (won) sfx.win(); else if (!draw) sfx.lose();
       $("result-title").textContent = draw ? "No contest" : won ? "You win!" : "You lose";
       $("result-title").className = draw ? "" : won ? "win" : "lose";
-      $("result-detail").innerHTML = `${m.reason}<br>` + (won ? `Payout <b class="win">${fmtSol(m.payout)} SOL</b> (house fee ${fmtSol(m.fee)} SOL)` : draw ? "Stakes refunded in full." : "Stake went to the winner.")
+      const feeNote = BigInt(m.fee) > 0n ? ` (house fee ${fmtSol(m.fee)} SOL)` : " — no house fee";
+      $("result-detail").innerHTML = `${m.reason}<br>` + (won ? `Payout <b class="win">${fmtSol(m.payout)} SOL</b>${feeNote}` : draw ? "Stakes refunded in full." : "Stake went to the winner.")
         + (m.sig ? `<br><span class="mono">tx: ${m.sig}</span>` : "");
       predictor = predictor; show("opp-banner", false);
       return;
@@ -231,6 +281,7 @@ function frame(now: number) {
   let s: GameState = idleState;
   if (mode === "practice" && practice) s = practice.state;
   else if (mode === "online" && predictor) s = predictor.pred;
+  renderer.mySkin = mySkin();
   renderer.draw(s, { seat: mode === "lobby" ? null : seat, names: ["P1", "P2"], ping: mode === "online" ? ping : undefined });
 
   const cd = $("countdown");

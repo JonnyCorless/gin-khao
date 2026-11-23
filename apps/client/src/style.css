@@ -27,6 +27,13 @@ button.big { font-size:20px; padding:14px 28px; width:100%; margin:12px 0 4px; }
 .stat-bar i { flex:1; height:6px; border-radius:2px; background:#2a2a52; font-style:normal; }
 .stat-bar i.on { background:var(--pri); }
 @media (max-width: 640px) { .chars { grid-template-columns:repeat(2, 1fr); } }
+#skin-row { display:flex; align-items:center; justify-content:center; gap:8px; margin:10px 0 2px; }
+.skin-label { font-size:12px; color:var(--mut); }
+.skin-swatch { width:40px; height:40px; padding:2px; border:2px solid #3a3a70; border-radius:8px; background:#1a1a36; cursor:pointer; }
+.skin-swatch canvas { width:100%; height:100%; image-rendering:pixelated; }
+.skin-swatch.sel { border-color:var(--pri); }
+#support-row { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:12px; }
+#support-row button, #support-row a { font-size:13px; padding:6px 12px; margin:0; }
 .fee { color:var(--mut); font-size:13px; }
 #wallet-info { font-family:ui-monospace, monospace; color:var(--pri); margin:6px 0 10px; word-break:break-all; }
 .divider { display:flex; align-items:center; gap:10px; margin:18px 0 10px; color:var(--mut); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }

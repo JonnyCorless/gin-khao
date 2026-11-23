@@ -53,7 +53,9 @@ class Bot {
 
 async function harness(overrides: Record<string, string> = {}) {
   const dir = mkdtempSync(join(tmpdir(), "smash-"));
-  const cfg = loadConfig({ PORT: "0", TICK_MS: "2", START_STOCKS: "1", COUNTDOWN_MS: "50", DEPOSIT_TIMEOUT_MS: "1500", GRACE_MS: "300", DATA_DIR: dir, ...overrides } as any);
+  // FEE_BPS: "330" here so the existing fee-math assertions below keep covering the (still fully
+  // supported, just no longer default) nonzero-fee path; the zero-fee *default* has its own test.
+  const cfg = loadConfig({ PORT: "0", TICK_MS: "2", START_STOCKS: "1", COUNTDOWN_MS: "50", DEPOSIT_TIMEOUT_MS: "1500", GRACE_MS: "300", DATA_DIR: dir, FEE_BPS: "330", ...overrides } as any);
   const srv = await startServer(cfg);
   return { srv, chain: srv.chain as MockChain, url: `ws://127.0.0.1:${srv.port}` };
 }
@@ -89,6 +91,24 @@ test("full 1v1: queue -> stake -> fight -> 3.3% settlement", async () => {
     const net = [...chain.balances.values()].reduce((x, y) => x + y, 0n) + chain.treasury;
     assert.equal(net, 0n, "no money created or destroyed");
     assert.equal(chain.matches.size, 0);
+  } finally { await srv.close(); }
+});
+
+test("the actual shipped default (no FEE_BPS set) takes NO house fee: winner gets the entire pot", async () => {
+  // harness() forces FEE_BPS=330 so the test above keeps covering the nonzero-fee path; this one
+  // deliberately overrides it back off, to cover what a real deploy with no FEE_BPS set does.
+  const { srv, chain, url } = await harness({ FEE_BPS: "0" });
+  try {
+    const { a, b, ma } = await pair(url);
+    assert.equal(ma.fee, "0");
+    assert.equal(ma.payout, "20000000", "winner receives the full pot, not pot-minus-fee");
+    const [seat0, seat1] = a.seat === 0 ? [a, b] : [b, a];
+    seat1.autoInput = INPUT.LEFT;
+    const [ra] = await Promise.all([a.next("result", 15000), b.next("result", 15000)]);
+    assert.equal(ra.fee, "0");
+    assert.equal(ra.payout, "20000000");
+    assert.equal(chain.balances.get(seat0.pubkey), 10000000n, "winner nets a full stake's worth, not a fee-shaved amount");
+    assert.equal(chain.treasury, 0n, "the platform received nothing");
   } finally { await srv.close(); }
 });
 

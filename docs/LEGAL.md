@@ -16,11 +16,27 @@ None of this means it's definitely illegal everywhere, or that nobody successful
 ## What changes the analysis (ask a lawyer about these specifically)
 
 - **Peer-to-peer vs. house-banked**: this design is peer-to-peer (players' stakes form the pot; the house only takes a service fee, never risks its own capital against a player). Some jurisdictions treat that more like an entry-fee tournament than banked gambling — this is one of the stronger arguments in your favour, and also one a lawyer needs to confirm actually holds in your target markets.
-- **Stake size and framing**: "$1 tournament entry fee, winner-take-most prize pool" reads differently to some regulators than "wager." The 3.3% "house cut" framing is closer to a rake, which is itself a regulated thing in several places (e.g. US poker rake rules).
+- **Stake size and framing**: "$1 tournament entry fee, winner-take-most prize pool" reads differently to some regulators than "wager." A nonzero house cut (this repo shipped at 330 bps earlier, and still supports one) is closer to a rake, which is itself a regulated thing in several places (e.g. US poker rake rules) — see the zero-fee section below for why removing it is a real but partial improvement.
 - **Jurisdiction of players, not just of you**: geo-blocking isn't a formality — it's usually the actual compliance mechanism (IP geolocation, sometimes device/SIM checks), and getting it wrong is what turns a grey area into enforcement exposure.
 - **KYC/AML**: real-money wagering platforms are frequently subject to anti-money-laundering obligations (identity verification, transaction monitoring, suspicious-activity reporting) independent of the gambling licence itself.
 - **Age verification**: essentially universal requirement for real-money wagering.
 - **Consumer funds**: several licensing regimes require player funds to be held separately from operating funds (safeguarding), which the on-chain escrow design arguably satisfies better than a custodial balance would — still a question for counsel, not an assumption.
+
+## Does removing the house fee make this legal?
+
+**No, but it is a real, meaningful reduction in risk — not nothing, not everything.**
+
+Gambling law almost universally triggers on the *players'* side of the transaction (stake + chance-or-skill + prize), not on whether a middleman profits. Two people wagering value against each other with a winner-take-all pot is still "wagering" between them whether or not an operator takes a cut. Zeroing the fee doesn't erase that question.
+
+Where it genuinely helps: several US states have "social gambling" or "private wager" exemptions written specifically around "no one profits except as a player" — if the platform takes literally nothing and the money only moves player-to-player, some of these carve-outs apply, and the stricter commercial-operator licensing category can fall away. That's a real mechanism.
+
+Where it doesn't help as much: the UK Gambling Act regulates *facilitating* remote gambling — providing the software/platform that lets others wager — largely independent of whether the facilitator profits. Several other frameworks are similar: they regulate the facilitation of wagering, not just an operator's profit from it. Zero fee also doesn't touch age-verification or KYC/AML obligations that can attach to a wagering platform regardless of fee structure.
+
+This repo ships with `FEE_BPS` defaulting to 0 (see the Fee row in the decision table above): players stake, the winner takes the entire pot, the platform takes nothing. Treat that as reducing the problem, not solving it, and get the same jurisdiction-specific legal review either way before any real money.
+
+### If you want to monetize anyway, keep it separate from the wagering mechanic
+
+The standard safe pattern (how free poker/fantasy-sports apps monetize in markets where rake-for-stakes itself would need a license): cosmetic skins sold or unlocked separately from matches, a tip jar / "support the devs" link, Discord or Patreon membership perks, lobby sponsorships. The hard constraint is that **none of it may touch stake size, odds, or payout** — a cosmetic that boosts win chance, or a "donation" that increases your payout, is just the house fee again under a different name, and would undo the exact thing zeroing the fee was meant to do.
 
 ## Realistic paths, roughly in order of effort
 

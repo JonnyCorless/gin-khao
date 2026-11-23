@@ -50,6 +50,18 @@ export function ixInitialize(programId: PublicKey, admin: PublicKey, authority: 
   });
 }
 
+export function ixUpdateConfig(programId: PublicKey, admin: PublicKey, authority: PublicKey, treasury: PublicKey, feeBps: number, minStake: bigint) {
+  const fee = Buffer.alloc(2); fee.writeUInt16LE(feeBps);
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: configPda(programId), isSigner: false, isWritable: true },
+      { pubkey: admin, isSigner: true, isWritable: false },
+    ],
+    data: Buffer.concat([disc("update_config"), authority.toBuffer(), treasury.toBuffer(), fee, u64le(minStake)]),
+  });
+}
+
 export function ixCreate(programId: PublicKey, matchId: bigint, playerA: PublicKey, stake: bigint, opponent: PublicKey) {
   return new TransactionInstruction({
     programId,
@@ -151,12 +163,17 @@ export class SolanaChain implements ChainAdapter {
     // Config layout: 8 disc, admin, authority, treasury, fee_bps u16, min_stake u64
     const authority = new PublicKey(cfg.data.subarray(8 + 32, 8 + 64));
     const treasury = new PublicKey(cfg.data.subarray(8 + 64, 8 + 96));
+    const feeBps = cfg.data.readUInt16LE(8 + 96);
     if (!authority.equals(this.authority.publicKey)) throw new Error(`AUTHORITY_SECRET (${this.authorityPubkey}) is not the on-chain authority (${authority.toBase58()})`);
     if (!treasury.equals(this.treasury)) throw new Error(`TREASURY env (${this.treasury.toBase58()}) differs from on-chain treasury (${treasury.toBase58()})`);
-    // A system account must stay rent-exempt, so the very first fee payout to an empty treasury would fail.
-    const rent = await this.conn.getMinimumBalanceForRentExemption(0);
-    const tBal = await this.conn.getBalance(this.treasury);
-    if (tBal < rent) throw new Error(`treasury ${this.treasury.toBase58()} holds ${tBal} lamports; send it at least ${rent} so fee payouts don't fail rent checks`);
+    if (feeBps > 0) {
+      // A system account must stay rent-exempt, so the very first fee payout to an empty treasury
+      // would fail. Only matters at all if a fee is actually configured — at 0 bps (the default:
+      // players keep the whole pot, the platform takes nothing) settle() never sends it anything.
+      const rent = await this.conn.getMinimumBalanceForRentExemption(0);
+      const tBal = await this.conn.getBalance(this.treasury);
+      if (tBal < rent) throw new Error(`treasury ${this.treasury.toBase58()} holds ${tBal} lamports; send it at least ${rent} so fee payouts don't fail rent checks`);
+    }
     const aBal = await this.conn.getBalance(this.authority.publicKey);
     if (aBal < 5_000_000) throw new Error(`authority ${this.authorityPubkey} needs SOL to pay settlement fees (has ${aBal} lamports)`);
   }

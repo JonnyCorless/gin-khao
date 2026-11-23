@@ -12,7 +12,7 @@ export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.cargo/b
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 CLUSTER="${CLUSTER:-https://api.devnet.solana.com}"
-FEE_BPS="${FEE_BPS:-330}"
+FEE_BPS="${FEE_BPS:-0}"  # no house cut by default: players keep the whole pot
 KEYS="$ROOT/keys"
 
 case "$CLUSTER" in
@@ -68,8 +68,13 @@ if ! ADMIN_KEYPAIR="$KEYS/admin.json" AUTHORITY="$AUTHORITY" TREASURY="$TREASURY
   echo "(config may already exist from a previous run; use update_config to change it)"
 fi
 
-echo "== funding treasury (rent-exempt minimum) and server authority (pays settlement tx fees)"
-solana transfer "$TREASURY" 0.01 -u "$CLUSTER" --keypair "$KEYS/admin.json" --allow-unfunded-recipient >/dev/null
+if [ "$FEE_BPS" != "0" ]; then
+  echo "== funding treasury (rent-exempt minimum, needed because a fee is configured)"
+  solana transfer "$TREASURY" 0.01 -u "$CLUSTER" --keypair "$KEYS/admin.json" --allow-unfunded-recipient >/dev/null
+else
+  echo "== fee is 0 bps: skipping treasury funding, the platform takes nothing from matches"
+fi
+echo "== funding server authority (pays settlement tx fees, not a house cut)"
 solana transfer "$AUTHORITY" 0.5 -u "$CLUSTER" --keypair "$KEYS/admin.json" --allow-unfunded-recipient >/dev/null
 
 cat > "$ROOT/.env.devnet" <<EOF

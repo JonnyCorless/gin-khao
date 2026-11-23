@@ -14,7 +14,7 @@ if (!rpc.includes("devnet") && !rpc.includes("localhost") && !rpc.includes("127.
 }
 const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(need("ADMIN_KEYPAIR"), "utf8"))));
 const programId = new PublicKey(need("PROGRAM_ID"));
-const feeBps = Number(process.env.FEE_BPS ?? 330);
+const feeBps = Number(process.env.FEE_BPS ?? 0); // no house cut by default
 const minStake = BigInt(process.env.MIN_STAKE_LAMPORTS ?? 1_000_000); // 0.001 SOL floor
 
 const ix = ixInitialize(programId, admin.publicKey, new PublicKey(need("AUTHORITY")), new PublicKey(need("TREASURY")), feeBps, minStake);

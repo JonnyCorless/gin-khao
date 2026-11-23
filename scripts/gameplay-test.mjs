@@ -204,11 +204,11 @@ async function run() {
           await b.page.waitForSelector("#result:not([hidden])", { timeout: 5000 }).catch(() => {});
           const detailA = await a.page.textContent("#result-detail");
           const detailB = await b.page.textContent("#result-detail");
-          // Only the WINNER's screen states the house fee (by design); matchmaking randomises which
-          // seat/browser wins, so check whichever of the two detail texts has it, not always "a".
-          const feeMatch = detailA.match(/house fee ([\d.]+) SOL/) ?? detailB.match(/house fee ([\d.]+) SOL/);
-          assert("winner's screen states the house fee", !!feeMatch, `A: ${detailA} | B: ${detailB}`);
-          if (feeMatch) assert("house fee equals exactly 3.3% of the 0.02 SOL pot", feeMatch[1] === "0.00066", feeMatch[1]);
+          // This server was started with no FEE_BPS override, i.e. the actual shipped default: no
+          // house fee, winner keeps the entire pot. Matchmaking randomises which seat/browser wins,
+          // so check whichever of the two detail texts states the result.
+          assert("winner's screen says no house fee (the shipped default)", /no house fee/.test(detailA) || /no house fee/.test(detailB), `A: ${detailA} | B: ${detailB}`);
+          assert("winner's payout is the full 0.02 SOL pot, not pot-minus-fee", /0\.02 SOL/.test(detailA) || /0\.02 SOL/.test(detailB), `A: ${detailA} | B: ${detailB}`);
           assert("both players saw a result (one win, one lose/draw)", /win|lose|contest/i.test(detailA + detailB));
           await a.page.screenshot({ path: join(OUT, "04-online-result-a.png") });
           await b.page.screenshot({ path: join(OUT, "04-online-result-b.png") });

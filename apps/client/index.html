@@ -20,6 +20,7 @@
 
       <div id="pick">
         <div class="chars" id="chars"><!-- generated from CHARACTERS in main.ts --></div>
+        <div id="skin-row"><span class="skin-label">Skin:</span><span id="skin-swatches"></span></div>
       </div>
       <button id="btn-practice" class="primary big">Practice vs bot (free, no stake)</button>
 
@@ -31,7 +32,7 @@
       <div id="wallet-info" hidden></div>
       <div id="stake-row" hidden>
         <button id="btn-queue" class="primary big">Stake <span id="stake-btn">0.01 SOL</span> &amp; find match</button>
-        <div class="fee" id="fee-line">House cut 3.3%. Winner receives ~1.934 stakes.</div>
+        <div class="fee" id="fee-line">No house fee — winner takes the entire pot.</div>
       </div>
 
       <details class="controls">
@@ -46,6 +47,8 @@
           <tr><td>Gamepad</td><td>stick, A/B jump, X attack, Y special, bumpers shield</td></tr>
         </table>
       </details>
+
+      <div id="support-row"><!-- populated by main.ts if TIP_ADDRESS/COMMUNITY_URL are set --></div>
     </section>
 
     <!-- Match status -->

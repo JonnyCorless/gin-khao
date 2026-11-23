@@ -2,7 +2,10 @@
 import type { GameEvent, GameState } from "./index.ts";
 
 export const LOGIN_PREFIX = "SolanaSmash login\nnonce:";
-export const DEFAULT_FEE_BPS = 330; // 3.3 %
+// No house cut by default: players stake against each other and the winner takes the entire pot,
+// the platform takes nothing. See docs/LEGAL.md for why this is a real (if partial) risk reduction,
+// not a complete fix, and why monetization is kept entirely separate from the staked matches.
+export const DEFAULT_FEE_BPS = 0;
 export const DEFAULT_STAKE_LAMPORTS = 10_000_000n; // 0.01 SOL each
 export const DISCONNECT_GRACE_MS = 10_000;
 
