@@ -56,7 +56,24 @@ function setStatus(title: string, detail = "", actions: { label: string; fn: () 
   }
 }
 
-// ---------- lobby ----------
+// ---------- lobby: character picker, generated from the roster so adding a fighter is just
+// adding an entry to CHARACTERS in packages/sim ----------
+const STAT_AXES: { key: keyof (typeof CHARACTERS)[number]["rating"]; label: string }[] = [
+  { key: "speed", label: "SPD" }, { key: "power", label: "PWR" }, { key: "weight", label: "WGT" },
+  { key: "range", label: "RNG" }, { key: "mobility", label: "MOB" },
+];
+const charsEl = $("chars");
+CHARACTERS.forEach((c, i) => {
+  const btn = document.createElement("button");
+  btn.className = "char" + (i === 0 ? " sel" : "");
+  btn.dataset.char = String(i);
+  const bars = STAT_AXES.map(({ key, label }) => `
+    <div class="stat-row"><span class="stat-label">${label}</span><span class="stat-bar">${
+      Array.from({ length: 5 }, (_, n) => `<i class="${n < c.rating[key] ? "on" : ""}"></i>`).join("")
+    }</span></div>`).join("");
+  btn.innerHTML = `<canvas width="64" height="64" id="pv${i}"></canvas><b>${c.name}</b><small>${c.tagline}</small><div class="archetype">${c.archetype}</div><div class="stats">${bars}</div>`;
+  charsEl.appendChild(btn);
+});
 CHARACTERS.forEach((_, i) => drawPreview($(`pv${i}`) as HTMLCanvasElement, i));
 document.querySelectorAll<HTMLButtonElement>(".char").forEach((b) => {
   b.onclick = () => {

@@ -1,6 +1,6 @@
 # SolanaSmash
 
-Browser platform fighter where two players each stake **0.01 SOL**, fight a 1v1, and the winner takes the pot minus a **3.3% house cut** (winner gets 0.01934 SOL, house gets 0.00066 SOL). **Devnet prototype**: real-money operation is a real legal question in most jurisdictions, not just an engineering one — see `docs/LEGAL.md` before taking this anywhere near mainnet. Four original characters, none based on existing copyrighted or trademarked IP: Pounce, Bork, Quillborne (detective archetype), Nightshade (vampire archetype).
+Browser platform fighter where two players each stake **0.01 SOL**, fight a 1v1, and the winner takes the pot minus a **3.3% house cut** (winner gets 0.01934 SOL, house gets 0.00066 SOL). **Devnet prototype**: real-money operation is a real legal question in most jurisdictions, not just an engineering one — see `docs/LEGAL.md` before taking this anywhere near mainnet. Eight original characters (none based on existing copyrighted or trademarked IP) built on a formal 5-axis stat system — see `docs/CHARACTERS.md`.
 
 ```
 packages/sim        deterministic fighting core (shared by client + server), wire protocol, fee maths
@@ -64,7 +64,7 @@ Every match's full input log + result is stored in `DATA_DIR` (`replays/<id>.bin
 ## Tests
 
 ```bash
-npm test                       # sim (12: determinism, rules, every character pairing) + server (12: mock-chain full flow, matchmaking, limits, Solana encoding)
+npm test                       # sim (15: determinism, rules, every pairing across all 8 characters) + server (12: mock-chain full flow, matchmaking, limits, Solana encoding)
 cargo test --manifest-path programs/escrow/Cargo.toml   # fee maths (4)
 npm run onchain-test           # builds the program, boots a local validator, runs 13 on-chain tests
 ```

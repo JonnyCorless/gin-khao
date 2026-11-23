@@ -69,8 +69,26 @@ export interface Move {
   projectile?: { speed: number; life: number; w: number; h: number; cooldown: number };
 }
 
+/**
+ * 1-5 rating on each axis, shown to players on the character-select screen. These are *descriptive*
+ * labels, not a formula that derives the engine numbers below — each character's actual physics and
+ * move data are still hand-tuned and playtested. The rating is a guide for designing new characters
+ * consistently (see docs/CHARACTERS.md) and for players comparing fighters at a glance, not a source
+ * of truth the sim reads from.
+ */
+export interface StatRating {
+  speed: number; // run/air speed, how fast attacks start up
+  power: number; // damage and knockback dealt
+  weight: number; // how hard THEY are to launch
+  range: number; // hitbox/hurtbox reach, including projectile uptime
+  mobility: number; // jump height, air control, special-move repositioning
+}
+
 export interface Character {
   name: string;
+  archetype: string; // Rushdown / Zoner / Heavyweight / Trickster / All-rounder (see docs/CHARACTERS.md)
+  tagline: string; // one line, shown on the character-select card
+  rating: StatRating;
   runSpeed: number;
   accel: number;
   friction: number;
@@ -88,6 +106,9 @@ export interface Character {
 export const CHARACTERS: Character[] = [
   {
     name: "Pounce",
+    archetype: "Rushdown",
+    tagline: "Fast rushdown cat",
+    rating: { speed: 5, power: 2, weight: 2, range: 2, mobility: 4 },
     runSpeed: 4.6,
     accel: 0.6,
     friction: 0.55,
@@ -109,6 +130,9 @@ export const CHARACTERS: Character[] = [
   },
   {
     name: "Bork",
+    archetype: "Zoner",
+    tagline: "Heavy zoner, throws bones",
+    rating: { speed: 2, power: 4, weight: 4, range: 4, mobility: 2 },
     runSpeed: 3.6,
     accel: 0.45,
     friction: 0.5,
@@ -137,6 +161,9 @@ export const CHARACTERS: Character[] = [
     // Original character, archetype only: a Victorian consulting-detective silhouette
     // (deerstalker hat, coat, cane). Not any specific studio's likeness or design.
     name: "Quillborne",
+    archetype: "Rushdown",
+    tagline: "Lightweight skirmisher, long cane reach",
+    rating: { speed: 5, power: 2, weight: 1, range: 4, mobility: 5 },
     runSpeed: 5.0,
     accel: 0.65,
     friction: 0.58,
@@ -163,6 +190,9 @@ export const CHARACTERS: Character[] = [
     // Original character, archetype only: a folkloric vampire-noble silhouette (cape,
     // pale face, red eyes). Not any specific studio's likeness, costume design or name.
     name: "Nightshade",
+    archetype: "Trickster",
+    tagline: "Floaty, long dash special",
+    rating: { speed: 3, power: 4, weight: 3, range: 3, mobility: 5 },
     runSpeed: 4.0,
     accel: 0.5,
     friction: 0.45,
@@ -182,6 +212,137 @@ export const CHARACTERS: Character[] = [
       special: {
         startup: 6, active: 8, recovery: 24, hb: { x: 0, y: -50, w: 50, h: 36 },
         dmg: 10, base: 360, growth: 440, dirx: 85, diry: -45, lunge: 16,
+      },
+    },
+  },
+  {
+    // Original character, archetype only: a disciplined duelist (topknot, sash, curved blade
+    // silhouette). Not any specific studio's likeness, costume design or name.
+    name: "Ronin",
+    archetype: "Duelist", // All-rounder leaning power/range: big reward for committing to a hit
+    tagline: "Disciplined duelist, high-risk quick-draw special",
+    rating: { speed: 4, power: 4, weight: 3, range: 4, mobility: 3 },
+    runSpeed: 4.2,
+    accel: 0.55,
+    friction: 0.55,
+    airSpeed: 3.6,
+    airAccel: 0.32,
+    jumpV: 12.8,
+    airJumpV: 11.8,
+    gravity: 0.64,
+    fallMax: 11,
+    fastFall: 15,
+    weight: 100,
+    moves: {
+      neutral: { startup: 3, active: 3, recovery: 8, hb: { x: 10, y: -50, w: 42, h: 24 }, dmg: 3, base: 150, growth: 40, dirx: 95, diry: -28 },
+      forward: { startup: 13, active: 4, recovery: 22, hb: { x: 12, y: -46, w: 74, h: 22 }, dmg: 15, base: 460, growth: 700, dirx: 93, diry: -32 },
+      up: { startup: 7, active: 5, recovery: 17, hb: { x: -22, y: -102, w: 50, h: 44 }, dmg: 9, base: 380, growth: 520, dirx: 12, diry: -99 },
+      down: { startup: 6, active: 4, recovery: 16, hb: { x: -5, y: -14, w: 66, h: 14 }, dmg: 8, base: 300, growth: 300, dirx: 68, diry: -69 },
+      // "Iaijutsu Dash": a quick-draw dash-slash. Fast startup (the whole point of a quick draw)
+      // but very punishable if it whiffs — a high-risk, high-reward signature rather than a safe poke.
+      special: {
+        startup: 5, active: 3, recovery: 28, hb: { x: 14, y: -48, w: 60, h: 26 },
+        dmg: 13, base: 420, growth: 600, dirx: 92, diry: -34, lunge: 14,
+      },
+    },
+  },
+  {
+    // Original character, archetype only: a swashbuckler silhouette (tricorn hat, coat, cutlass).
+    // Not any specific studio's likeness, costume design or name.
+    name: "Buccaneer",
+    archetype: "Trickster", // stage control via a pull special rather than raw speed or power
+    tagline: "Swashbuckler, hook pulls foes in close",
+    rating: { speed: 3, power: 2, weight: 3, range: 3, mobility: 4 },
+    runSpeed: 4.1,
+    accel: 0.5,
+    friction: 0.5,
+    airSpeed: 3.5,
+    airAccel: 0.3,
+    jumpV: 13.0,
+    airJumpV: 12.4,
+    gravity: 0.6,
+    fallMax: 10.8,
+    fastFall: 14.5,
+    weight: 105,
+    moves: {
+      neutral: { startup: 4, active: 3, recovery: 9, hb: { x: 9, y: -50, w: 44, h: 25 }, dmg: 3, base: 160, growth: 45, dirx: 95, diry: -30 },
+      forward: { startup: 10, active: 5, recovery: 20, hb: { x: 9, y: -48, w: 64, h: 30 }, dmg: 11, base: 400, growth: 560, dirx: 91, diry: -36 },
+      up: { startup: 8, active: 6, recovery: 18, hb: { x: -27, y: -103, w: 54, h: 45 }, dmg: 8, base: 360, growth: 470, dirx: 15, diry: -98 },
+      down: { startup: 6, active: 4, recovery: 16, hb: { x: 0, y: -14, w: 62, h: 14 }, dmg: 7, base: 295, growth: 290, dirx: 69, diry: -69 },
+      // "Grapple Hook": a thrown hook that pulls the opponent toward the Buccaneer on hit (negative
+      // dirx = knockback reversed, toward the attacker instead of away) rather than launching them —
+      // low damage, built for repositioning an edgeguard or dragging someone off a platform.
+      // NOTE: this is a simplified approximation (reversed knockback), not a true grab/drag mechanic;
+      // a real command-grab would need its own sim-engine support, which is a separate piece of work.
+      special: {
+        startup: 9, active: 1, recovery: 22,
+        hb: { x: 0, y: 0, w: 0, h: 0 },
+        dmg: 5, base: 140, growth: 120, dirx: -70, diry: -20,
+        projectile: { speed: 10, life: 55, w: 20, h: 14, cooldown: 55 },
+      },
+    },
+  },
+  {
+    // Original character, archetype only: a towering stone-giant silhouette. Not any specific
+    // studio's likeness or design.
+    name: "Boulderkin",
+    archetype: "Heavyweight",
+    tagline: "Towering heavyweight, devastating but slow",
+    rating: { speed: 1, power: 5, weight: 5, range: 3, mobility: 1 },
+    runSpeed: 2.6,
+    accel: 0.3,
+    friction: 0.65,
+    airSpeed: 2.0,
+    airAccel: 0.18,
+    jumpV: 10.5,
+    airJumpV: 9.5,
+    gravity: 0.85,
+    fallMax: 13.5,
+    fastFall: 17,
+    weight: 150,
+    moves: {
+      neutral: { startup: 7, active: 4, recovery: 14, hb: { x: 6, y: -52, w: 50, h: 30 }, dmg: 6, base: 220, growth: 70, dirx: 95, diry: -32 },
+      forward: { startup: 20, active: 6, recovery: 32, hb: { x: 6, y: -50, w: 80, h: 40 }, dmg: 20, base: 520, growth: 900, dirx: 93, diry: -40 },
+      up: { startup: 14, active: 6, recovery: 26, hb: { x: -34, y: -108, w: 66, h: 52 }, dmg: 14, base: 440, growth: 620, dirx: 10, diry: -99 },
+      down: { startup: 12, active: 5, recovery: 24, hb: { x: -16, y: -12, w: 96, h: 16 }, dmg: 11, base: 340, growth: 340, dirx: 70, diry: -70 },
+      // "Seismic Slam": the single hardest-hitting move in the roster, and deliberately the most
+      // punishable on whiff — the heavyweight's entire identity is this tradeoff.
+      special: {
+        startup: 16, active: 5, recovery: 34, hb: { x: -20, y: -20, w: 90, h: 30 },
+        dmg: 17, base: 480, growth: 680, dirx: 80, diry: -55, lunge: 4,
+      },
+    },
+  },
+  {
+    // Original character, archetype only: a steampunk clockwork automaton (brass/copper, gear
+    // motifs). Not any specific studio's likeness or design.
+    name: "Mainspring",
+    archetype: "All-rounder", // the roster's "learn this one first" — balanced, with a projectile
+    tagline: "Balanced clockwork duelist, flings a gear",
+    rating: { speed: 4, power: 3, weight: 3, range: 3, mobility: 4 },
+    runSpeed: 4.3,
+    accel: 0.6,
+    friction: 0.52,
+    airSpeed: 3.7,
+    airAccel: 0.34,
+    jumpV: 13.2,
+    airJumpV: 12.6,
+    gravity: 0.6,
+    fallMax: 11.2,
+    fastFall: 15,
+    weight: 95,
+    moves: {
+      neutral: { startup: 3, active: 3, recovery: 8, hb: { x: 9, y: -50, w: 40, h: 24 }, dmg: 3, base: 150, growth: 38, dirx: 95, diry: -28 },
+      forward: { startup: 9, active: 4, recovery: 18, hb: { x: 9, y: -48, w: 58, h: 28 }, dmg: 10, base: 400, growth: 560, dirx: 92, diry: -36 },
+      up: { startup: 7, active: 5, recovery: 16, hb: { x: -25, y: -101, w: 50, h: 43 }, dmg: 8, base: 360, growth: 490, dirx: 12, diry: -98 },
+      down: { startup: 6, active: 4, recovery: 15, hb: { x: -4, y: -14, w: 60, h: 14 }, dmg: 7, base: 290, growth: 280, dirx: 67, diry: -68 },
+      // "Flywheel": a flung gear, flat and fast with the shortest cooldown of any projectile in the
+      // cast — rewards spacing and sustained zoning rather than a single big payoff.
+      special: {
+        startup: 7, active: 1, recovery: 16,
+        hb: { x: 0, y: 0, w: 0, h: 0 },
+        dmg: 7, base: 240, growth: 180, dirx: 88, diry: -40,
+        projectile: { speed: 10, life: 60, w: 22, h: 16, cooldown: 32 },
       },
     },
   },
@@ -443,7 +604,13 @@ function updateFighter(s: GameState, idx: 0 | 1, inp: number) {
         f.vx = Math.trunc((f.vx * 251) / 256);
       }
 
-      if (pressed(inp, prev, INPUT.JUMP) || pressed(inp, prev, INPUT.UP)) {
+      // Up is dual-purpose (jump, or "aim this attack upward"). When Up and Attack are pressed on
+      // the very same frame — entirely normal for a real player, not just a scripted bot — Up must
+      // mean "up-attack", not "also jump". The dedicated Jump button has no such ambiguity and
+      // always jumps.
+      const attackPressed = pressed(inp, prev, INPUT.ATTACK);
+      const upTriggersJump = pressed(inp, prev, INPUT.UP) && !attackPressed;
+      if (pressed(inp, prev, INPUT.JUMP) || upTriggersJump) {
         if (f.grounded) {
           f.vy = -fp(c.jumpV); f.grounded = false; s.events.push({ t: "jump", player: idx });
         } else if (f.jumps > 0) {
@@ -453,7 +620,7 @@ function updateFighter(s: GameState, idx: 0 | 1, inp: number) {
       if (f.grounded && pressed(inp, prev, INPUT.DOWN)) f.dropThrough = 14;
       if (!f.grounded && held(inp, INPUT.DOWN) && f.vy > 0) f.vy = Math.max(f.vy, fp(c.fastFall));
 
-      if (pressed(inp, prev, INPUT.ATTACK)) {
+      if (attackPressed) {
         const mv = held(inp, INPUT.UP) ? 2 : held(inp, INPUT.DOWN) ? 3 : dir !== 0 ? 1 : 0;
         startAction(f, A.ATTACK, mv);
         s.events.push({ t: "swing", player: idx });

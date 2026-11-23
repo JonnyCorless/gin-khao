@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S npx tsx
 /**
  * Automated gameplay/UI regression test. Drives the actual built client in a real browser against
  * a real server (mock chain), the way `npm test` cannot: it catches wiring bugs between the sim,
@@ -9,7 +9,8 @@
  * Needs a Chromium build. One-time setup if you don't already have one:
  *   npm i -D playwright && npx playwright install chromium
  *
- * Usage: node scripts/gameplay-test.mjs [--headed] [--keep-server]
+ * Run via tsx (it imports the sim package directly), not plain node: `npm run test:game`,
+ * or `npx tsx scripts/gameplay-test.mjs [--headed] [--keep-server]`.
  */
 import { chromium } from "playwright";
 import { spawn } from "node:child_process";
@@ -17,6 +18,7 @@ import { existsSync, mkdtempSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { CHARACTERS } from "../packages/sim/src/index.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "scripts", "gameplay-test-output");
@@ -152,7 +154,7 @@ async function run() {
     }
 
     // --- 2. Practice mode for every character in the roster, no wallet needed ---
-    for (let c = 0; c < 4; c++) {
+    for (let c = 0; c < CHARACTERS.length; c++) {
       const { page, errors } = await newBot(browser);
       await page.goto(URL, { waitUntil: "load" });
       await page.waitForSelector("#lobby");
@@ -202,8 +204,10 @@ async function run() {
           await b.page.waitForSelector("#result:not([hidden])", { timeout: 5000 }).catch(() => {});
           const detailA = await a.page.textContent("#result-detail");
           const detailB = await b.page.textContent("#result-detail");
-          const feeMatch = detailA.match(/house fee ([\d.]+) SOL/);
-          assert("winner's screen states the house fee", !!feeMatch, detailA);
+          // Only the WINNER's screen states the house fee (by design); matchmaking randomises which
+          // seat/browser wins, so check whichever of the two detail texts has it, not always "a".
+          const feeMatch = detailA.match(/house fee ([\d.]+) SOL/) ?? detailB.match(/house fee ([\d.]+) SOL/);
+          assert("winner's screen states the house fee", !!feeMatch, `A: ${detailA} | B: ${detailB}`);
           if (feeMatch) assert("house fee equals exactly 3.3% of the 0.02 SOL pot", feeMatch[1] === "0.00066", feeMatch[1]);
           assert("both players saw a result (one win, one lose/draw)", /win|lose|contest/i.test(detailA + detailB));
           await a.page.screenshot({ path: join(OUT, "04-online-result-a.png") });
