@@ -93,7 +93,10 @@ async function run() {
   console.log(`Starting mock server on :${PORT}...`);
   const server = spawn("npx", ["tsx", "apps/server/src/index.ts"], {
     cwd: ROOT,
-    env: { ...process.env, PORT: String(PORT), DATA_DIR: dataDir, CLIENT_DIR: join(ROOT, "apps/client/dist"), CHAIN_MODE: "mock" },
+    env: {
+      ...process.env, PORT: String(PORT), DATA_DIR: dataDir, CLIENT_DIR: join(ROOT, "apps/client/dist"), CHAIN_MODE: "mock",
+      START_STOCKS: "1", // one stock: a scripted bot/player reaches a result in seconds, not a full 3-stock match
+    },
     stdio: ["ignore", "pipe", "pipe"],
   });
   let serverLog = "";
