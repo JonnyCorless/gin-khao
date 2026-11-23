@@ -61,23 +61,27 @@ async function connectDevWallet(page) {
   await page.waitForSelector("#stake-row:not([hidden])", { timeout: 8000 });
 }
 
-/** Drive a practice match to completion (or a frame budget), alternating attack/movement. */
-async function playOutPractice(page, maxMs = 20000) {
+/**
+ * Drive a practice match to completion (or a frame budget). Practice mode is purely client-side
+ * (createState() with the sim's default 3 stocks — the server's START_STOCKS env has no effect on
+ * it), so the fast, deterministic way to reach a result is to walk straight off the left edge
+ * repeatedly: each stock lost takes roughly a second to walk off + fall, plus the ~2.5s forced
+ * respawn freeze, so 3 stocks reliably finishes in well under the budget below.
+ */
+async function playOutPractice(page, maxMs = 25000) {
   const deadline = Date.now() + maxMs;
-  let dir = "KeyD";
-  let i = 0;
-  while (Date.now() < deadline) {
-    const over = await page.evaluate(() => window.__smash?.state?.over).catch(() => false);
-    if (over) return true;
-    dir = i % 7 === 0 ? (dir === "KeyD" ? "KeyA" : "KeyD") : dir;
-    await page.keyboard.down(dir);
-    await page.waitForTimeout(90);
-    await page.keyboard.up(dir);
-    await page.keyboard.press(i % 2 === 0 ? "KeyJ" : "KeyK");
-    await page.waitForTimeout(160);
-    i++;
+  await page.keyboard.down("KeyA");
+  let over = false;
+  try {
+    while (Date.now() < deadline) {
+      over = await page.evaluate(() => window.__smash?.state?.over).catch(() => false);
+      if (over) break;
+      await page.waitForTimeout(250);
+    }
+  } finally {
+    await page.keyboard.up("KeyA").catch(() => {});
   }
-  return await page.evaluate(() => window.__smash?.state?.over).catch(() => false);
+  return over;
 }
 
 async function run() {
@@ -91,6 +95,10 @@ async function run() {
   });
 
   console.log(`Starting mock server on :${PORT}...`);
+  // `npx tsx ...` forks through an extra shell/npx layer, so `server.kill()` on just that PID
+  // doesn't reach the real tsx/node process underneath it — it's left running forever, and this
+  // script then hangs too (it keeps the server's stdout pipe open). detached:true puts the whole
+  // tree in its own process group, so killing with the *negative* pid kills every descendant.
   const server = spawn("npx", ["tsx", "apps/server/src/index.ts"], {
     cwd: ROOT,
     env: {
@@ -98,14 +106,23 @@ async function run() {
       START_STOCKS: "1", // one stock: a scripted bot/player reaches a result in seconds, not a full 3-stock match
     },
     stdio: ["ignore", "pipe", "pipe"],
+    detached: true,
   });
   let serverLog = "";
   server.stdout.on("data", (d) => (serverLog += d));
   server.stderr.on("data", (d) => (serverLog += d));
 
+  async function killServer() {
+    if (server.pid == null || server.killed) return;
+    const exited = new Promise((resolve) => server.once("exit", resolve));
+    try { process.kill(-server.pid, "SIGTERM"); } catch { /* group already gone */ }
+    const timedOut = await Promise.race([exited.then(() => false), new Promise((r) => setTimeout(() => r(true), 3000))]);
+    if (timedOut) { try { process.kill(-server.pid, "SIGKILL"); } catch { /* already gone */ } }
+  }
+
   const up = await waitForHealth(URL);
   assert("server starts and reports healthy", up, up ? "" : serverLog.slice(-500));
-  if (!up) { server.kill(); process.exitCode = 1; return; }
+  if (!up) { await killServer(); process.exitCode = 1; return; }
 
   // Some sandboxes pre-install a Chromium build outside Playwright's own cache (e.g. for a project
   // that pins a Playwright version). Fall back to it if `playwright install` hasn't been run here.
@@ -146,7 +163,7 @@ async function run() {
       await page.waitForTimeout(400);
       const started = await page.evaluate((i) => window.__smash?.state?.fighters?.[0]?.char === i, c);
       assert(`char ${c}: practice starts with the selected fighter`, started);
-      const finished = await playOutPractice(page, 15000);
+      const finished = await playOutPractice(page, 25000);
       assert(`char ${c}: a practice match reaches a result within budget`, finished);
       if (finished) {
         await page.waitForSelector("#result:not([hidden])", { timeout: 2000 }).catch(() => {});
@@ -210,7 +227,7 @@ async function run() {
     }
   } finally {
     await browser.close();
-    if (!KEEP_SERVER) server.kill();
+    if (!KEEP_SERVER) await killServer();
     rmSync(dataDir, { recursive: true, force: true });
   }
 
@@ -223,4 +240,8 @@ async function run() {
   }
 }
 
-run().catch((e) => { console.error("gameplay-test crashed:", e); process.exitCode = 1; });
+run()
+  .catch((e) => { console.error("gameplay-test crashed:", e); process.exitCode = 1; })
+  // Belt and suspenders: if anything (an open socket, a stray handle) is still keeping the event
+  // loop alive after cleanup, don't hang forever — exit now that every check has been reported.
+  .finally(() => process.exit(process.exitCode ?? 0));
