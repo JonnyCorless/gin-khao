@@ -1,6 +1,6 @@
 :root { --bg:#0b0b14; --fg:#f2f0ff; --mut:#9a96b8; --pri:#14f195; --pri2:#9945ff; --panel:#15152a; --bad:#ff5470; }
 * { box-sizing: border-box; }
-html, body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:16px/1.4 system-ui, sans-serif; overflow:hidden; }
+html, body { margin:0; height:100%; background:radial-gradient(ellipse at 50% 45%, #25134a 0%, #0b0b14 70%); color:var(--fg); font:16px/1.4 system-ui, sans-serif; overflow:hidden; }
 #stage { position:relative; width:100vw; height:100vh; display:grid; place-items:center; }
 #game { width:min(100vw, calc(100vh * 16 / 9)); height:min(100vh, calc(100vw * 9 / 16)); image-rendering:pixelated; background:#000; }
 .panel { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(560px, 92vw); max-height:94vh; overflow:auto;
@@ -21,6 +21,9 @@ button.big { font-size:20px; padding:14px 28px; width:100%; margin:12px 0 4px; }
 .char canvas { width:64px; height:64px; image-rendering:pixelated; }
 .fee { color:var(--mut); font-size:13px; }
 #wallet-info { font-family:ui-monospace, monospace; color:var(--pri); margin:6px 0 10px; word-break:break-all; }
+.divider { display:flex; align-items:center; gap:10px; margin:18px 0 10px; color:var(--mut); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+.divider::before, .divider::after { content:""; flex:1; height:1px; background:#2a2a52; }
+#pick { margin-bottom:10px; }
 .controls { text-align:left; margin-top:12px; color:var(--mut); font-size:14px; } .controls table { width:100%; margin-top:6px; } .controls td:first-child { color:var(--fg); padding-right:10px; }
 #hud-top { position:absolute; top:6px; right:10px; font-size:12px; color:var(--mut); }
 #hud-top button { font-size:12px; padding:2px 8px; margin:0; }

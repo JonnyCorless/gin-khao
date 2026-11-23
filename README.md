@@ -64,11 +64,19 @@ Every match's full input log + result is stored in `DATA_DIR` (`replays/<id>.bin
 ## Tests
 
 ```bash
-npm test                       # sim (10), mock-chain full flow + matchmaking + limits + Solana encoding (12)
+npm test                       # sim (12: determinism, rules, every character pairing) + server (12: mock-chain full flow, matchmaking, limits, Solana encoding)
 cargo test --manifest-path programs/escrow/Cargo.toml   # fee maths (4)
 npm run onchain-test           # builds the program, boots a local validator, runs 13 on-chain tests
 ```
 The on-chain suite covers create/join/cancel/settle/void/timeout refund, attacks (stranger settling, fee redirection, non-player winner, front-running the join, double settle, self-play, dust stake), exact lamport conservation, crash recovery, and the **full server flow in `solana` mode** with keypair bots signing server-built transactions. Its binary uses a 6s timeout (`short-timeout` feature) and goes to a temp dir so it can't be deployed by accident.
+
+### Gameplay/UI test (real browser, real DOM — not just logic)
+
+```bash
+npx playwright install chromium   # one-time
+npm run test:game
+```
+`scripts/gameplay-test.mjs` builds the client, boots the mock-chain server, and drives **real Chromium pages** through: the character picker without a wallet connected, a full practice match for each of the 4 characters to a result screen, a full two-browser online mock match through matchmaking → stake → fight → settlement with the displayed house fee checked to be exactly 3.3%, and a phone-width (375px) layout check for horizontal scroll. It fails loudly (non-zero exit, named failing check) on any console/page error or broken flow, and saves screenshots to `scripts/gameplay-test-output/` (gitignored) for a quick look. This is what actually caught the character-picker-behind-a-wallet issue below — the node:test suites never touch a browser, so they couldn't have.
 
 ## Verified vs not
 

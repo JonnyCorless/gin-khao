@@ -7,3 +7,4 @@ target/
 keys/
 *.keypair.json
 .env.*
+scripts/gameplay-test-output/

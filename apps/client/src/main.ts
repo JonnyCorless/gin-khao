@@ -117,7 +117,7 @@ async function onServer(m: ServerMsg) {
       } catch { $("net").textContent = "login cancelled"; }
       return;
     }
-    case "authed": show("pick", true); return;
+    case "authed": show("stake-row", true); return;
     case "queued": return;
     case "matched": {
       matchInfo = m; seat = m.seat; mode = "online";

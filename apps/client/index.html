@@ -18,23 +18,26 @@
       <p class="tag">1v1 platform fighter. Stake <b id="stake-txt">0.01 SOL</b> each. Winner takes the pot.</p>
       <div id="devnet-banner">DEVNET PROTOTYPE: no real money. Test SOL only.</div>
 
-      <div id="wallet-row">
-        <button id="btn-phantom" class="primary">Connect Phantom</button>
-        <button id="btn-dev">Use dev wallet</button>
-      </div>
-      <div id="wallet-info" hidden></div>
-
-      <div id="pick" hidden>
+      <div id="pick">
         <div class="chars">
           <button class="char sel" data-char="0"><canvas width="64" height="64" id="pv0"></canvas><b>Pounce</b><small>Fast rushdown cat</small></button>
           <button class="char" data-char="1"><canvas width="64" height="64" id="pv1"></canvas><b>Bork</b><small>Heavy zoner, throws bones</small></button>
           <button class="char" data-char="2"><canvas width="64" height="64" id="pv2"></canvas><b>Quillborne</b><small>Lightweight skirmisher, long cane reach</small></button>
           <button class="char" data-char="3"><canvas width="64" height="64" id="pv3"></canvas><b>Nightshade</b><small>Floaty, long dash special</small></button>
         </div>
+      </div>
+      <button id="btn-practice" class="primary big">Practice vs bot (free, no stake)</button>
+
+      <div class="divider"><span>play for stakes</span></div>
+      <div id="wallet-row">
+        <button id="btn-phantom" class="primary">Connect Phantom</button>
+        <button id="btn-dev">Use dev wallet</button>
+      </div>
+      <div id="wallet-info" hidden></div>
+      <div id="stake-row" hidden>
         <button id="btn-queue" class="primary big">Stake <span id="stake-btn">0.01 SOL</span> &amp; find match</button>
         <div class="fee" id="fee-line">House cut 3.3%. Winner receives ~1.934 stakes.</div>
       </div>
-      <button id="btn-practice">Practice vs bot (free, no stake)</button>
 
       <details class="controls">
         <summary>Controls</summary>
