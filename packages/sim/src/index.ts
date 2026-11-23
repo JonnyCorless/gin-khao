@@ -133,6 +133,58 @@ export const CHARACTERS: Character[] = [
       },
     },
   },
+  {
+    // Original character, archetype only: a Victorian consulting-detective silhouette
+    // (deerstalker hat, coat, cane). Not any specific studio's likeness or design.
+    name: "Quillborne",
+    runSpeed: 5.0,
+    accel: 0.65,
+    friction: 0.58,
+    airSpeed: 4.0,
+    airAccel: 0.38,
+    jumpV: 13.0,
+    airJumpV: 12.0,
+    gravity: 0.6,
+    fallMax: 10.5,
+    fastFall: 14,
+    weight: 85,
+    moves: {
+      neutral: { startup: 2, active: 3, recovery: 7, hb: { x: 10, y: -50, w: 36, h: 22 }, dmg: 2, base: 140, growth: 35, dirx: 95, diry: -25 },
+      forward: { startup: 8, active: 5, recovery: 16, hb: { x: 8, y: -48, w: 62, h: 26 }, dmg: 9, base: 380, growth: 520, dirx: 90, diry: -35 },
+      up: { startup: 6, active: 6, recovery: 15, hb: { x: -26, y: -102, w: 52, h: 42 }, dmg: 7, base: 340, growth: 460, dirx: 15, diry: -98 },
+      down: { startup: 5, active: 3, recovery: 14, hb: { x: 0, y: -14, w: 58, h: 14 }, dmg: 6, base: 280, growth: 260, dirx: 65, diry: -66 },
+      special: {
+        startup: 9, active: 5, recovery: 18, hb: { x: 20, y: -50, w: 70, h: 16 },
+        dmg: 8, base: 330, growth: 400, dirx: 88, diry: -30, lunge: 11,
+      },
+    },
+  },
+  {
+    // Original character, archetype only: a folkloric vampire-noble silhouette (cape,
+    // pale face, red eyes). Not any specific studio's likeness, costume design or name.
+    name: "Nightshade",
+    runSpeed: 4.0,
+    accel: 0.5,
+    friction: 0.45,
+    airSpeed: 4.2,
+    airAccel: 0.4,
+    jumpV: 12.8,
+    airJumpV: 13.0,
+    gravity: 0.52,
+    fallMax: 9.5,
+    fastFall: 13,
+    weight: 100,
+    moves: {
+      neutral: { startup: 4, active: 3, recovery: 9, hb: { x: 10, y: -50, w: 42, h: 24 }, dmg: 3, base: 160, growth: 45, dirx: 95, diry: -30 },
+      forward: { startup: 11, active: 5, recovery: 20, hb: { x: 8, y: -48, w: 64, h: 30 }, dmg: 12, base: 400, growth: 600, dirx: 90, diry: -35 },
+      up: { startup: 8, active: 6, recovery: 18, hb: { x: -28, y: -104, w: 56, h: 46 }, dmg: 8, base: 360, growth: 480, dirx: 20, diry: -97 },
+      down: { startup: 7, active: 4, recovery: 17, hb: { x: -8, y: -14, w: 70, h: 14 }, dmg: 7, base: 290, growth: 280, dirx: 70, diry: -68 },
+      special: {
+        startup: 6, active: 8, recovery: 24, hb: { x: 0, y: -50, w: 50, h: 36 },
+        dmg: 10, base: 360, growth: 440, dirx: 85, diry: -45, lunge: 16,
+      },
+    },
+  },
 ];
 
 // ---------- State ----------

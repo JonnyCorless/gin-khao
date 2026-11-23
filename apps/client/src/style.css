@@ -14,7 +14,8 @@ button { font:inherit; color:var(--fg); background:#25254a; border:1px solid #3a
 button:hover { background:#303060; } button:disabled { opacity:.5; cursor:not-allowed; }
 button.primary { background:linear-gradient(90deg,var(--pri2),var(--pri)); color:#07070f; font-weight:700; border:0; }
 button.big { font-size:20px; padding:14px 28px; width:100%; margin:12px 0 4px; }
-.chars { display:flex; gap:10px; justify-content:center; }
+.chars { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+.chars .char { min-width:110px; }
 .char { display:flex; flex-direction:column; align-items:center; flex:1; border:2px solid #3a3a70; }
 .char.sel { border-color:var(--pri); background:#1d2a3a; } .char small { color:var(--mut); }
 .char canvas { width:64px; height:64px; image-rendering:pixelated; }

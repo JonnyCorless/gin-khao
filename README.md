@@ -1,6 +1,6 @@
 # SolanaSmash
 
-Browser platform fighter where two players each stake **0.01 SOL**, fight a 1v1, and the winner takes the pot minus a **3.3% house cut** (winner gets 0.01934 SOL, house gets 0.00066 SOL). **Devnet prototype**: no real money until the checklist in `docs/PLAN.md` is done.
+Browser platform fighter where two players each stake **0.01 SOL**, fight a 1v1, and the winner takes the pot minus a **3.3% house cut** (winner gets 0.01934 SOL, house gets 0.00066 SOL). **Devnet prototype**: real-money operation is a real legal question in most jurisdictions, not just an engineering one — see `docs/LEGAL.md` before taking this anywhere near mainnet. Four original characters, none based on existing copyrighted or trademarked IP: Pounce, Bork, Quillborne (detective archetype), Nightshade (vampire archetype).
 
 ```
 packages/sim        deterministic fighting core (shared by client + server), wire protocol, fee maths
@@ -39,6 +39,16 @@ On start in `solana` mode the server **refuses to run** unless the program is de
 
 ### Hosting
 `Dockerfile` builds one image (server + web client). Any host with WebSocket support works (Fly.io, Render, Railway, a VPS). Set `CHAIN_MODE` and the env above; keep `AUTHORITY_SECRET` in the host's secret store. One instance only (sessions are in memory).
+
+### The fee wallet (treasury) is a normal, visible on-chain address
+
+It is **not** obscured and it can't be: every `settle` call emits a public `MatchSettled` event naming the treasury pubkey, and the destination is a plain `Config` account field anyone can read with `getAccountInfo` or a block explorer (`solana.fm`/`explorer.solana.com`, devnet cluster). Trying to hide it would just mean an address nobody can verify charges exactly 3.3%, which is worse for players, not better.
+
+If you want the fee to go to a wallet you already hold and recognise (rather than a script-generated one), pass it explicitly and keep its keypair yourself — the deploy script never needs to touch it:
+```bash
+TREASURY=<your own devnet pubkey> scripts/deploy-devnet.sh
+```
+`admin.json` (config owner) and `authority.json` (settles matches) are still generated locally in `./keys` and never leave this machine; back them up somewhere safe.
 
 ## How a match works
 

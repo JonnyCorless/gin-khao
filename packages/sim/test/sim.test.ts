@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createState, step, hashState, cloneState, INPUT, A, FP, STAGE, MATCH_FRAMES, sanitizeInput, type Inputs } from "../src/index.ts";
+import { createState, step, hashState, cloneState, CHARACTERS, INPUT, A, FP, STAGE, MATCH_FRAMES, sanitizeInput, type Inputs } from "../src/index.ts";
 
 // tiny deterministic PRNG just for generating test inputs
 function lcg(seed: number) {
@@ -133,5 +133,30 @@ test("random matches terminate without NaN/Infinity", () => {
   for (const seed of [11, 12, 13]) {
     const { s } = run(seed, MATCH_FRAMES * 2);
     for (const f of s.fighters) for (const k of ["x", "y", "vx", "vy"] as const) assert.ok(Number.isFinite(f[k]));
+  }
+});
+
+test("every character pairing in the roster plays a full match cleanly (determinism + no NaN)", () => {
+  assert.equal(CHARACTERS.length, 4);
+  for (let a = 0; a < CHARACTERS.length; a++) {
+    for (let b = 0; b < CHARACTERS.length; b++) {
+      const seed = a * 10 + b + 1;
+      const { s, log } = run(seed, 2500, [a, b]);
+      for (const f of s.fighters) for (const k of ["x", "y", "vx", "vy"] as const) assert.ok(Number.isFinite(f[k]), `char ${a} vs ${b}: ${k}`);
+      const replay = createState([a, b]);
+      for (const inp of log) step(replay, inp);
+      assert.equal(hashState(s), hashState(replay), `char ${a} vs ${b} is deterministic`);
+    }
+  }
+});
+
+test("new fighters land a hit, including the non-projectile special (disjointed hitbox)", () => {
+  for (const [atk, def] of [[2, 3], [3, 2]] as const) {
+    const s = createState([atk, def]);
+    s.fighters[0].x = 500 * FP; s.fighters[1].x = 530 * FP; s.fighters[0].facing = 1;
+    step(s, [INPUT.SPECIAL | INPUT.RIGHT, 0]);
+    let hit = false;
+    for (let i = 0; i < 30 && !hit; i++) { step(s, [INPUT.RIGHT, 0]); hit = s.fighters[1].action === A.HITSTUN; }
+    assert.ok(hit, `char ${atk}'s special should hit char ${def}`);
   }
 });

@@ -2,7 +2,7 @@ import { createServer, type Server } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
 import { WebSocketServer, type WebSocket } from "ws";
-import { encodeMsg, type ClientMsg, type ServerMsg } from "@solanasmash/sim";
+import { CHARACTERS, encodeMsg, type ClientMsg, type ServerMsg } from "@solanasmash/sim";
 import { verifyLogin, newNonce } from "./auth.ts";
 import type { ChainAdapter } from "./chain/types.ts";
 import { MockChain } from "./chain/mock.ts";
@@ -85,7 +85,8 @@ export async function startServer(cfg: Config = loadConfig(), chain: ChainAdapte
           if (queue[i].pubkey === first.pubkey || queue[i].pubkey === second.pubkey) queue.splice(i, 1);
         }
         const [a, b] = Math.random() < 0.5 ? [second, first] : [first, second]; // seat 0 deposits first; randomise who
-        const s = new Session(cfg, chain, cfg.stakeLamports, { client: a, char: a.queuedChar ?? 0 }, { client: b, char: b.queuedChar ?? 1 }, (done) => {
+        const bChar = b.queuedChar ?? (a.queuedChar === 1 ? 0 : 1); // default to a different fighter than A's
+        const s = new Session(cfg, chain, cfg.stakeLamports, { client: a, char: a.queuedChar ?? 0 }, { client: b, char: bChar }, (done) => {
           for (const pk of done.pubkeys) if (sessions.get(pk) === done) sessions.delete(pk);
         });
         a.queuedChar = b.queuedChar = null;
@@ -136,7 +137,7 @@ export async function startServer(cfg: Config = loadConfig(), chain: ChainAdapte
         case "queue": {
           if (c.session || sessions.has(c.pubkey)) { c.send({ t: "error", code: "busy", msg: "You're already in a match" }); return; }
           if (queue.includes(c)) return;
-          c.queuedChar = m.char === 1 ? 1 : 0;
+          c.queuedChar = Number.isInteger(m.char) && m.char >= 0 && m.char < CHARACTERS.length ? m.char : 0;
           queue.push(c);
           c.send({ t: "queued", waiting: queue.length });
           tryMatch();

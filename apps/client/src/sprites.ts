@@ -2,6 +2,8 @@
 const PAL: Record<string, string> = {
   o: "#ff9a2e", d: "#c96a10", w: "#fff4e0", k: "#1a1020", p: "#ff7aa8",
   b: "#a8703c", e: "#6e4420",
+  t: "#c9a876", g: "#6e6e78", m: "#4a2f1f", // Quillborne: coat tan, hat gray, mustache
+  v: "#2a1a33", r: "#c43b3b", // Nightshade: cape violet-black, red accent
 };
 const CAT = [
   "................",
@@ -39,7 +41,43 @@ const DOG = [
   "..bbbb....bbbb..",
   "..kkkk....kkkk..",
 ];
-const SHEETS = [CAT, DOG];
+const QUILL = [
+  "................",
+  "..gg........gg..",
+  "..ggt......tgg..",
+  "..tttttttttttt..",
+  "..tktttttttktt..",
+  "..tttttmmttttt..",
+  "..ttwwwwwwwwtt..",
+  "...tttttttttt...",
+  "..tttttttttttt..",
+  ".tttttttttttttt.",
+  ".ttwwttttttwwtt.",
+  ".tttttttttttttt.",
+  "..tttttttttttt..",
+  "..tttt....tttt..",
+  "..tttt....tttt..",
+  "..kkkk....kkkk..",
+];
+const NIGHT = [
+  "................",
+  "..vv........vv..",
+  "..vvr......rvv..",
+  "..vvvvvvvvvvvv..",
+  "..vrvvvvvvvrvv..",
+  "..vvvvvrrvvvvv..",
+  "..vvwwwwwwwwvv..",
+  "...vvvvvvvvvv...",
+  "..vvvvvvvvvvvv..",
+  ".vvvvvvvvvvvvvv.",
+  ".vvwwvvvvvvwwvv.",
+  ".vvvvvvvvvvvvvv.",
+  "..vvvvvvvvvvvv..",
+  "..vvvv....vvvv..",
+  "..vvvv....vvvv..",
+  "..kkkk....kkkk..",
+];
+const SHEETS = [CAT, DOG, QUILL, NIGHT];
 
 const cache = new Map<string, HTMLCanvasElement>();
 export function sprite(char: number, flash = false): HTMLCanvasElement {

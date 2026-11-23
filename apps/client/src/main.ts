@@ -1,6 +1,6 @@
 import nacl from "tweetnacl";
 import {
-  A, FP, LOGIN_PREFIX, TICK_RATE, createState, step, type ClientMsg, type GameState, type ServerMsg,
+  A, CHARACTERS, FP, LOGIN_PREFIX, TICK_RATE, createState, step, type ClientMsg, type GameState, type ServerMsg,
 } from "@solanasmash/sim";
 import { botInput } from "./ai.ts";
 import { readInput } from "./input.ts";
@@ -57,8 +57,7 @@ function setStatus(title: string, detail = "", actions: { label: string; fn: () 
 }
 
 // ---------- lobby ----------
-drawPreview($("pv0") as HTMLCanvasElement, 0);
-drawPreview($("pv1") as HTMLCanvasElement, 1);
+CHARACTERS.forEach((_, i) => drawPreview($(`pv${i}`) as HTMLCanvasElement, i));
 document.querySelectorAll<HTMLButtonElement>(".char").forEach((b) => {
   b.onclick = () => {
     chosenChar = Number(b.dataset.char);
@@ -181,7 +180,8 @@ async function onServer(m: ServerMsg) {
 // ---------- practice ----------
 function startPractice() {
   mode = "practice"; panel("none");
-  practice = { state: createState([chosenChar, 1 - chosenChar]), frame: 0, me: 0 };
+  const botChar = (chosenChar + 1) % CHARACTERS.length;
+  practice = { state: createState([chosenChar, botChar]), frame: 0, me: 0 };
   seat = 0;
 }
 

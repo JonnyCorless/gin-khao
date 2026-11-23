@@ -13,7 +13,7 @@
 | Accounts | Wallet-only login (signed nonce), instant queue | profiles/ELO, lobby, link duels |
 | Disconnects | 10s grace then forfeit; countdown-phase disconnect refunds | refund-always (exploitable) |
 | Combat | Damage %, knockback scaling by weight, stocks, shield + roll, double jump, drop-through, sudden death | simplified / HP bar |
-| Content | 2 characters (Pounce rushdown, Bork zoner), 1 stage, 3 stocks, 5 min | mirror match |
+| Content | 4 original characters — Pounce (rushdown), Bork (zoner), Quillborne (lightweight skirmisher, detective archetype), Nightshade (floaty, vampire archetype) — 1 stage, 3 stocks, 5 min. Archetypes only: original names, original pixel art, no existing studio's character design, costume or likeness. A request for actual recognisable copyrighted characters was declined — that's a trademark/copyright problem a disclaimer doesn't fix | mirror match, 2-character roster |
 | Input | Keyboard + gamepad; input abstraction ready for touch | |
 | Escrow flow | A creates+deposits **naming B** (program only lets B join: no front-running), B joins+deposits; A can cancel; timeout refund; server voids late/orphaned matches and recovers after crashes | atomic co-signed deposit, pre-funded vault |
 | Result signing | Single server authority key, program-enforced payout destinations; void for draws | multisig, co-signed results |
@@ -29,7 +29,7 @@
 
 ## Risks / open items before any real money
 
-1. **Legal** (biggest): real-money skill gaming is restricted or licensed in many jurisdictions (e.g. many US states, UK, much of the EU). Needs counsel, geo-blocking, age/KYC decisions, ToS. Not legal advice.
+1. **Legal** (biggest): real-money skill gaming is restricted or licensed in many jurisdictions (e.g. many US states, UK, much of the EU). Needs counsel, geo-blocking, age/KYC decisions, ToS. Not legal advice — see `docs/LEGAL.md` for the longer version and the realistic paths. Pushback on "you're being too cautious" doesn't change the underlying regulatory analysis; it's not something either of us can determine from here.
 2. **Escrow audit**: unaudited program; needs integration tests (Anchor/bankrun) and external review. Specific areas: lamport accounting on close, duplicate-account passing, rent handling.
 3. **Cheating**: authoritative server removes state hacking; remaining threats are input automation (macros/bots), collusion/win-trading between two wallets (costs only the 3.3% fee, but matters if rewards are added), and multi-accounting. Mitigations: input-pattern heuristics, rate limits per wallet, ELO matchmaking, replay review.
 4. **Server key**: single hot authority key. Rotate through `update_config`; move to KMS/multisig before mainnet. Cap matches/stakes at start.
@@ -37,13 +37,14 @@
 6. **Availability**: if the server is down mid-match, funds return only after 20 minutes via `refund_expired`. Consider shorter timeouts + a keeper bot.
 7. **Single-process server**: sessions are in memory; a restart voids in-flight matches (they refund via timeout). Persist session state before scale-out.
 8. **Dollar value drifts**: the stake is fixed in SOL, so its USD value moves with the market. Fine for a prototype; revisit (USDC or an oracle) before launch.
-9. **IP**: fighters are original (cat/dog). Don't ship Nintendo characters, names, or stages.
+9. **IP**: all four fighters are original designs, not existing studios' characters. Keep it that way — "royalty-free but recognisable" is a contradiction for anything actually recognisable; if it's instantly identifiable it's owned, licence or no licence.
+10. **Fee transparency**: the treasury address is a public on-chain account, emitted in every `MatchSettled` event and readable by anyone. Don't try to obscure it — an unverifiable fee destination is worse for trust, not better, and doesn't change the legal analysis in item 1.
 
 ## Roadmap
 
 1. (done) Deterministic sim, mock-chain full flow, playable client, escrow program, real-validator test suite, deploy script, Docker.
 2. Deploy to devnet with `scripts/deploy-devnet.sh`, playtest with real Phantom.
-3. Fun pass: balance, hitstop, ledge grab, more moves, audio, more characters/stage, sprite animation frames.
+3. Fun pass: balance, hitstop, ledge grab, more moves, more stages, sprite animation frames. Roster is now 4 original characters (Pounce, Bork, Quillborne, Nightshade); more can follow the same archetype-not-IP approach.
 4. Matchmaking: ELO, rematch, private challenge links, spectate.
 5. Hardening: anti-automation, replay verifier service, monitoring, regional servers, persistence.
 6. Legal review → decide on mainnet, USDC option, multisig, audit.
@@ -58,3 +59,5 @@
 - Late deposits after an abort / crash mid-match could orphan funds until the 20-minute timeout: reaper + startup recovery void them.
 - Per-IP connection cap, payload cap, origin allow-list, per-socket message rate limit.
 - Client leaked a ping timer on every reconnect: fixed.
+- Matchmaking, practice mode and the bot assumed exactly 2 characters by index (`1 - char`); generalised for the 4-character roster.
+- Devnet deploy: this sandbox's shared IP had already exhausted the public devnet faucet's rate limit when I tried to deploy live, so the deploy itself is still pending real devnet SOL (see the session's final message for the exact unblock). Verified instead against a local validator with the same deploy script, same program, same config flow — only the source of SOL differs.
